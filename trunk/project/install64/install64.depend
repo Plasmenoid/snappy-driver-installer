@@ -1,6 +1,0 @@
-# depslib dependency file v1.0
-1389883151 source:c:\newdrp\newcur\source\install64.c
-	<windows.h>
-	<newdev.h>
-	<stdio.h>
-
