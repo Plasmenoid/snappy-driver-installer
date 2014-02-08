@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="7-ZIP" />
+		<Option platforms="Windows;" />
+		<Option makefile="makefile" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Win32 ReleaseU">
+				<Option platforms="Windows;" />
+				<Option output="..\..\..\..\..\..\..\lib\ReleaseU\lib7Z" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="..\..\..\..\..\..\..\obj\ReleaseU\7Z" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-fexceptions" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DWIN32" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-DEXCLUDE_COM" />
+					<Add option="-DNO_REGISTRY" />
+					<Add option="-DUNICODE" />
+					<Add option="-D_UNICODE" />
+					<Add option="-D_NO_CRYPTO" />
+					<Add option="-DEXTRACT_ONLY" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="kernel32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="winspool" />
+					<Add library="comdlg32" />
+					<Add library="advapi32" />
+					<Add library="shell32" />
+					<Add library="ole32" />
+					<Add library="oleaut32" />
+					<Add library="uuid" />
+					<Add library="odbc32" />
+					<Add library="odbccp32" />
+					<Add directory="..\..\..\..\..\..\..\resources" />
+					<Add directory="..\..\..\..\..\..\..\obj\ReleaseU" />
+				</Linker>
+			</Target>
+			<Target title="Win32 DebugU">
+				<Option platforms="Windows;" />
+				<Option output="..\..\..\..\..\..\..\lib\DebugU\lib7Z" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="..\..\..\..\..\..\..\obj\DebugU\7Z" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-pg" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-fexceptions" />
+					<Add option="-D_DEBUG" />
+					<Add option="-DWIN32" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-DEXCLUDE_COM" />
+					<Add option="-DNO_REGISTRY" />
+					<Add option="-D_MBCS" />
+					<Add option="-D_UNICODE" />
+					<Add option="-DUNICODE" />
+					<Add option="-D_NO_CRYPTO" />
+					<Add option="-DEXTRACT_ONLY" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg -lgmon" />
+					<Add library="kernel32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="winspool" />
+					<Add library="comdlg32" />
+					<Add library="advapi32" />
+					<Add library="shell32" />
+					<Add library="ole32" />
+					<Add library="oleaut32" />
+					<Add library="uuid" />
+					<Add library="odbc32" />
+					<Add library="odbccp32" />
+					<Add directory="..\..\..\..\..\..\..\obj\DebugU" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="..\..\..\" />
+			<Add directory="..\..\..\..\C" />
+		</Compiler>
+		<Unit filename="..\..\Archive\7z\7zCompressionMode.cpp" />
+		<Unit filename="..\..\Archive\7z\7zCompressionMode.h" />
+		<Unit filename="..\..\Archive\7z\7zDecode.cpp" />
+		<Unit filename="..\..\Archive\7z\7zDecode.h" />
+		<Unit filename="..\..\Archive\7z\7zEncode.h" />
+		<Unit filename="..\..\Archive\7z\7zExtract.cpp" />
+		<Unit filename="..\..\Archive\7z\7zFolderInStream.cpp" />
+		<Unit filename="..\..\Archive\7z\7zFolderInStream.h" />
+		<Unit filename="..\..\Archive\7z\7zFolderOutStream.cpp" />
+		<Unit filename="..\..\Archive\7z\7zFolderOutStream.h" />
+		<Unit filename="..\..\Archive\7z\7zHandler.cpp" />
+		<Unit filename="..\..\Archive\7z\7zHandler.h" />
+		<Unit filename="..\..\Archive\7z\7zHeader.cpp" />
+		<Unit filename="..\..\Archive\7z\7zHeader.h" />
+		<Unit filename="..\..\Archive\7z\7zIn.cpp" />
+		<Unit filename="..\..\Archive\7z\7zIn.h" />
+		<Unit filename="..\..\Archive\7z\7zItem.h" />
+		<Unit filename="..\..\Archive\7z\7zOut.h" />
+		<Unit filename="..\..\Archive\7z\7zProperties.cpp" />
+		<Unit filename="..\..\Archive\7z\7zProperties.h" />
+		<Unit filename="..\..\Archive\7z\7zRegister.cpp" />
+		<Unit filename="..\..\Archive\7z\7zSpecStream.cpp" />
+		<Unit filename="..\..\Archive\7z\7zSpecStream.h" />
+		<Unit filename="..\..\Archive\7z\7zUpdate.h" />
+		<Unit filename="..\..\Archive\Common\CoderMixer2.cpp" />
+		<Unit filename="..\..\Archive\Common\CoderMixer2.h" />
+		<Unit filename="..\..\Archive\Common\CoderMixer2MT.cpp" />
+		<Unit filename="..\..\Archive\Common\CoderMixer2MT.h" />
+		<Unit filename="..\..\Archive\Common\CrossThreadProgress.cpp" />
+		<Unit filename="..\..\Archive\Common\CrossThreadProgress.h" />
+		<Unit filename="..\..\Archive\Common\DummyOutStream.cpp" />
+		<Unit filename="..\..\Archive\Common\DummyOutStream.h" />
+		<Unit filename="..\..\Archive\Common\InStreamWithCRC.cpp" />
+		<Unit filename="..\..\Archive\Common\InStreamWithCRC.h" />
+		<Unit filename="..\..\Archive\Common\ItemNameUtils.cpp" />
+		<Unit filename="..\..\Archive\Common\ItemNameUtils.h" />
+		<Unit filename="..\..\Archive\Common\MultiStream.cpp" />
+		<Unit filename="..\..\Archive\Common\MultiStream.h" />
+		<Unit filename="..\..\Archive\Common\OutStreamWithCRC.cpp" />
+		<Unit filename="..\..\Archive\Common\OutStreamWithCRC.h" />
+		<Unit filename="..\..\Archive\Common\ParseProperties.cpp" />
+		<Unit filename="..\..\Archive\Common\ParseProperties.h" />
+		<Unit filename="..\..\Archive\LzmaHandler.cpp" />
+		<Unit filename="StdAfx.cpp" />
+		<Unit filename="StdAfx.h" />
+		<Unit filename="resource.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="..\..\Common\CWrappers.cpp" />
+		<Unit filename="..\..\Common\CWrappers.h" />
+		<Unit filename="..\..\Common\CreateCoder.cpp" />
+		<Unit filename="..\..\Common\CreateCoder.h" />
+		<Unit filename="..\..\Common\FilePathAutoRename.cpp" />
+		<Unit filename="..\..\Common\FilePathAutoRename.h" />
+		<Unit filename="..\..\Common\FileStreams.cpp" />
+		<Unit filename="..\..\Common\FileStreams.h" />
+		<Unit filename="..\..\Common\FilterCoder.cpp" />
+		<Unit filename="..\..\Common\FilterCoder.h" />
+		<Unit filename="..\..\Common\InBuffer.cpp" />
+		<Unit filename="..\..\Common\InBuffer.h" />
+		<Unit filename="..\..\Common\InOutTempBuffer.cpp" />
+		<Unit filename="..\..\Common\InOutTempBuffer.h" />
+		<Unit filename="..\..\Common\LimitedStreams.cpp" />
+		<Unit filename="..\..\Common\LimitedStreams.h" />
+		<Unit filename="..\..\Common\LockedStream.cpp" />
+		<Unit filename="..\..\Common\LockedStream.h" />
+		<Unit filename="..\..\Common\MethodId.cpp" />
+		<Unit filename="..\..\Common\MethodId.h" />
+		<Unit filename="..\..\Common\MethodProps.cpp" />
+		<Unit filename="..\..\Common\MethodProps.h" />
+		<Unit filename="..\..\Common\OffsetStream.cpp" />
+		<Unit filename="..\..\Common\OffsetStream.h" />
+		<Unit filename="..\..\Common\OutBuffer.cpp" />
+		<Unit filename="..\..\Common\OutBuffer.h" />
+		<Unit filename="..\..\Common\ProgressUtils.cpp" />
+		<Unit filename="..\..\Common\ProgressUtils.h" />
+		<Unit filename="..\..\Common\RegisterArc.h" />
+		<Unit filename="..\..\Common\RegisterCodec.h" />
+		<Unit filename="..\..\Common\StreamBinder.cpp" />
+		<Unit filename="..\..\Common\StreamBinder.h" />
+		<Unit filename="..\..\Common\StreamObjects.cpp" />
+		<Unit filename="..\..\Common\StreamObjects.h" />
+		<Unit filename="..\..\Common\StreamUtils.cpp" />
+		<Unit filename="..\..\Common\StreamUtils.h" />
+		<Unit filename="..\..\Common\VirtThread.cpp" />
+		<Unit filename="..\..\Common\VirtThread.h" />
+		<Unit filename="..\..\Compress\Bcj2Coder.cpp" />
+		<Unit filename="..\..\Compress\Bcj2Coder.h" />
+		<Unit filename="..\..\Compress\Bcj2Register.cpp" />
+		<Unit filename="..\..\Compress\BcjCoder.cpp" />
+		<Unit filename="..\..\Compress\BcjCoder.h" />
+		<Unit filename="..\..\Compress\BcjRegister.cpp" />
+		<Unit filename="..\..\Compress\BranchCoder.cpp" />
+		<Unit filename="..\..\Compress\BranchCoder.h" />
+		<Unit filename="..\..\Compress\BranchMisc.cpp" />
+		<Unit filename="..\..\Compress\BranchMisc.h" />
+		<Unit filename="..\..\Compress\BranchRegister.cpp" />
+		<Unit filename="..\..\Compress\ByteSwap.cpp" />
+		<Unit filename="..\..\Compress\ByteSwap.h" />
+		<Unit filename="..\..\Compress\CopyCoder.cpp" />
+		<Unit filename="..\..\Compress\CopyCoder.h" />
+		<Unit filename="..\..\Compress\CopyRegister.cpp" />
+		<Unit filename="..\..\Compress\DeltaFilter.cpp" />
+		<Unit filename="..\..\Compress\Lzma2Decoder.cpp" />
+		<Unit filename="..\..\Compress\Lzma2Decoder.h" />
+		<Unit filename="..\..\Compress\Lzma2Encoder.cpp" />
+		<Unit filename="..\..\Compress\Lzma2Encoder.h" />
+		<Unit filename="..\..\Compress\Lzma2Register.cpp" />
+		<Unit filename="..\..\Compress\LzmaDecoder.cpp" />
+		<Unit filename="..\..\Compress\LzmaDecoder.h" />
+		<Unit filename="..\..\Compress\LzmaEncoder.cpp" />
+		<Unit filename="..\..\Compress\LzmaEncoder.h" />
+		<Unit filename="..\..\Compress\LzmaRegister.cpp" />
+		<Unit filename="..\..\Compress\RangeCoder.h" />
+		<Unit filename="..\..\Compress\RangeCoderBit.h" />
+		<Unit filename="..\..\Compress\RangeCoderBitTree.h" />
+		<Unit filename="..\..\Compress\RangeCoderOpt.h" />
+		<Unit filename="..\..\ICoder.h" />
+		<Unit filename="..\..\IMyUnknown.h" />
+		<Unit filename="..\..\IPassword.h" />
+		<Unit filename="..\..\IProgress.h" />
+		<Unit filename="..\..\IStream.h" />
+		<Unit filename="..\..\PropID.h" />
+		<Unit filename="..\..\UI\Common\ArchiveCommandLine.cpp" />
+		<Unit filename="..\..\UI\Common\ArchiveCommandLine.h" />
+		<Unit filename="..\..\UI\Common\ArchiveExtractCallback.cpp" />
+		<Unit filename="..\..\UI\Common\ArchiveExtractCallback.h" />
+		<Unit filename="..\..\UI\Common\ArchiveOpenCallback.cpp" />
+		<Unit filename="..\..\UI\Common\ArchiveOpenCallback.h" />
+		<Unit filename="..\..\UI\Common\Bench.h" />
+		<Unit filename="..\..\UI\Common\DefaultName.cpp" />
+		<Unit filename="..\..\UI\Common\DefaultName.h" />
+		<Unit filename="..\..\UI\Common\EnumDirItems.cpp" />
+		<Unit filename="..\..\UI\Common\EnumDirItems.h" />
+		<Unit filename="..\..\UI\Common\Extract.cpp" />
+		<Unit filename="..\..\UI\Common\Extract.h" />
+		<Unit filename="..\..\UI\Common\ExtractingFilePath.cpp" />
+		<Unit filename="..\..\UI\Common\ExtractingFilePath.h" />
+		<Unit filename="..\..\UI\Common\LoadCodecs.cpp" />
+		<Unit filename="..\..\UI\Common\LoadCodecs.h" />
+		<Unit filename="..\..\UI\Common\OpenArchive.cpp" />
+		<Unit filename="..\..\UI\Common\OpenArchive.h" />
+		<Unit filename="..\..\UI\Common\PropIDUtils.cpp" />
+		<Unit filename="..\..\UI\Common\PropIDUtils.h" />
+		<Unit filename="..\..\UI\Common\Property.h" />
+		<Unit filename="..\..\UI\Common\SetProperties.cpp" />
+		<Unit filename="..\..\UI\Common\SetProperties.h" />
+		<Unit filename="..\..\UI\Common\SortUtils.cpp" />
+		<Unit filename="..\..\UI\Common\SortUtils.h" />
+		<Unit filename="..\..\UI\Common\TempFiles.cpp" />
+		<Unit filename="..\..\UI\Common\TempFiles.h" />
+		<Unit filename="..\..\UI\Common\Update.h" />
+		<Unit filename="..\..\UI\Common\UpdateAction.h" />
+		<Unit filename="..\..\UI\Common\UpdateCallback.h" />
+		<Unit filename="..\..\UI\Common\UpdatePair.h" />
+		<Unit filename="..\..\UI\Common\UpdateProduce.h" />
+		<Unit filename="..\..\UI\Common\WorkDir.cpp" />
+		<Unit filename="..\..\UI\Common\WorkDir.h" />
+		<Unit filename="..\..\UI\Console\ArError.h" />
+		<Unit filename="..\..\UI\Console\BenchCon.h" />
+		<Unit filename="..\..\UI\Console\CompressionMode.h" />
+		<Unit filename="..\..\UI\Console\ConsoleClose.cpp" />
+		<Unit filename="..\..\UI\Console\ConsoleClose.h" />
+		<Unit filename="..\..\UI\Console\ExtractCallbackConsole.cpp" />
+		<Unit filename="..\..\UI\Console\ExtractCallbackConsole.h" />
+		<Unit filename="..\..\UI\Console\List.h" />
+		<Unit filename="..\..\UI\Console\Main.cpp" />
+		<Unit filename="..\..\UI\Console\MainAr.cpp" />
+		<Unit filename="..\..\UI\Console\OpenCallbackConsole.cpp" />
+		<Unit filename="..\..\UI\Console\OpenCallbackConsole.h" />
+		<Unit filename="..\..\UI\Console\PercentPrinter.cpp" />
+		<Unit filename="..\..\UI\Console\PercentPrinter.h" />
+		<Unit filename="..\..\UI\Console\UpdateCallbackConsole.cpp" />
+		<Unit filename="..\..\UI\Console\UpdateCallbackConsole.h" />
+		<Unit filename="..\..\UI\Console\UserInputUtils.cpp" />
+		<Unit filename="..\..\UI\Console\UserInputUtils.h" />
+		<Unit filename="..\..\..\Common\AutoPtr.h" />
+		<Unit filename="..\..\..\Common\Buffer.h" />
+		<Unit filename="..\..\..\Common\CRC.cpp" />
+		<Unit filename="..\..\..\Common\ComTry.h" />
+		<Unit filename="..\..\..\Common\CommandLineParser.cpp" />
+		<Unit filename="..\..\..\Common\CommandLineParser.h" />
+		<Unit filename="..\..\..\Common\Defs.h" />
+		<Unit filename="..\..\..\Common\DynamicBuffer.h" />
+		<Unit filename="..\..\..\Common\IntToString.cpp" />
+		<Unit filename="..\..\..\Common\IntToString.h" />
+		<Unit filename="..\..\..\Common\ListFileUtils.cpp" />
+		<Unit filename="..\..\..\Common\ListFileUtils.h" />
+		<Unit filename="..\..\..\Common\MyCom.h" />
+		<Unit filename="..\..\..\Common\MyException.h" />
+		<Unit filename="..\..\..\Common\MyGuidDef.h" />
+		<Unit filename="..\..\..\Common\MyInitGuid.h" />
+		<Unit filename="..\..\..\Common\MyString.cpp" />
+		<Unit filename="..\..\..\Common\MyString.h" />
+		<Unit filename="..\..\..\Common\MyUnknown.h" />
+		<Unit filename="..\..\..\Common\MyVector.cpp" />
+		<Unit filename="..\..\..\Common\MyVector.h" />
+		<Unit filename="..\..\..\Common\NewHandler.cpp" />
+		<Unit filename="..\..\..\Common\NewHandler.h" />
+		<Unit filename="..\..\..\Common\StdInStream.cpp" />
+		<Unit filename="..\..\..\Common\StdInStream.h" />
+		<Unit filename="..\..\..\Common\StdOutStream.cpp" />
+		<Unit filename="..\..\..\Common\StdOutStream.h" />
+		<Unit filename="..\..\..\Common\StringConvert.cpp" />
+		<Unit filename="..\..\..\Common\StringConvert.h" />
+		<Unit filename="..\..\..\Common\StringToInt.cpp" />
+		<Unit filename="..\..\..\Common\StringToInt.h" />
+		<Unit filename="..\..\..\Common\Types.h" />
+		<Unit filename="..\..\..\Common\UTFConvert.cpp" />
+		<Unit filename="..\..\..\Common\UTFConvert.h" />
+		<Unit filename="..\..\..\Common\Wildcard.cpp" />
+		<Unit filename="..\..\..\Common\Wildcard.h" />
+		<Unit filename="..\..\..\Windows\DLL.cpp" />
+		<Unit filename="..\..\..\Windows\DLL.h" />
+		<Unit filename="..\..\..\Windows\Defs.h" />
+		<Unit filename="..\..\..\Windows\Device.h" />
+		<Unit filename="..\..\..\Windows\Error.cpp" />
+		<Unit filename="..\..\..\Windows\Error.h" />
+		<Unit filename="..\..\..\Windows\FileDir.cpp" />
+		<Unit filename="..\..\..\Windows\FileDir.h" />
+		<Unit filename="..\..\..\Windows\FileFind.cpp" />
+		<Unit filename="..\..\..\Windows\FileFind.h" />
+		<Unit filename="..\..\..\Windows\FileIO.cpp" />
+		<Unit filename="..\..\..\Windows\FileIO.h" />
+		<Unit filename="..\..\..\Windows\FileMapping.h" />
+		<Unit filename="..\..\..\Windows\FileName.cpp" />
+		<Unit filename="..\..\..\Windows\FileName.h" />
+		<Unit filename="..\..\..\Windows\Handle.h" />
+		<Unit filename="..\..\..\Windows\MemoryLock.cpp" />
+		<Unit filename="..\..\..\Windows\MemoryLock.h" />
+		<Unit filename="..\..\..\Windows\PropVariant.cpp" />
+		<Unit filename="..\..\..\Windows\PropVariant.h" />
+		<Unit filename="..\..\..\Windows\PropVariantConversions.cpp" />
+		<Unit filename="..\..\..\Windows\PropVariantConversions.h" />
+		<Unit filename="..\..\..\Windows\Synchronization.cpp" />
+		<Unit filename="..\..\..\Windows\Synchronization.h" />
+		<Unit filename="..\..\..\Windows\System.cpp" />
+		<Unit filename="..\..\..\Windows\System.h" />
+		<Unit filename="..\..\..\Windows\Thread.h" />
+		<Unit filename="..\..\..\Windows\Time.cpp" />
+		<Unit filename="..\..\..\Windows\Time.h" />
+		<Unit filename="..\..\..\..\C\7zCrc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\7zCrc.h" />
+		<Unit filename="..\..\..\..\C\7zCrcOpt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\7zStream.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\Alloc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\Alloc.h" />
+		<Unit filename="..\..\..\..\C\Bra.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\Bra.h" />
+		<Unit filename="..\..\..\..\C\Bra86.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\BraIA64.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\Compress\Lz\LzHash.h" />
+		<Unit filename="..\..\..\..\C\CpuArch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\CpuArch.h" />
+		<Unit filename="..\..\..\..\C\Delta.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\Delta.h" />
+		<Unit filename="..\..\..\..\C\IStream.h" />
+		<Unit filename="..\..\..\..\C\LzFind.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\LzFind.h" />
+		<Unit filename="..\..\..\..\C\LzFindMt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\LzFindMt.h" />
+		<Unit filename="..\..\..\..\C\LzHash.h" />
+		<Unit filename="..\..\..\..\C\Lzma2Dec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\Lzma2Dec.h" />
+		<Unit filename="..\..\..\..\C\Lzma2Enc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\Lzma2Enc.h" />
+		<Unit filename="..\..\..\..\C\LzmaDec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\LzmaDec.h" />
+		<Unit filename="..\..\..\..\C\LzmaEnc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\LzmaEnc.h" />
+		<Unit filename="..\..\..\..\C\MtCoder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\MtCoder.h" />
+		<Unit filename="..\..\..\..\C\Sha256.h" />
+		<Unit filename="..\..\..\..\C\Threads.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\..\..\C\Threads.h" />
+		<Unit filename="..\..\..\..\C\Types.h" />
+		<Unit filename="..\..\..\..\C\Xz.h" />
+		<Unit filename="..\..\..\..\C\XzCrc64.h" />
+		<Unit filename="..\..\..\..\C\XzEnc.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

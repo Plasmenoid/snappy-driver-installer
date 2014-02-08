@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<BrowseTracker_layout_file>
+	<ActiveTarget name="Win32 ReleaseU" />
+	<File name="..\..\UI\Console\UpdateCallbackConsole.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="940" topLine="202" />
+	</File>
+	<File name="..\..\UI\Console\ExtractCallbackConsole.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="1171" topLine="0" />
+	</File>
+	<File name="..\..\..\..\C\7zAlloc.c" open="0" top="0" tabpos="2">
+		<Cursor position="1451" topLine="15" />
+	</File>
+</BrowseTracker_layout_file>

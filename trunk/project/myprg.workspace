@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="MyPrg">
+		<Project filename="Drivers.cbp">
+			<Depends filename="../external/SevenZ/build/CPP/7zip/Bundles/Alone7z/lib.cbp" />
+		</Project>
+		<Project filename="../external/SevenZ/build/CPP/7zip/Bundles/Alone7z/lib.cbp" />
+		<Project filename="install64/install64.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

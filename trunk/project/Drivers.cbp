@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Drivers" />
+		<Option makefile="makefile" />
+		<Option execution_dir="C:/newdrp/newcur/" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Win32 ReleaseU">
+				<Option output="../drv" prefix_auto="1" extension_auto="1" />
+				<Option working_dir=".." />
+				<Option object_output="../obj/ReleaseU" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Option parameters="-disableinstall" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-g" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add directory="../lib/ReleaseU" />
+				</Linker>
+			</Target>
+			<Target title="Win32 DebugU">
+				<Option output="../drv_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir=".." />
+				<Option object_output="../obj/DebugU" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-pg" />
+					<Add option="-g" />
+					<Add option="-D_DEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg -lgmon" />
+					<Add directory="../lib/DebugU" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wshadow" />
+			<Add option="-Winit-self" />
+			<Add option="-Wredundant-decls" />
+			<Add option="-Wcast-align" />
+			<Add option="-Wundef" />
+			<Add option="-Wfloat-equal" />
+			<Add option="-Winline" />
+			<Add option="-Wunreachable-code" />
+			<Add option="-Wmissing-declarations" />
+			<Add option="-Wmissing-include-dirs" />
+			<Add option="-Wswitch-enum" />
+			<Add option="-Wswitch-default" />
+			<Add option="-Wmain" />
+			<Add option="-Wextra" />
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add option="-Wno-format" />
+			<Add option="-fno-builtin-log" />
+			<Add option="-I..\source\lzma" />
+			<Add option="-m32" />
+			<Add option="-DWIN32" />
+			<Add option="-D_CONSOLE" />
+			<Add option="-DEXCLUDE_COM" />
+			<Add option="-DNO_REGISTRY" />
+			<Add option="-D_MBCS" />
+			<Add option="-DUNICODE" />
+			<Add option="-D_UNICODE" />
+			<Add option="-D_NO_CRYPTO" />
+			<Add option="-DEXTRACT_ONLY" />
+			<Add directory="../resources" />
+			<Add directory="../external/SevenZ/build/C" />
+		</Compiler>
+		<Linker>
+			<Add option="-static-libstdc++" />
+			<Add option="-static" />
+			<Add option="-m32" />
+			<Add library="7z" />
+			<Add library="kernel32" />
+			<Add library="user32" />
+			<Add library="gdi32" />
+			<Add library="winspool" />
+			<Add library="comdlg32" />
+			<Add library="advapi32" />
+			<Add library="shell32" />
+			<Add library="ole32" />
+			<Add library="oleaut32" />
+			<Add library="uuid" />
+			<Add library="odbc32" />
+			<Add library="odbccp32" />
+			<Add library="setupapi" />
+			<Add library="webp" />
+			<Add library="msimg32" />
+			<Add library="shlwapi" />
+			<Add library="newdev" />
+			<Add library="comctl32" />
+		</Linker>
+		<ExtraCommands>
+			<Add before="..\resources\delres.bat" />
+			<Add before="..\SubWCRev32.exe ..\source ..\source\svnrev_template.h ..\source\svnrev.h" />
+		</ExtraCommands>
+		<Unit filename="../langs/english.txt" />
+		<Unit filename="../resources/resources.h" />
+		<Unit filename="../resources/resources.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="../source/common.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/common.h" />
+		<Unit filename="../source/enum.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/enum.h" />
+		<Unit filename="../source/guicon.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/guicon.h" />
+		<Unit filename="../source/indexing.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/indexing.h" />
+		<Unit filename="../source/langlist.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/langlist.h" />
+		<Unit filename="../source/lzma/Alloc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/lzma/Alloc.h" />
+		<Unit filename="../source/lzma/Bra.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/lzma/Bra.h" />
+		<Unit filename="../source/lzma/LzFind.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/lzma/LzFind.h" />
+		<Unit filename="../source/lzma/LzFindMt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/lzma/LzFindMt.h" />
+		<Unit filename="../source/lzma/LzHash.h" />
+		<Unit filename="../source/lzma/Lzma2Enc.h" />
+		<Unit filename="../source/lzma/Lzma86.h" />
+		<Unit filename="../source/lzma/Lzma86Dec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/lzma/Lzma86Enc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/lzma/LzmaDec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/lzma/LzmaDec.h" />
+		<Unit filename="../source/lzma/LzmaEnc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/lzma/LzmaEnc.h" />
+		<Unit filename="../source/lzma/Types.h" />
+		<Unit filename="../source/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/main.h" />
+		<Unit filename="../source/manager.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/manager.h" />
+		<Unit filename="../source/matcher.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/matcher.h" />
+		<Unit filename="../source/svnrev.h" />
+		<Unit filename="../source/theme.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/theme.h" />
+		<Unit filename="../source/themelist.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/themelist.h" />
+		<Unit filename="../themes/classic.txt" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
