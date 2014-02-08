@@ -1,0 +1,44 @@
+/*
+This file is part of
+Snappy Driver Installer.
+
+Snappy Driver Installer is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Snappy Driver Installer is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <windows.h>
+#include <commctrl.h>
+#include <winuser.h>
+#include "resources.h"
+
+IDI_ICON1       ICON        "icon.ico"
+IDR_UP          RESFILE     "up.webp"
+IDR_DOWN        RESFILE     "down.webp"
+IDR_UP_H        RESFILE     "up_h.webp"
+IDR_DOWN_H      RESFILE     "down_h.webp"
+IDR_LICENSE     RESFILE     "gpl-3.0.txt"
+IDR_THEME       RESFILE     "..\\themes\\classic.txt"
+IDR_LANG        RESFILE     "..\\langs\\english.txt"
+IDR_INSTALL64   RESFILE     "install64.exe"
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "drv.exe.manifest"
+
+IDD_DIALOG1 DIALOGEX DISCARDABLE 0, 0, 340, 349
+STYLE DS_MODALFRAME|WS_POPUP|WS_CAPTION|WS_SYSMENU|DS_CENTER
+CAPTION "Dialog"
+{
+    LTEXT           "Please read the following License Agreement carefully before using this program.",0,10,10,300,20
+    DEFPUSHBUTTON   "&Decline", IDCANCEL, 10, 318, 70, 20
+    PUSHBUTTON      "&Accept",  IDOK,     87, 318, 70, 20
+    EDITTEXT        IDC_EDIT1, 10, 30, 320, 300-30, WS_HSCROLL|WS_VSCROLL|ES_MULTILINE|ES_READONLY
+}

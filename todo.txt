@@ -1,0 +1,118 @@
+^ themes(none?)
+^ preload device class images
+^ Memory leaks
+^ Error handling
+- Check indexing
+? manager_populate
+? thread_loadall loop
+* Full unicode support(???) ANSI:log and indexes
+* auto width in left panel
+? *.cat
+? not a virus
+- double click on driver to install and reboot
+? CatalogFile.NT
+- theme
+? Extract to
+
+
+
+font_size
+color
+    combobox
+
+
+red     needs driver
+yellow  update available
+green   actual
+blue    old,worse
+gray    incompatible
+
+                                                           // VHYX
+anchor                                             // CCAA
+   top_left                              0 // 0000
+   top_right                             1 // 0001
+   bottom_left                           2 // 0010
+   bottom_right                          3 // 0011
+   center_top                            4 // 010*
+   center_bottom                         6 // 011*
+   center_left                           8 // 10*0
+   center_right                          9 // 10*1
+   center                               12 // 11**
+
+0: 0left / 1right
+1: 0top  / 1bottom
+2:         1hcenter
+3:         1vcenter
+
+                                                //  VHVH
+fill                                    //  SSTT
+   none                           0 //  0000
+   htile                          1 //  0001
+   vtile                          2 //  0010
+   htile_vtile            3 //  0011
+   hstr                           4 //  0100
+   vstr                           8 //  1000
+   hstr_vstr             12 //  1100
+   htile_vstr             9 //  1**1
+   vtile_hstr             6 //  *11*
+
+0:htile
+1:vtile
+2:hstr
+3:vstr
+
+Update
+  clear messages
+  do
+  {
+        flag=0
+        process
+        while(new messages)
+        {
+          clear messages
+          sleep(200)
+          flag=1
+        }
+  }
+  while(flag)
+
+box
+  x                     OFSX
+  y                     OFSY
+  wx                    WX
+  wy                    WY
+
+  ic                    INSIDE_COLOR
+  oc                    OUTLINE_COLOR
+  ow                    OUTLINE_WIDTH
+  or                    OUTLINE_ROUND
+  bn                    BITMAP_FILENAME
+  ba                    BITMAP_ANCHOR
+  bf                    BITMAP_FILL
+
+  ic                    INSIDE_COLOR_H
+  oc                    OUTLINE_COLOR_H
+  ow                    OUTLINE_WIDTH_H
+  or                    OUTLINE_ROUND_H
+  bn                    BITMAP_FILENAME_H
+  ba                    BITMAP_ANCHOR_H
+  bf                    BITMAP_FILL_H
+
+
+BN  BETTER_NEW
+SN  SAME_NEW
+WN  WORSE_NEW
+BC  BETTER_CUR
+SC  SAME_CUR
+WC  WORSE_CUR
+BO  BETTER_OLD
+SO  SAME_OLD
+WO  WORSE_OLD
+
+MS  MISSING
+IN  INVALID
+DP  DUP
+
+NM  NOT-FOUND,MISSING
+NS  NOT-FOUND,INSTELLED_UNKNOWN
+NU  NOT-FOUND,INSTALLED_STANDARD

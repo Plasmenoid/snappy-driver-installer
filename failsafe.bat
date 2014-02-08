@@ -1,0 +1,1 @@
+drv.exe -noslowsysinfo -failsafe

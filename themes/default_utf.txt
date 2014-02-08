@@ -1,0 +1,37 @@
+﻿THEME_NAME = "UTF8"
+
+MAINWND_WX              = 640
+MAINWND_WY              = 480
+MAINWND_COL_INNER       = 0x209090
+MAINWND_COL_OUTLINE_C   = 0x105050
+MAINWND_COL_OUTLINE_W   = 3
+
+DRVLIST_WX              = 130
+DRVLIST_OFST            = 20
+DRVLIST_COL_INNER       = 0x10EF2F
+DRVLIST_COL_OUTLINE_C   = 0x108080
+DRVLIST_COL_OUTLINE_W   = 3
+
+ITEM_WX                 = 420
+ITEM_OFS                = 12
+ITEM_DIST_Y0            = 50
+ITEM_DIST_Y1            = 37
+ITEM_WY                 = 32
+ITEM_COL_INNER          = 0x109090
+ITEM_COL_OUTLINE_C      = 0x105050
+ITEM_COL_OUTLINE_W      = 3
+
+ITEM_CHECKBOX_OFS_X     = 4
+ITEM_CHECKBOX_OFS_Y     = 2
+ITEM_CHECKBOX_SIZE      = 30
+ITEM_ICON_OFS_X         = 31
+ITEM_ICON_OFS_Y         = -1
+ITEM_ICON_SIZE          = 28
+ITEM_TEXT_OFS_X         = 64
+ITEM_TEXT_OFS_Y         = 2
+ITEM_TEXT_DIST_Y        = 14
+
+GROUP_OFS               = 6
+GROUP_COL_INNER         = 0x109090
+GROUP_COL_OUTLINE_C     = 0x105050
+GROUP_COL_OUTLINE_W     = 3

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<BrowseTracker_layout_file>
+	<ActiveTarget name="Win32 ReleaseU" />
+	<File name="..\source\svnrev.h" open="0" top="0" tabpos="2">
+		<Cursor position="823" topLine="0" />
+	</File>
+	<File name="..\source\lzma\LzFind.c" open="0" top="0" tabpos="8">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="..\source\theme.c" open="0" top="0" tabpos="8">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="2788" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\theme.h" open="0" top="0" tabpos="2">
+		<Cursor position="662" topLine="0" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\guicon.h" open="0" top="0" tabpos="6">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\enum.c" open="0" top="0" tabpos="2">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="17400" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\themelist.c" open="0" top="0" tabpos="5">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\enum.h" open="0" top="0" tabpos="4">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\themelist.h" open="0" top="0" tabpos="3">
+		<Cursor position="678" topLine="1" />
+		<BrowseMarks positions="972,6329" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\lzma\Lzma86Enc.c" open="0" top="0" tabpos="10">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="..\source\common.h" open="0" top="0" tabpos="12">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\lzma\LzmaEnc.c" open="0" top="0" tabpos="11">
+		<Cursor position="25352" topLine="909" />
+	</File>
+	<File name="..\source\lzma\Alloc.c" open="0" top="0" tabpos="11">
+		<Cursor position="1727" topLine="54" />
+	</File>
+	<File name="..\source\guicon.c" open="1" top="1" tabpos="3">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\main.h" open="0" top="0" tabpos="6">
+		<Cursor position="1781" topLine="6" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\manager.h" open="0" top="0" tabpos="2">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\langlist.c" open="0" top="0" tabpos="6">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\manager.c" open="0" top="0" tabpos="7">
+		<Cursor position="55163" topLine="1547" />
+		<BrowseMarks positions="46988" />
+		<Book_Marks positions="10526,10526,23374,8838,8838,39299,32597,7714,41254,24277" />
+	</File>
+	<File name="..\source\langlist.h" open="0" top="0" tabpos="7">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="3034" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\indexing.h" open="0" top="0" tabpos="6">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="3395,4054" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\indexing.c" open="0" top="0" tabpos="4">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="15974" />
+	</File>
+	<File name="..\langs\english.txt" open="0" top="0" tabpos="0">
+		<Cursor position="3836" topLine="58" />
+	</File>
+	<File name="..\resources\resources.rc" open="1" top="0" tabpos="10">
+		<Cursor position="937" topLine="0" />
+		<BrowseMarks positions="741,1523" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\main.c" open="1" top="0" tabpos="1">
+		<Cursor position="49005" topLine="1560" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="45125,44960,8744,11445,11423,8730,8908,8908,13829,13829,30105,30108,30892,31082,46518,32307,42679,20013,20013,38652" />
+	</File>
+	<File name="..\source\lzma\LzmaDec.c" open="0" top="0" tabpos="9">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="..\source\matcher.c" open="0" top="0" tabpos="9">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="4759,5564,6774,7570,12646,16280,20406" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\common.c" open="0" top="0" tabpos="5">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="..\source\matcher.h" open="0" top="0" tabpos="3">
+		<Cursor position="662" topLine="1" />
+		<BrowseMarks positions="" />
+		<Book_Marks positions="2415,2415" />
+	</File>
+	<File name="..\resources\resources.h" open="1" top="0" tabpos="0">
+		<Cursor position="891" topLine="0" />
+		<BrowseMarks positions="989,1045" />
+		<Book_Marks positions="" />
+	</File>
+</BrowseTracker_layout_file>
