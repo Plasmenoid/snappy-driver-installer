@@ -1018,19 +1018,19 @@ int driverpack_genindex(driverpack_t *drp)
     unsigned i;
 
     HANDLE thr;
-    char name[512];
+    WCHAR name[512];
     WCHAR pathinf[1024];
     WCHAR *inffile;
 
     log_err("Indexing %ws\\%ws\n",drp->text+drp->drppath,drp->text+drp->drpfilename);
-    sprintf(name,"%ws\\%ws",drp->text+drp->drppath,drp->text+drp->drpfilename);
+    wsprintf(name,L"%ws\\%ws",drp->text+drp->drppath,drp->text+drp->drpfilename);
     //log("Scanning '%s'\n",name);
     allocImp.Alloc=SzAlloc;
     allocImp.Free=SzFree;
     allocTempImp.Alloc=SzAllocTemp;
     allocTempImp.Free=SzFreeTemp;
 
-    if(InFile_Open(&archiveStream.file,name))return 1;
+    if(InFile_OpenW(&archiveStream.file,name))return 1;
 
     FileInStream_CreateVTable(&archiveStream);
     LookToRead_CreateVTable(&lookStream,False);
