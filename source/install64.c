@@ -1,3 +1,20 @@
+/*
+This file is part of Snappy Driver Installer.
+
+Snappy Driver Installer is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Snappy Driver Installer is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #if defined(UNICODE) && !defined(_UNICODE)
 	#define _UNICODE
 #elif defined(_UNICODE) && !defined(UNICODE)
@@ -13,7 +30,7 @@ void print_error(int r,const WCHAR *s)
     WCHAR buf[4096];
     buf[0]=0;
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,NULL,r,0,(LPWSTR)&buf,4000,NULL);
-    printf("ERROR with %ws:[%d]'%ws'\n",s,r,buf);
+    wprintf(L"ERROR with %ws:[%d]'%s'\n",s,r,buf);
 }
 
 int WINAPI WinMain(HINSTANCE hThisInstance,HINSTANCE hPrevInstance,LPSTR lpszArgument,int nCmdShow)
@@ -22,19 +39,19 @@ int WINAPI WinMain(HINSTANCE hThisInstance,HINSTANCE hPrevInstance,LPSTR lpszArg
     int argc;
     int ret=0,needreboot=0,lr;
 
-	printf("Start\n");
-	printf("Command: '%ws'\n",GetCommandLineW());
+	wprintf(L"Start\n");
+	wprintf(L"Command: '%s'\n",GetCommandLineW());
     argv=CommandLineToArgvW(GetCommandLineW(),&argc);
 
 	if(argc==3)
 	{
-		printf("Install64.exe '%ws' '%ws'\n",argv[1],argv[2]);
-		ret=UpdateDriverForPlugAndPlayDevices(0,argv[1],argv[2],INSTALLFLAG_FORCE|INSTALLFLAG_NONINTERACTIVE,&needreboot);
+		wprintf(L"Install64.exe '%s' '%s'\n",argv[1],argv[2]);
+		ret=UpdateDriverForPlugAndPlayDevices(0,argv[1],argv[2],INSTALLFLAG_FORCE,&needreboot);
 	}
 	else
 		printf("argc=%d\n",argc);
 	lr=GetLastError();
-	printf("Finished %d,%d,%d(%X)\n",ret,needreboot,lr,lr);
+	wprintf(L"Finished %d,%d,%d(%X)\n",ret,needreboot,lr,lr);
 	if(!ret)
 	{
 		ret=lr;

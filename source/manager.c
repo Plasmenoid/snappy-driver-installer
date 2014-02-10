@@ -209,6 +209,7 @@ void _7z_setcomplited(long long i)
     int _totalitems=0;
     int _processeditems=0;
 
+    if(statemode==STATEMODE_7Z)return;
     itembar_t *itembar=manager_g->items_list;
     for(j=0;j<manager_g->items_handle.items;j++,itembar++)
     if(j>=RES_SLOTS)
@@ -376,7 +377,7 @@ goaround:
                 if(flags&FLAG_DISABLEINSTALL)
                     Sleep(2000);
                 else
-                    ret=UpdateDriverForPlugAndPlayDevices(0,hwid,inf,INSTALLFLAG_FORCE|INSTALLFLAG_NONINTERACTIVE,&needrb);
+                    ret=UpdateDriverForPlugAndPlayDevices(0,hwid,inf,INSTALLFLAG_FORCE,&needrb);
             }
             else
                 ret=1;
