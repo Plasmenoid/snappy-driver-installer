@@ -38,6 +38,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #include <signal.h>
 #include <process.h>
 #include <direct.h>
+#include <locale.h>
 
 #include "svnrev.h"
 #include "resources.h"

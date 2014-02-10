@@ -72,6 +72,8 @@ void log_start(WCHAR *log_dir)
     GetComputerName(pcname,&sz);
     time(&rawtime);
     ti=localtime(&rawtime);
+    setlocale(LC_ALL,"");
+    system("chcp 1251");
 
     wsprintf(timestamp,L"%4d_%02d_%02d__%02d_%02d_%02d__",
              1900+ti->tm_year,ti->tm_mon+1,ti->tm_mday,
@@ -90,6 +92,16 @@ void log_start(WCHAR *log_dir)
 
     mkdir_r(log_dir);
     logfile=_wfopen(filename,L"wb");
+    if(!logfile)
+    {
+        log_err("ERROR in log_start(): Write-protected,'%ws'\n",filename);
+        GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
+        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
+        wcscat(log_dir,L"\\SDI");
+        wsprintf(filename,L"%s\\%s%s_log.txt",log_dir,timestamp,pcname);
+        mkdir_r(log_dir);
+        logfile=_wfopen(filename,L"wb");
+    }
     log("{start logging\n");
     log("%s\n\n",SVN_REV_STR);
 }

@@ -154,6 +154,7 @@ STR_EXTRACTFOLDER       = "Please select the destination folder."
 // Device status
 STR_STATUS_INVALID      = "Incompatible driver"
 STR_STATUS_MISSING      = "Driver available (driver not installed yet)"
+STR_STATUS_NOTSIGNED    = " (not signed)"
 
 STR_STATUS_BETTER_NEW   = "Updated driver available which is also more optimal"
 STR_STATUS_SAME_NEW     = "Updated driver available"
