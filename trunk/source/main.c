@@ -107,6 +107,7 @@ int horiz_sh=0;
 WCHAR *floating_str=0;
 
 int exitflag=0;
+int ret_global;
 HANDLE event;
 
 // Settings
@@ -155,13 +156,13 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
-            int r;
             wsprintf(cmd,L"7za %s",wcsstr(GetCommandLineW(),L"-7z")+4);
-            log("Executing '%ws'\n",cmd);
-            r=Extract7z(cmd);
-            log("Ret: %d\n",r);
+            log_err("Executing '%ws'\n",cmd);
+            registerall();
+            statemode=STATEMODE_7Z;
+            ret_global=Extract7z(cmd);
+            log_err("Ret: %d\n",ret_global);
             log_stop();
-            statemode=3;
             return;
         }
         else
@@ -268,8 +269,12 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     wcscpy(output_dir,log_dir);
 #endif
     log_start(log_dir);
+    if(statemode==STATEMODE_7Z)
+    {
+        if(backtrace)FreeLibrary(backtrace);
+        return ret_global;
+    }
     signal(SIGSEGV,SignalHandler);
-    if(statemode==STATEMODE_7Z)return 0;
     ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:SW_HIDE);
 
     if(log_verbose&LOG_VERBOSE_ARGS)
