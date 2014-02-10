@@ -88,7 +88,7 @@ void manager_filter(manager_t *manager,int options)
     devicematch_t *devicematch;
     itembar_t *itembar;
     int i,j,k;
-    int cnt[NUM_STATUS];
+    int cnt[NUM_STATUS+1];
     int o1=options&FILTER_SHOW_ONE;
 
     manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==STATEMODE_LOAD?0:1;
@@ -123,10 +123,12 @@ void manager_filter(manager_t *manager,int options)
             }
 
             for(k=0;k<NUM_STATUS;k++)
-                if((!o1||!cnt[k])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
+                if((!o1||!cnt[NUM_STATUS])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
             {
+                if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&devicematch->device->problem==0
+                   &&itembar->hwidmatch->altsectscore<2/*&&manager->matcher->state->platform.dwMajorVersion>=6*/)continue;
                 cnt[k]++;
-                if(o1&&itembar->hwidmatch->altsectscore<2&&manager->matcher->state->platform.dwMajorVersion>=6)continue;
+                cnt[NUM_STATUS]++;
                 itembar->isactive=1;
             }
         }
@@ -244,9 +246,13 @@ unsigned int __stdcall thread_install(void *arg)
 
     // Prepare extract dir
     mkdir_r(extractdir);
+    log_err("Dir: (%ws)\n",extractdir);
     wsprintf(cmd,L"%s\\install64.exe",extractdir);
     f=_wfopen(cmd,L"wb");
-    if(!f)log_err("Failed to create '%ws'\n",cmd);
+    if(f)
+        log_err("Created '%ws'\n",cmd);
+    else
+        log_err("Failed to create '%ws'\n",cmd);
     get_resource(IDR_INSTALL64,&install64bin,&size);
     fwrite(install64bin,1,size,f);
     fclose(f);
@@ -309,7 +315,7 @@ unsigned int __stdcall thread_install(void *arg)
 goaround:
     itembar=manager->items_list;
     for(i=0;i<manager->items_handle.items&&installmode==1;i++,itembar++)
-        if(i>=RES_SLOTS&&itembar->checked)
+        if(i>=RES_SLOTS&&itembar->checked&&itembar->isactive&&itembar->hwidmatch)
     {
         int unpacked=0;
         itembar_act=i;
@@ -348,7 +354,8 @@ goaround:
             log_err("Extracting via '%ws'\n",cmd);
             itembar->install_status=STR_INST_EXTRACT;
             redrawfield();
-            Extract7z(cmd);
+            r=Extract7z(cmd);
+            log_err("Ret %d\n",r);
         }
 
         // Install driver
@@ -451,7 +458,7 @@ goaround:
     }
     if(instflag&INSTALLDRIVERS)
     {
-        wsprintf(buf,L" /c rd /s /q %s",extractdir);
+        wsprintf(buf,L" /c rd /s /q \"%s\"",extractdir);
         RunSilent(L"cmd",buf,SW_HIDE,1);
     }
 
@@ -688,6 +695,10 @@ void str_status(WCHAR *buf,itembar_t *itembar)
             }
         }
         if(status&STATUS_DUP)wcscat(buf,STR(STR_STATUS_DUP));
+        if(itembar->hwidmatch->altsectscore<2/*&&manager_g->matcher->state->platform.dwMajorVersion>=6*/)
+        {
+            wcscat(buf,STR(STR_STATUS_NOTSIGNED));
+        }
     }
     else
     //if(devicematch)
@@ -1037,7 +1048,7 @@ void manager_drawitem(manager_t *manager,HDC hdc,int pos,itembar_t *itembar,int 
                 str_status(bufw,itembar);
                 if(itembar->install_status)
                 {
-                    wsprintf(bufw,itembar->install_status==STR_INST_FAILED?L"%s %d":L"%s",
+                    wsprintf(bufw,itembar->install_status==STR_INST_FAILED?L"%s %X":L"%s",
                              STR(itembar->install_status),itembar->val1);
 //                    if(itembar->install_status==STR_INST_INSTALL&&(installmode==2||!itembar->checked))
 //                    if(installmode==2&&!itembar->checked)

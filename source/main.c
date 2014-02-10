@@ -399,6 +399,7 @@ unsigned int __stdcall thread_loadall(void *arg)
         else
         {
             printf("*** FINISH ***\n\n");
+            printf("*** FINISH ***(%ws)\n\n",STR(STR_EXPERT));
             bundle_display^=1;
             bundle_shadow^=1;
         }
@@ -1483,6 +1484,20 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 viruscheck(L"",0,0);
                 manager_restorepos(manager_g,manager_prev);
                 manager_setpos(manager_g);
+                if(flags&FLAG_AUTOINSTALL)
+                {
+                    manager_selectall(manager_g);
+                    if(installmode==0)
+                    {
+                        WCHAR path[512];
+                        extractinfo_t ei={L"TEMP",INSTALLDRIVERS};
+                        ei.dir=L"TEMP";
+                        wsprintf(path,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
+                        ei.dir=path;
+                        manager_install(&ei);
+                    }
+                    flags&=~FLAG_AUTOINSTALL;
+                }
             }
             break;
 
