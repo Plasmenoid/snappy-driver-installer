@@ -160,7 +160,10 @@ void manager_print(manager_t *manager)
     itembar=manager->items_list;
     for(k=0;k<manager->items_handle.items;k++,itembar++)
         if(itembar->isactive&&itembar->hwidmatch)
-            {hwidmatch_print(itembar->hwidmatch,limits);act++;}
+            {
+                log("$%3d|",k);
+                hwidmatch_print(itembar->hwidmatch,limits);act++;
+            }
 
     log("}manager_print[%d]\n\n",act);
 }
@@ -226,6 +229,55 @@ void _7z_setcomplited(long long i)
     manager_g->items_list[SLOT_EXTRACTING].val2=_totalitems;
 }
 
+void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
+{
+    WCHAR cmd[BUFLEN];
+    WCHAR buf[BUFLEN];
+    void *install64bin;
+    int size;
+    FILE *f;
+
+    *ret=1;*needrb=1;
+    wsprintf(cmd,L"%s\\install64.exe",extractdir);
+    if(!PathFileExists(cmd))
+    {
+        mkdir_r(extractdir);
+        log_err("Dir: (%ws)\n",extractdir);
+        f=_wfopen(cmd,L"wb");
+        if(f)
+            log_err("Created '%ws'\n",cmd);
+        else
+            log_err("Failed to create '%ws'\n",cmd);
+        get_resource(IDR_INSTALL64,&install64bin,&size);
+        fwrite(install64bin,1,size,f);
+        fclose(f);
+    }
+
+    if(installmode==MODE_INSTALLING)
+    {
+        if(flags&FLAG_DISABLEINSTALL)
+            Sleep(2000);
+        else
+            *ret=UpdateDriverForPlugAndPlayDevices(0,hwid,inf,INSTALLFLAG_FORCE,needrb);
+    }
+    else
+        *ret=1;
+
+    if(!*ret)*ret=GetLastError();
+    if((unsigned)ret==0xE0000235)//ERROR_IN_WOW64
+    {
+        wsprintf(buf,L"\"%s\" \"%s\"",hwid,inf);
+        wsprintf(cmd,L"%s\\install64.exe",extractdir);
+        log_err("'%ws %ws'\n",cmd,buf);
+        *ret=RunSilent(cmd,buf,SW_HIDE,1);
+        if((*ret&0x7FFFFFFF)==1)
+        {
+            *needrb=*ret&0x80000000?1:0;
+            *ret&=~0x80000000;
+        }
+    }
+}
+
 unsigned int __stdcall thread_install(void *arg)
 {
     UNREFERENCED_PARAMETER(arg)
@@ -235,9 +287,7 @@ unsigned int __stdcall thread_install(void *arg)
     WCHAR hwid[BUFLEN];
     WCHAR inf[BUFLEN];
     WCHAR buf[BUFLEN];
-    int i,j,size;
-    FILE *f;
-    void *install64bin;
+    int i,j;
     RESTOREPOINTINFOW pRestorePtSpec;
     STATEMGRSTATUS pSMgrStatus;
     HINSTANCE hinstLib=0;
@@ -246,18 +296,6 @@ unsigned int __stdcall thread_install(void *arg)
     int r=0;
 
     // Prepare extract dir
-    mkdir_r(extractdir);
-    log_err("Dir: (%ws)\n",extractdir);
-    wsprintf(cmd,L"%s\\install64.exe",extractdir);
-    f=_wfopen(cmd,L"wb");
-    if(f)
-        log_err("Created '%ws'\n",cmd);
-    else
-        log_err("Failed to create '%ws'\n",cmd);
-    get_resource(IDR_INSTALL64,&install64bin,&size);
-    fwrite(install64bin,1,size,f);
-    fclose(f);
-
     installmode=MODE_INSTALLING;
     manager->items_list[SLOT_EXTRACTING].isactive=1;
     manager_setpos(manager);
@@ -321,6 +359,7 @@ goaround:
         int unpacked=0;
         itembar_act=i;
         hwidmatch_t *hwidmatch=itembar->hwidmatch;
+        log_err("INDEX %d\n",i);
         wsprintf(cmd,L"%s\\%S",extractdir,getdrp_infpath(hwidmatch));
 
         // Extract
@@ -360,7 +399,7 @@ goaround:
         }
 
         // Install driver
-        if(instflag&INSTALLDRIVERS)
+        if(instflag&INSTALLDRIVERS&&itembar->checked)
         {
             int needrb=0,ret=1;
             wsprintf(inf,L"%s\\%S%S",
@@ -372,7 +411,8 @@ goaround:
             itembar->install_status=STR_INST_INSTALL;
             redrawfield();
 
-            if(installmode==MODE_INSTALLING&&itembar->checked)
+            driver_install(hwid,inf,&ret,&needrb);
+            /*if(installmode==MODE_INSTALLING)
             {
                 if(flags&FLAG_DISABLEINSTALL)
                     Sleep(2000);
@@ -394,7 +434,7 @@ goaround:
                     needrb=ret&0x80000000?1:0;
                     ret&=~0x80000000;
                 }
-            }
+            }*/
             //ret=1;needrb=1;
             log_err("Ret %d(%X),%d\n\n",ret,ret,needrb);
 
@@ -596,8 +636,9 @@ void manager_selectnone(manager_t *manager)
     itembar_t *itembar;
     int i;
 
-    itembar=manager->items_list;
-    for(i=0;i<manager->items_handle.items;i++,itembar++)itembar->checked=0;
+    manager->items_list[SLOT_RESTORE_POINT].checked=0;
+    itembar=&manager->items_list[RES_SLOTS];
+    for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)itembar->checked=0;
 }
 
 void manager_selectall(manager_t *manager)
@@ -605,8 +646,9 @@ void manager_selectall(manager_t *manager)
     itembar_t *itembar;
     int i,group=-1;
 
-    itembar=manager->items_list;
-    for(i=0;i<manager->items_handle.items;i++,itembar++)
+    manager->items_list[SLOT_RESTORE_POINT].checked=1;
+    itembar=&manager->items_list[RES_SLOTS];
+    for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
     {
         itembar->checked=0;
         if(itembar->isactive)
@@ -1444,7 +1486,7 @@ int isvalidcat(hwidmatch_t *hwidmatch,state_t *state)
     return strstr(s,bufa)?1:0;
 }
 
-void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int i)
+void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int index)
 {
     WCHAR bufw[BUFLEN];
     WCHAR i_hwid[BUFLEN];
@@ -1463,10 +1505,10 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int i)
     int c0=D(POPUP_TEXT_COLOR),cb=D(POPUP_CMP_BETTER_COLOR);
     int p0=D(POPUP_OFSX),p1=D(POPUP_OFSX)+10;
 
-    if(i<RES_SLOTS)return;
+    if(index<RES_SLOTS)return;
 
-    devicematch_f=manager->items_list[i].devicematch;
-    hwidmatch_f=manager->items_list[i].hwidmatch;
+    devicematch_f=manager->items_list[index].devicematch;
+    hwidmatch_f=manager->items_list[index].hwidmatch;
 
     td.y=D(POPUP_OFSY);
     td.wy=D(POPUP_WY);
@@ -1477,6 +1519,7 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int i)
 
     if(devicematch_f->device->driver_index>=0)
     {
+        int i;
         cur_driver=&manager->matcher->state->drivers_list[devicematch_f->device->driver_index];
         wsprintf(bufw,L"%s",t+cur_driver->MatchingDeviceId);
         for(i=0;bufw[i];i++)i_hwid[i]=toupper(bufw[i]);i_hwid[i]=0;
@@ -1502,7 +1545,7 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int i)
     }
 
     td.x=p0;TextOutF(&td,c0,L"%s",STR(STR_HINT_ANALYSIS));td.x=p1;
-
+    TextOutF(&td,c0,L"$%d",index);
     if(hwidmatch_f)
     {
         TextOutF(&td,isvalidcat(hwidmatch_f,manager->matcher->state)?cb:D(POPUP_CMP_INVALID_COLOR),
