@@ -61,33 +61,39 @@ void log_times()
     log("##test:       %7ld\n",time_test);
 }
 
-void log_start(WCHAR *log_dir)
+void gen_timestamp()
 {
-    WCHAR filename[BUFLEN];
+    WCHAR pcname[BUFLEN];
     time_t rawtime;
     struct tm *ti;
-    WCHAR pcname[BUFLEN];
     DWORD sz=BUFLEN;
 
     GetComputerName(pcname,&sz);
     time(&rawtime);
     ti=localtime(&rawtime);
+    wsprintf(timestamp,L"%4d_%02d_%02d__%02d_%02d_%02d__%s",
+             1900+ti->tm_year,ti->tm_mon+1,ti->tm_mday,
+             ti->tm_hour,ti->tm_min,ti->tm_sec,pcname);
+}
+
+void log_start(WCHAR *log_dir)
+{
+    WCHAR filename[BUFLEN];
+
     setlocale(LC_ALL,"");
     system("chcp 1251");
 
-    wsprintf(timestamp,L"%4d_%02d_%02d__%02d_%02d_%02d__",
-             1900+ti->tm_year,ti->tm_mon+1,ti->tm_mday,
-             ti->tm_hour,ti->tm_min,ti->tm_sec);
+    gen_timestamp();
 
     wcscpy(filename,L"log.txt");
-    wsprintf(filename,L"%s\\%s%s_log.txt",log_dir,timestamp,pcname);
+    wsprintf(filename,L"%s\\%s_log.txt",log_dir,timestamp);
     if(!canWrite(filename))
     {
         log_err("ERROR in log_start(): Write-protected,'%ws'\n",filename);
         GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
         GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
         wcscat(log_dir,L"\\SDI");
-        wsprintf(filename,L"%s\\%s%s_log.txt",log_dir,timestamp,pcname);
+        wsprintf(filename,L"%s\\%s_log.txt",log_dir,timestamp);
     }
 
     mkdir_r(log_dir);
@@ -98,7 +104,7 @@ void log_start(WCHAR *log_dir)
         GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
         GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
         wcscat(log_dir,L"\\SDI");
-        wsprintf(filename,L"%s\\%s%s_log.txt",log_dir,timestamp,pcname);
+        wsprintf(filename,L"%s\\%s_log.txt",log_dir,timestamp);
         mkdir_r(log_dir);
         logfile=_wfopen(filename,L"wb");
     }

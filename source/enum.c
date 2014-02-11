@@ -272,10 +272,12 @@ void device_printHWIDS(device_t *cur_device,state_t *state)
 void driver_print(driver_t *cur_driver,state_t *state)
 {
     char *s=state->text;
+    WCHAR buf[BUFLEN];
 
+    str_date(&cur_driver->version,buf);
     log("##Name:#####%ws\n",s+cur_driver->DriverDesc);
     log("##Provider:#%ws\n",s+cur_driver->ProviderName);
-    log("##Date:#####%d-%d-%d\n",cur_driver->version.m,cur_driver->version.d,cur_driver->version.y);
+    log("##Date:#####%ws\n",buf);
     log("##Version:##%d.%d.%d.%d\n",cur_driver->version.v1,cur_driver->version.v2,cur_driver->version.v3,cur_driver->version.v4);
     log("##HWID:#####%ws\n",s+cur_driver->MatchingDeviceId);
     log("##inf:######%ws%ws,%ws%ws\n",(s+state->windir),s+cur_driver->InfPath,s+cur_driver->InfSection,s+cur_driver->InfSectionExt);

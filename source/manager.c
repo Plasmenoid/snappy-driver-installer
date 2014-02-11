@@ -258,7 +258,7 @@ unsigned int __stdcall thread_install(void *arg)
     fwrite(install64bin,1,size,f);
     fclose(f);
 
-    installmode=1;
+    installmode=MODE_INSTALLING;
     manager->items_list[SLOT_EXTRACTING].isactive=1;
     manager_setpos(manager);
 
@@ -315,7 +315,7 @@ unsigned int __stdcall thread_install(void *arg)
     }
 goaround:
     itembar=manager->items_list;
-    for(i=0;i<manager->items_handle.items&&installmode==1;i++,itembar++)
+    for(i=0;i<manager->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
         if(i>=RES_SLOTS&&itembar->checked&&itembar->isactive&&itembar->hwidmatch)
     {
         int unpacked=0;
@@ -372,7 +372,7 @@ goaround:
             itembar->install_status=STR_INST_INSTALL;
             redrawfield();
 
-            if(installmode==1&&itembar->checked)
+            if(installmode==MODE_INSTALLING&&itembar->checked)
             {
                 if(flags&FLAG_DISABLEINSTALL)
                     Sleep(2000);
@@ -388,11 +388,7 @@ goaround:
                 wsprintf(buf,L"\"%s\" \"%s\"",hwid,inf);
                 wsprintf(cmd,L"%s\\install64.exe",extractdir);
                 log_err("'%ws %ws'\n",cmd,buf);
-                //if(installmode==1&&itembar->checked)
                 ret=RunSilent(cmd,buf,SW_HIDE,1);
-                    //Sleep(1000);
-            //    else
-                    //ret=1;
                 if((ret&0x7FFFFFFF)==1)
                 {
                     needrb=ret&0x80000000?1:0;
@@ -417,7 +413,7 @@ goaround:
             }
 
             if(needrb)needreboot=1;
-            if(installmode==2||!itembar->checked)
+            if(installmode==MODE_STOPPING||!itembar->checked)
             {
                 itembar->percent=0;
                 itembar->checked=0;
@@ -438,7 +434,7 @@ goaround:
             redrawfield();
         }
     }
-    if(installmode==1)
+    if(installmode==MODE_INSTALLING)
     {
         itembar=manager_g->items_list;
         for(j=0;j<manager_g->items_handle.items;j++,itembar++)
@@ -463,18 +459,23 @@ goaround:
         RunSilent(L"cmd",buf,SW_HIDE,1);
     }
 
-    installmode=0;
+    if(installmode==MODE_STOPPING)
+    {
+        flags&=~FLAG_AUTOINSTALL;
+        installmode=MODE_NONE;
+    }
+    if(installmode==MODE_INSTALLING)installmode=MODE_SCANNING;
+    PostMessage(hMain,WM_DEVICECHANGE,7,0);
     manager->items_list[SLOT_EXTRACTING].percent=1000;
     redrawfield();
 
     return 0;
 }
 
-void manager_install(extractinfo_t *ei)
+void manager_install(int flagsv)
 {
-    wcscpy(extractdir,ei->dir);
-    instflag=ei->flags;
-    _beginthreadex(0,0,&thread_install,ei,0,0);
+    instflag=flagsv;
+    _beginthreadex(0,0,&thread_install,0,0,0);
 }
 
 void manager_clear(manager_t *manager)
@@ -557,6 +558,7 @@ void manager_toggle(manager_t *manager,int index)
     int i,group;
 
     itembar1=&manager->items_list[index];
+    if(index>=RES_SLOTS&&!itembar1->hwidmatch)return;
     itembar1->checked^=1;
     group=itembar1->index;
 
@@ -912,8 +914,8 @@ void manager_drawitem(manager_t *manager,HDC hdc,int pos,itembar_t *itembar,int 
     {
         //printf("%d\n",itembar->percent);
         int a=BOX_PROGR;
-        if(index==SLOT_EXTRACTING&&installmode==2)a=BOX_PROGR_S;
-        if(index>=RES_SLOTS&&(!itembar->checked||installmode==2))a=BOX_PROGR_S;
+        if(index==SLOT_EXTRACTING&&installmode==MODE_STOPPING)a=BOX_PROGR_S;
+        if(index>=RES_SLOTS&&(!itembar->checked||installmode==MODE_STOPPING))a=BOX_PROGR_S;
         box_draw(hdc,x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX)*itembar->percent/1000.,pos+D(DRVITEM_WY),a);
     }
 
@@ -950,7 +952,7 @@ void manager_drawitem(manager_t *manager,HDC hdc,int pos,itembar_t *itembar,int 
                         manager->items_list[SLOT_EXTRACTING].val1+1,STR(STR_OF),
                         manager->items_list[SLOT_EXTRACTING].val2);
                 if(itembar_act==SLOT_RESTORE_POINT)wcscpy(bufw,STR(STR_REST_CREATING));
-                if(installmode==2)wcscpy(bufw,STR(STR_INST_STOPPING));
+                if(installmode==MODE_STOPPING)wcscpy(bufw,STR(STR_INST_STOPPING));
                 SetTextColor(hdc,D(boxindex[box_status(index)]+14));
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
                 if(itembar_act>=RES_SLOTS)
@@ -1053,7 +1055,7 @@ void manager_drawitem(manager_t *manager,HDC hdc,int pos,itembar_t *itembar,int 
                              STR(itembar->install_status),itembar->val1);
 //                    if(itembar->install_status==STR_INST_INSTALL&&(installmode==2||!itembar->checked))
 //                    if(installmode==2&&!itembar->checked)
-                    if(itembar->install_status==STR_INST_EXTRACT&&(installmode==2||!itembar->checked))
+                    if(itembar->install_status==STR_INST_EXTRACT&&(installmode==MODE_STOPPING||!itembar->checked))
                         wcscpy(bufw,STR(STR_INST_STOPPING));
 
                     SetTextColor(hdc,0);

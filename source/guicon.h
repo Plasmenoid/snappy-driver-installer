@@ -50,6 +50,7 @@ void closeConsole();
 
 // Logging
 void log_times();
+void gen_timestamp();
 void log_start(WCHAR *log_dir);
 void log_stop();
 void log(CHAR const *format,...);

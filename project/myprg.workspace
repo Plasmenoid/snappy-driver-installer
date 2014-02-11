@@ -3,6 +3,7 @@
 	<Workspace title="MyPrg">
 		<Project filename="Drivers.cbp">
 			<Depends filename="../external/SevenZ/build/CPP/7zip/Bundles/Alone7z/lib.cbp" />
+			<Depends filename="install64/install64.cbp" />
 		</Project>
 		<Project filename="../external/SevenZ/build/CPP/7zip/Bundles/Alone7z/lib.cbp" />
 		<Project filename="install64/install64.cbp" />
