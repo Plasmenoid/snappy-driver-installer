@@ -91,11 +91,9 @@ typedef struct _textdata_t
     int mode;
 }textdata_t;
 
-typedef struct _extractinfo_t
-{
-    WCHAR *dir;
-    int flags;
-}extractinfo_t;
+//{ Global vars
+extern WCHAR extractdir[4096];
+//}
 
 // Manager
 void manager_init(manager_t *manager,matcher_t *matcher);
@@ -106,7 +104,7 @@ void manager_print(manager_t *manager);
 
 // User interaction
 void manager_hitscan(manager_t *manager,int x,int y, int *i,int *zone);
-void manager_install(extractinfo_t *ei);
+void manager_install(int flags);
 void manager_clear(manager_t *manager);
 void manager_testitembars(manager_t *manager);
 void manager_toggle(manager_t *manager,int index);

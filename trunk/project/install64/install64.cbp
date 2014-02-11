@@ -4,13 +4,13 @@
 	<Project>
 		<Option title="install64" />
 		<Option pch_mode="2" />
-		<Option compiler="gcc" />
+		<Option compiler="gcc_64" />
 		<Build>
 			<Target title="Debug">
 				<Option output="../../resources/install64" prefix_auto="1" extension_auto="1" />
 				<Option object_output="../../obj/DebugU" />
 				<Option type="1" />
-				<Option compiler="gcc" />
+				<Option compiler="gcc_64" />
 				<Option use_console_runner="0" />
 				<Option parameters="asd qwe" />
 				<Compiler>
@@ -21,7 +21,7 @@
 				<Option output="../../resources/install64" prefix_auto="1" extension_auto="1" />
 				<Option object_output="../../obj/ReleaseU" />
 				<Option type="1" />
-				<Option compiler="gcc" />
+				<Option compiler="gcc_64" />
 				<Option use_console_runner="0" />
 				<Option parameters="asd qwe" />
 				<Compiler>

@@ -12,6 +12,7 @@
 				<Option output="../drv" prefix_auto="1" extension_auto="1" />
 				<Option working_dir=".." />
 				<Option object_output="../obj/ReleaseU" />
+				<Option external_deps="../resources/install64.exe;../themes/classic.txt;" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
@@ -186,7 +187,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../source/themelist.h" />
-		<Unit filename="../themes/classic.txt" />
 		<Extensions>
 			<code_completion />
 			<envvars />

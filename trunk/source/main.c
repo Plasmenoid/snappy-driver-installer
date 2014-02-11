@@ -73,7 +73,7 @@ int manager_active=0;
 int bundle_display=1;
 int bundle_shadow=0;
 int firstrun=1;
-int volatile installmode=0;
+int volatile installmode=MODE_NONE;
 
 // Window
 HINSTANCE ghInst;
@@ -475,12 +475,8 @@ void bundle_lowprioirity(bundle_t *bundle)
         state_save(&bundle->state,state_file);
     else
     {
-        WCHAR filename[4096];
-        WCHAR pcname[4096];
-        DWORD sz=4096;
-
-        GetComputerName(pcname,&sz);
-        wsprintf(filename,L"%s\\%s%s_state.snp",log_dir,timestamp,pcname);
+        WCHAR filename[BUFLEN];
+        wsprintf(filename,L"%s\\%s_state.snp",log_dir,timestamp);
         state_save(&bundle->state,filename);
     }
 
@@ -1277,7 +1273,6 @@ void extractto()
     WCHAR dir[BUFLEN];
     WCHAR buf[BUFLEN];
     LPITEMIDLIST list;
-    extractinfo_t ei;
     WCHAR **argv;
     int argc;
 
@@ -1287,8 +1282,6 @@ void extractto()
     lpbi.lpszTitle=STR(STR_EXTRACTFOLDER);
     lpbi.ulFlags=BIF_NEWDIALOGSTYLE|BIF_EDITBOX;
 
-    ei.dir=dir;
-    ei.flags=OPENFOLDER;
 
     list=SHBrowseForFolder(&lpbi);
     if(list)
@@ -1297,13 +1290,14 @@ void extractto()
 
         argv=CommandLineToArgvW(GetCommandLineW(),&argc);
         printf("'%ws',%d\n",argv[0],argc);
-        wsprintf(buf,L"%s\\drv.exe",ei.dir);
+        wsprintf(buf,L"%s\\drv.exe",dir);
         if(!CopyFile(argv[0],buf,0))
             log_err("ERROR in extractto(): failed CopyFile(%ws,%ws)\n",argv[0],buf);
         LocalFree(argv);
 
         wcscat(dir,L"\\drivers");
-        manager_install(&ei);
+        wcscpy(extractdir,dir);
+        manager_install(OPENFOLDER);
     }
 }
 
@@ -1489,20 +1483,43 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 viruscheck(L"",0,0);
                 manager_restorepos(manager_g,manager_prev);
                 manager_setpos(manager_g);
+                if(MODE_SCANNING)
+                {
+                    WCHAR filename[BUFLEN];
+
+                    gen_timestamp();
+                    wsprintf(filename,L"%s\\%s_state.snp",log_dir,timestamp);
+                    state_save(manager_g->matcher->state,filename);
+                }
                 if(flags&FLAG_AUTOINSTALL)
                 {
-                    manager_selectall(manager_g);
-                    if(installmode==0)
+                    int cnt=0;
+                    if(installmode==MODE_SCANNING)
                     {
-                        WCHAR path[512];
-                        extractinfo_t ei={L"TEMP",INSTALLDRIVERS};
-                        ei.dir=L"TEMP";
-                        wsprintf(path,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
-                        ei.dir=path;
-                        manager_install(&ei);
+                        itembar_t *itembar=&manager_g->items_list[RES_SLOTS];
+                        for(i=RES_SLOTS;i<manager_g->items_handle.items;i++,itembar++)
+                            if(itembar->install_status==0&&itembar->hwidmatch&&itembar->isactive)
+                        {
+                            itembar->checked=1;
+                            cnt++;
+                        }
+
+                        if(!cnt)flags&=~FLAG_AUTOINSTALL;
+                        log_err("Autoinstall rescan: %d found\n",cnt);
                     }
-                    flags&=~FLAG_AUTOINSTALL;
+
+                    if(installmode==MODE_NONE||(installmode==MODE_SCANNING&&cnt))
+                    {
+                        manager_selectall(manager_g);
+                        wsprintf(extractdir,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
+                        manager_install(INSTALLDRIVERS);
+                    }
+                    else
+                        installmode=MODE_NONE;
                 }
+                else
+                    if(installmode==MODE_SCANNING)installmode=MODE_NONE;
+
             }
             break;
 
@@ -1522,7 +1539,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             return DefWindowProc(hwnd,uMsg,wParam,lParam);
 
         case WM_DEVICECHANGE:
-            if(installmode)break;
+            if(installmode==MODE_INSTALLING)break;
             printf("WM_DEVICECHANGE(%x,%x)\n",wParam,lParam);
             SetEvent(event);
             break;
@@ -1703,14 +1720,10 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             switch(wp)
             {
                 case ID_INSTALL:
-                    if(installmode==0)
+                    if(installmode==MODE_NONE)
                     {
-                        WCHAR path[512];
-                        extractinfo_t ei={L"TEMP",INSTALLDRIVERS};
-                        ei.dir=L"TEMP";
-                        wsprintf(path,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
-                        ei.dir=path;
-                        manager_install(&ei);
+                        wsprintf(extractdir,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
+                        manager_install(INSTALLDRIVERS);
                     }
                     break;
 
@@ -1924,22 +1937,18 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             }
             if(floating_itembar==SLOT_EXTRACTING)
             {
-                if(installmode)
-                    installmode=2;
-                else
+                if(installmode==MODE_INSTALLING)
+                    installmode=MODE_STOPPING;
+                else if(installmode==MODE_NONE)
                     manager_clear(manager_g);
             }
             if(floating_itembar>=0&&(i==1||i==0))
             {
                 manager_toggle(manager_g,floating_itembar);
-                if(wParam&MK_SHIFT&&installmode==0)
+                if(wParam&MK_SHIFT&&installmode==MODE_NONE)
                 {
-                    WCHAR path[512];
-                    extractinfo_t ei={L"TEMP",INSTALLDRIVERS};
-                    ei.dir=L"TEMP";
-                    wsprintf(path,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
-                    ei.dir=path;
-                    manager_install(&ei);
+                    wsprintf(extractdir,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
+                    manager_install(INSTALLDRIVERS);
                 }
                 redrawfield();
             }
