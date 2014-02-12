@@ -128,7 +128,7 @@ int calc_identifierscore(int dev_pos,int dev_ishw,int inf_pos)
         return 0x3000+dev_pos+0x100*inf_pos;
 }
 
-int calc_catalogfile(hwidmatch_t *hwidmatch,state_t *state)
+int calc_catalogfile(hwidmatch_t *hwidmatch)
 {
     int r=0,i;
 
@@ -387,7 +387,7 @@ void hwidmatch_init(hwidmatch_t *hwidmatch,driverpack_t *drp,int HWID_index,int 
     hwidmatch->decorscore=calc_decorscore(calc_secttype(buf),state);
     hwidmatch->markerscore=calc_markerscore(state,getdrp_infpath(hwidmatch));
     hwidmatch->altsectscore=calc_altsectscore(hwidmatch,state,hwidmatch->decorscore);
-    hwidmatch->score=calc_score(calc_catalogfile(hwidmatch,state),getdrp_drvfeature(hwidmatch),
+    hwidmatch->score=calc_score(calc_catalogfile(hwidmatch),getdrp_drvfeature(hwidmatch),
         hwidmatch->identifierscore,state,strstr(getdrp_drvinstallPicked(hwidmatch),".nt")?1:0);
     hwidmatch->status=calc_status(hwidmatch,state);
 }

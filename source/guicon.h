@@ -24,6 +24,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #define LOG_VERBOSE_TIMES      64
 
 extern int log_verbose;
+extern int log_console;
 extern WCHAR timestamp[4096];
 extern long
     time_total,

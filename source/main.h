@@ -50,6 +50,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #include "matcher.h"
 #include "manager.h"
 #include "theme.h"
+#include "install.h"
 
 #include "7z.h"
 #include "7zAlloc.h"
@@ -73,7 +74,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 // Mode
 #define STATEMODE_SAVE      1
 #define STATEMODE_LOAD      2
-#define STATEMODE_7Z        3
+#define STATEMODE_EXIT        3
 
 // Popup window
 #define FLOATING_NONE    0
@@ -168,6 +169,7 @@ extern manager_t *manager_g;
 extern int volatile installmode;
 extern WCHAR state_file[BUFLEN];
 extern WCHAR drpext_dir[BUFLEN];
+extern WCHAR data_dir  [BUFLEN];
 extern int flags;
 extern int statemode;
 //}

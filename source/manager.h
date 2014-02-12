@@ -123,9 +123,6 @@ void str_status(WCHAR *buf,itembar_t *itembar);
 int box_status(int index);
 void str_date(version_t *v,WCHAR *buf);
 WCHAR *str_version(version_t *ver);
-void _7z_total(long long i);
-void _7z_setcomplited(long long i);
-unsigned int __stdcall thread_install(void *arg);
 
 // Driver list
 void manager_setpos(manager_t *manager);
@@ -143,7 +140,7 @@ void TextOutSF(textdata_t *td,WCHAR *str,WCHAR *format,...);
 
 // Popup
 void popup_resize(int x,int y);
-void popup_driverline(hwidmatch_t *hwidmatch,int *limits,HDC hdcMem,int ln,int mode);
+void popup_driverline(hwidmatch_t *hwidmatch,int *limits,HDC hdcMem,int ln,int mode,int index);
 void popup_driverlist(manager_t *manager,HDC hdcMem,RECT rect,int i);
 int  pickcat(hwidmatch_t *hwidmatch,state_t *state);
 int  isvalidcat(hwidmatch_t *hwidmatch,state_t *state);

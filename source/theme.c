@@ -90,8 +90,12 @@ void icon_free(img_t *img)
 //{ Vault
 void vault_startmonitors()
 {
-    mon_lang=monitor_start(L"langs",FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,lang_callback);
-    mon_theme=monitor_start(L"themes",FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,theme_callback);
+    WCHAR buf[BUFLEN];
+
+    wsprintf(buf,L"%s\\langs",data_dir);
+    mon_lang=monitor_start(buf,FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,lang_callback);
+    wsprintf(buf,L"%s\\themes",data_dir);
+    mon_theme=monitor_start(buf,FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,theme_callback);
 }
 
 void vault_stopmonitors()
@@ -396,7 +400,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
     langauto[0]=0;
     wcscpy(langauto2,L"Auto");
 
-    wsprintf(buf,L"%s\\*.*",path);
+    wsprintf(buf,L"%s\\%s\\*.*",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
     while(FindNextFile(hFind,&FindFileData)!=0)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
@@ -404,7 +408,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
         int len=lstrlen(FindFileData.cFileName);
         if(lstrcmp(FindFileData.cFileName+len-4,L".txt")==0)
         {
-            wsprintf(buf,L"%s\\%s",path,FindFileData.cFileName);
+            wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
             lang_load(buf);
             if(language[STR_LANG_CODE].val==(locale&0xFF))
             {
@@ -439,7 +443,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
     int i=0;
 
     //SendMessage(hwnd,CB_ADDSTRING,0,(int)L"Classic(default)");langs=1;
-    wsprintf(buf,L"%s\\*.*",path);
+    wsprintf(buf,L"%s\\%s\\*.*",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
     while(FindNextFile(hFind,&FindFileData)!=0)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
@@ -447,7 +451,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
         int len=lstrlen(FindFileData.cFileName);
         if(lstrcmp(FindFileData.cFileName+len-4,L".txt")==0)
         {
-            wsprintf(buf,L"%s\\%s",path,FindFileData.cFileName);
+            wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
             theme_load(buf);
             SendMessage(hwnd,CB_ADDSTRING,0,(int)D(THEME_NAME));
             wcscpy(themelist[i],buf);
