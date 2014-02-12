@@ -76,7 +76,7 @@ void print_guid(GUID *g)
     log("%ws\n",buffer);
 }
 
-void print_status(int ret,int status,int problem)
+void print_status(int ret,int status,int problem,WCHAR *buf)
 {
     int isPhantom=0;
 
@@ -86,24 +86,23 @@ void print_status(int ret,int status,int problem)
     }
 
     if(isPhantom)
-        log("Device is not present.");
+        wsprintf(buf,L"Device is not present.");
     else
     {
         if((status&DN_HAS_PROBLEM)&&problem==CM_PROB_DISABLED)
-            log("Device is disabled.");
+            wsprintf(buf,L"Device is disabled.");
         else
         {
             if(status&DN_HAS_PROBLEM)
-                log("The device has the following problem: %d",problem);
+                wsprintf(buf,L"The device has the following problem: %d",problem);
             else if(status&DN_PRIVATE_PROBLEM)
-                log("The driver reported a problem with the device.");
+                wsprintf(buf,L"The driver reported a problem with the device.");
             else if(status&DN_STARTED)
-                log("Driver is running.");
+                wsprintf(buf,L"Driver is running.");
             else
-                log("Device is currently stopped.");
+                wsprintf(buf,L"Device is currently stopped.");
         }
     }
-    log("\n");
 }
 //}
 
@@ -225,10 +224,12 @@ void device_print(device_t *cur_device,state_t *state)
 #endif
 
     char *s=state->text;
+    WCHAR buf[BUFLEN];
 
+    print_status(cur_device->ret,cur_device->status,cur_device->problem,buf);
     log("DeviceInfo\n");
     log("##Name:#########%ws\n",s+cur_device->Devicedesc);
-    log("##Status:#######");    print_status(cur_device->ret,cur_device->status,cur_device->problem);
+    log("##Status:#######%ws\n",buf);
     log("##Manufacturer:#%ws\n",s+cur_device->Mfg);
     log("##HWID_reg######%ws\n",s+cur_device->Driver);
     log("##Class:########");    print_guid(&cur_device->DeviceInfoData.ClassGuid);

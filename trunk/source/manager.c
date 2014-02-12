@@ -159,7 +159,7 @@ void manager_print(manager_t *manager)
             if(itembar->hwidmatch)
                 hwidmatch_print(itembar->hwidmatch,limits);
             else
-                log("%ws\n",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
+                log("'%ws'\n",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
             act++;
         }
 
@@ -334,7 +334,7 @@ void manager_selectall(manager_t *manager)
         itembar->checked=0;
         if(itembar->isactive&&group!=itembar->index)
         {
-            itembar->checked=1;
+            if(itembar->install_status==0)itembar->checked=1;
             group=itembar->index;
         }
     }
@@ -866,8 +866,19 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
 
 int itembar_cmp(itembar_t *a,itembar_t *b,CHAR *ta,CHAR *tb)
 {
-    if(!wcscmp((WCHAR*)(ta+a->devicematch->device->Driver),(WCHAR*)(tb+b->devicematch->device->Driver)))return 1;
-    if(a->hwidmatch&&b->hwidmatch&&a->hwidmatch->HWID_index==b->hwidmatch->HWID_index)return 1;
+    if(wcslen(ta+a->devicematch->device->Driver)>2)
+    {
+        if(!wcscmp((WCHAR*)(ta+a->devicematch->device->Driver),(WCHAR*)(tb+b->devicematch->device->Driver)))return wcslen((WCHAR*)(ta+a->devicematch->device->Driver))+10;
+    }
+    else
+    {
+        if(wcslen((WCHAR*)(ta+a->devicematch->device->Devicedesc))>0)
+        {
+            if(!wcscmp((WCHAR*)(ta+a->devicematch->device->Devicedesc),(WCHAR*)(tb+b->devicematch->device->Devicedesc)))return 100+wcslen((WCHAR*)(ta+a->devicematch->device->Devicedesc));
+        }
+
+    }
+    if(a->hwidmatch&&b->hwidmatch&&a->hwidmatch->HWID_index==b->hwidmatch->HWID_index)return 3;
 
     return 0;
 }
@@ -1265,6 +1276,9 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int index)
     TextOutF(&td,c0,L"%s",t+devicematch_f->device->Devicedesc);
     TextOutF(&td,c0,L"%s%s",STR(STR_HINT_MANUF),t+devicematch_f->device->Mfg);
     TextOutF(&td,c0,L"%s",bufw);
+    TextOutF(&td,c0,L"%s",t+devicematch_f->device->Driver);
+    print_status(devicematch_f->device->ret,devicematch_f->device->status,devicematch_f->device->problem,bufw);
+    TextOutF(&td,c0,L"Status: %s",bufw);
 
     maxln=td.y;
     td.y=D(POPUP_OFSY);

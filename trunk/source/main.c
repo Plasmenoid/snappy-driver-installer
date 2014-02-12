@@ -1507,11 +1507,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     int cnt=0;
                     if(installmode==MODE_SCANNING)
                     {
+                        manager_selectall(manager_g);
                         itembar_t *itembar=&manager_g->items_list[RES_SLOTS];
                         for(i=RES_SLOTS;i<manager_g->items_handle.items;i++,itembar++)
-                            if(itembar->install_status==0&&itembar->hwidmatch&&itembar->isactive)
+                            if(itembar->checked)
                         {
-                            itembar->checked=1;
                             cnt++;
                         }
 
