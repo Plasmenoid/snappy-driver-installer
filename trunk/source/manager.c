@@ -18,12 +18,6 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "main.h"
 
 //{ Global vars
-long long total;
-int itembar_act;
-WCHAR extractdir[BUFLEN];
-int instflag;
-int needreboot=0;
-
 const status_t statustnl[NUM_STATUS]=
 {
     {FILTER_SHOW_CURRENT,   STATUS_CURRENT},
@@ -152,18 +146,22 @@ void manager_print(manager_t *manager)
     log("{manager_print\n");
     memset(limits,0,sizeof(limits));
 
-    itembar=manager->items_list;
-    for(k=0;k<manager->items_handle.items;k++,itembar++)
+    itembar=&manager->items_list[RES_SLOTS];
+    for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
         if(itembar->isactive&&itembar->hwidmatch)
             hwidmatch_calclen(itembar->hwidmatch,limits);
 
-    itembar=manager->items_list;
-    for(k=0;k<manager->items_handle.items;k++,itembar++)
-        if(itembar->isactive&&itembar->hwidmatch)
-            {
-                log("$%3d|",k);
-                hwidmatch_print(itembar->hwidmatch,limits);act++;
-            }
+    itembar=&manager->items_list[RES_SLOTS];
+    for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
+        if(itembar->isactive)
+        {
+            log("$%04d|",k);
+            if(itembar->hwidmatch)
+                hwidmatch_print(itembar->hwidmatch,limits);
+            else
+                log("%ws\n",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
+            act++;
+        }
 
     log("}manager_print[%d]\n\n",act);
 }
@@ -199,323 +197,6 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
         }
     }
     *r=-1;
-}
-
-void _7z_total(long long i)
-{
-    total=i;
-}
-
-void _7z_setcomplited(long long i)
-{
-    int j;
-    int _totalitems=0;
-    int _processeditems=0;
-
-    if(statemode==STATEMODE_7Z)return;
-    itembar_t *itembar=manager_g->items_list;
-    for(j=0;j<manager_g->items_handle.items;j++,itembar++)
-    if(j>=RES_SLOTS)
-    {
-        if(itembar->checked||itembar->install_status){_totalitems++;}
-        if(itembar->install_status&&!itembar->checked){_processeditems++;}
-    }
-
-    itembar_settext(manager_g,itembar_act,L"",(int)(i*(instflag&INSTALLDRIVERS?900.:1000.)/total));
-    //double d=(i*1000./total)/_totalitems;
-    double d=(manager_g->items_list[itembar_act].percent)/_totalitems;
-    itembar_settext(manager_g,SLOT_EXTRACTING,L"",(int)(_processeditems*1000./_totalitems+d));
-    manager_g->items_list[SLOT_EXTRACTING].val1=_processeditems;
-    manager_g->items_list[SLOT_EXTRACTING].val2=_totalitems;
-}
-
-void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
-{
-    WCHAR cmd[BUFLEN];
-    WCHAR buf[BUFLEN];
-    void *install64bin;
-    int size;
-    FILE *f;
-
-    *ret=1;*needrb=1;
-    wsprintf(cmd,L"%s\\install64.exe",extractdir);
-    if(!PathFileExists(cmd))
-    {
-        mkdir_r(extractdir);
-        log_err("Dir: (%ws)\n",extractdir);
-        f=_wfopen(cmd,L"wb");
-        if(f)
-            log_err("Created '%ws'\n",cmd);
-        else
-            log_err("Failed to create '%ws'\n",cmd);
-        get_resource(IDR_INSTALL64,&install64bin,&size);
-        fwrite(install64bin,1,size,f);
-        fclose(f);
-    }
-
-    if(installmode==MODE_INSTALLING)
-    {
-        if(flags&FLAG_DISABLEINSTALL)
-            Sleep(2000);
-        else
-            *ret=UpdateDriverForPlugAndPlayDevices(0,hwid,inf,INSTALLFLAG_FORCE,needrb);
-    }
-    else
-        *ret=1;
-
-    if(!*ret)*ret=GetLastError();
-    if((unsigned)ret==0xE0000235)//ERROR_IN_WOW64
-    {
-        wsprintf(buf,L"\"%s\" \"%s\"",hwid,inf);
-        wsprintf(cmd,L"%s\\install64.exe",extractdir);
-        log_err("'%ws %ws'\n",cmd,buf);
-        *ret=RunSilent(cmd,buf,SW_HIDE,1);
-        if((*ret&0x7FFFFFFF)==1)
-        {
-            *needrb=*ret&0x80000000?1:0;
-            *ret&=~0x80000000;
-        }
-    }
-}
-
-unsigned int __stdcall thread_install(void *arg)
-{
-    UNREFERENCED_PARAMETER(arg)
-
-    itembar_t *itembar,*itembar1;
-    WCHAR cmd[BUFLEN];
-    WCHAR hwid[BUFLEN];
-    WCHAR inf[BUFLEN];
-    WCHAR buf[BUFLEN];
-    int i,j;
-    RESTOREPOINTINFOW pRestorePtSpec;
-    STATEMGRSTATUS pSMgrStatus;
-    HINSTANCE hinstLib=0;
-    MYPROC ProcAdd;
-    manager_t *manager=manager_g;
-    int r=0;
-
-    // Prepare extract dir
-    installmode=MODE_INSTALLING;
-    manager->items_list[SLOT_EXTRACTING].isactive=1;
-    manager_setpos(manager);
-
-    // Restore point
-    if(manager->items_list[SLOT_RESTORE_POINT].checked)
-    {
-        hinstLib=LoadLibrary(L"SrClient.dll");
-        ProcAdd=(MYPROC)GetProcAddress(hinstLib,"SRSetRestorePointW");
-
-        if(hinstLib&&ProcAdd)
-        {
-            manager_g->items_list[SLOT_RESTORE_POINT].percent=500;
-            manager_g->items_list[SLOT_RESTORE_POINT].install_status=STR_REST_CREATING;
-            itembar_act=SLOT_RESTORE_POINT;
-            redrawfield();
-
-            memset(&pRestorePtSpec,0,sizeof(RESTOREPOINTINFOW));
-            pRestorePtSpec.dwEventType=BEGIN_SYSTEM_CHANGE;
-            pRestorePtSpec.dwRestorePtType=DEVICE_DRIVER_INSTALL;
-            wcscpy(pRestorePtSpec.szDescription,L"Installed drivers");
-            r=0;
-            if(flags&FLAG_DISABLEINSTALL)
-                Sleep(2000);
-            else
-                r=ProcAdd(&pRestorePtSpec,&pSMgrStatus);
-
-            printf("rt rest point{ %d(%d)\n",r,pSMgrStatus.nStatus);
-            manager_g->items_list[SLOT_RESTORE_POINT].percent=1000;
-            if(r)
-            {
-                manager_g->items_list[SLOT_RESTORE_POINT].install_status=STR_REST_CREATED;
-
-            }else
-            {
-                manager_g->items_list[SLOT_RESTORE_POINT].install_status=STR_REST_FAILED;
-                log_err("ERROR in thread_install: Failed to create restore point\n");
-            }
-        }
-        else
-        {
-            manager_g->items_list[SLOT_RESTORE_POINT].install_status=STR_REST_FAILED;
-            log_err("ERROR in thread_install: Failed to create restore point %d,%d\n",hinstLib,ProcAdd);
-        }
-        redrawfield();
-        if(hinstLib)
-        {
-            //pRestorePtSpec.dwRestorePtType=END_SYSTEM_CHANGE;
-            //pRestorePtSpec.llSequenceNumber=pSMgrStatus.llSequenceNumber;
-            //ProcAdd(&pRestorePtSpec,&pSMgrStatus);
-            //r=printf("rt rest point} %d(%d)\n",r,pSMgrStatus.nStatus);
-            FreeLibrary(hinstLib);
-        }
-        manager->items_list[SLOT_RESTORE_POINT].checked=0;
-    }
-goaround:
-    itembar=manager->items_list;
-    for(i=0;i<manager->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
-        if(i>=RES_SLOTS&&itembar->checked&&itembar->isactive&&itembar->hwidmatch)
-    {
-        int unpacked=0;
-        itembar_act=i;
-        hwidmatch_t *hwidmatch=itembar->hwidmatch;
-        log_err("INDEX %d\n",i);
-        wsprintf(cmd,L"%s\\%S",extractdir,getdrp_infpath(hwidmatch));
-
-        // Extract
-        if(PathFileExists(cmd))
-        {
-            log_err("Already unpacked\n");
-            _7z_total(100);
-            _7z_setcomplited(100);
-            redrawfield();
-        }
-        else
-        if(wcsstr(getdrp_packname(hwidmatch),L"unpacked.7z"))
-        {
-            printf("Unpacked '%ws'\n",getdrp_packpath(hwidmatch));
-            unpacked=1;
-        }
-        else
-        {
-            wsprintf(cmd,L"app x -y \"%s\\%s\" -o\"%s\"",getdrp_packpath(hwidmatch),getdrp_packname(hwidmatch),
-                    extractdir,
-                    getdrp_infpath(hwidmatch));
-
-            itembar1=itembar;
-            for(j=i;j<manager->items_handle.items;j++,itembar1++)
-                if(itembar1->checked&&
-                   !wcscmp(getdrp_packpath(hwidmatch),getdrp_packpath(itembar1->hwidmatch))&&
-                   !wcscmp(getdrp_packname(hwidmatch),getdrp_packname(itembar1->hwidmatch)))
-            {
-                wsprintf(buf,L" \"%S\"",getdrp_infpath(itembar1->hwidmatch));
-                if(!wcsstr(cmd,buf))wcscat(cmd,buf);
-            }
-            log_err("Extracting via '%ws'\n",cmd);
-            itembar->install_status=STR_INST_EXTRACT;
-            redrawfield();
-            r=Extract7z(cmd);
-            log_err("Ret %d\n",r);
-        }
-
-        // Install driver
-        if(instflag&INSTALLDRIVERS&&itembar->checked)
-        {
-            int needrb=0,ret=1;
-            wsprintf(inf,L"%s\\%S%S",
-                   unpacked?getdrp_packpath(hwidmatch):extractdir,
-                   getdrp_infpath(hwidmatch),
-                   getdrp_infname(hwidmatch));
-            wsprintf(hwid,L"%S",getdrp_drvHWID(hwidmatch));
-            log_err("Install32 '%ws','%ws'\n",hwid,inf);
-            itembar->install_status=STR_INST_INSTALL;
-            redrawfield();
-
-            driver_install(hwid,inf,&ret,&needrb);
-            /*if(installmode==MODE_INSTALLING)
-            {
-                if(flags&FLAG_DISABLEINSTALL)
-                    Sleep(2000);
-                else
-                    ret=UpdateDriverForPlugAndPlayDevices(0,hwid,inf,INSTALLFLAG_FORCE,&needrb);
-            }
-            else
-                ret=1;
-
-            if(!ret)ret=GetLastError();
-            if((unsigned)ret==0xE0000235)//ERROR_IN_WOW64
-            {
-                wsprintf(buf,L"\"%s\" \"%s\"",hwid,inf);
-                wsprintf(cmd,L"%s\\install64.exe",extractdir);
-                log_err("'%ws %ws'\n",cmd,buf);
-                ret=RunSilent(cmd,buf,SW_HIDE,1);
-                if((ret&0x7FFFFFFF)==1)
-                {
-                    needrb=ret&0x80000000?1:0;
-                    ret&=~0x80000000;
-                }
-            }*/
-            //ret=1;needrb=1;
-            log_err("Ret %d(%X),%d\n\n",ret,ret,needrb);
-
-            if(ret==1)
-            {
-                if(needrb)
-                    itembar->install_status=STR_INST_REBOOT;
-                else
-                    itembar->install_status=STR_INST_OK;
-            }
-            else
-            {
-                itembar->install_status=STR_INST_FAILED;
-                itembar->val1=ret;
-                //print_error(ret,L"");
-            }
-
-            if(needrb)needreboot=1;
-            if(installmode==MODE_STOPPING||!itembar->checked)
-            {
-                itembar->percent=0;
-                itembar->checked=0;
-                itembar->install_status=0;
-            }
-            else
-            {
-                itembar->checked=0;
-                itembar->percent=0;
-            }
-            redrawfield();
-        }
-        else
-        {
-            itembar->checked=0;
-            itembar->install_status=0;
-            itembar->percent=0;
-            redrawfield();
-        }
-    }
-    if(installmode==MODE_INSTALLING)
-    {
-        itembar=manager_g->items_list;
-        for(j=0;j<manager_g->items_handle.items;j++,itembar++)
-            if(j>=RES_SLOTS&&itembar->checked)
-                goto goaround;
-    }
-    // Instalation competed by this point
-
-    if(instflag&OPENFOLDER)
-    {
-        WCHAR *p=extractdir+wcslen(extractdir);
-        while(*(--p)!='\\');
-        *p=0;
-        log_err("%ws\n",extractdir);
-        ShellExecute(0,L"explore",extractdir,0,0,SW_SHOW);
-        manager->items_list[SLOT_EXTRACTING].isactive=0;
-        manager_setpos(manager);
-    }
-    if(instflag&INSTALLDRIVERS)
-    {
-        wsprintf(buf,L" /c rd /s /q \"%s\"",extractdir);
-        RunSilent(L"cmd",buf,SW_HIDE,1);
-    }
-
-    if(installmode==MODE_STOPPING)
-    {
-        flags&=~FLAG_AUTOINSTALL;
-        installmode=MODE_NONE;
-    }
-    if(installmode==MODE_INSTALLING)installmode=MODE_SCANNING;
-    PostMessage(hMain,WM_DEVICECHANGE,7,0);
-    manager->items_list[SLOT_EXTRACTING].percent=1000;
-    redrawfield();
-
-    return 0;
-}
-
-void manager_install(int flagsv)
-{
-    instflag=flagsv;
-    _beginthreadex(0,0,&thread_install,0,0,0);
 }
 
 void manager_clear(manager_t *manager)
@@ -651,12 +332,8 @@ void manager_selectall(manager_t *manager)
     for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
     {
         itembar->checked=0;
-        if(itembar->isactive)
-        //printf("%d:%d,%d,%d\n",i,itembar->index,group,group!=itembar->index);
-
         if(itembar->isactive&&group!=itembar->index)
         {
-            //printf("*\n");
             itembar->checked=1;
             group=itembar->index;
         }
@@ -1189,10 +866,10 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
 
 int itembar_cmp(itembar_t *a,itembar_t *b,CHAR *ta,CHAR *tb)
 {
-    if(wcscmp((WCHAR*)(ta+a->devicematch->device->Driver),(WCHAR*)(tb+b->devicematch->device->Driver)))return 0;
-    if(a->hwidmatch&&b->hwidmatch&&a->hwidmatch->HWID_index!=b->hwidmatch->HWID_index)return 0;
+    if(!wcscmp((WCHAR*)(ta+a->devicematch->device->Driver),(WCHAR*)(tb+b->devicematch->device->Driver)))return 1;
+    if(a->hwidmatch&&b->hwidmatch&&a->hwidmatch->HWID_index==b->hwidmatch->HWID_index)return 1;
 
-    return 1;
+    return 0;
 }
 
 void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
@@ -1200,6 +877,9 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
     itembar_t *itembar_new,*itembar_old;
     CHAR *t_new,*t_old;
     int i,j;
+    int show_changes=manager_old->items_handle.items>20;
+
+    if(statemode==STATEMODE_LOAD)show_changes=0;
 
     t_old=manager_old->matcher->state->text;
     t_new=manager_new->matcher->state->text;
@@ -1209,49 +889,69 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
         return;
     }
 
+    log_err("{Updated %d->%d\n",manager_old->items_handle.items,manager_new->items_handle.items);
+    log_console=0;
     itembar_new=&manager_new->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager_new->items_handle.items;i++,itembar_new++)
     {
         itembar_old=&manager_old->items_list[RES_SLOTS];
         for(j=RES_SLOTS;j<manager_old->items_handle.items;j++,itembar_old++)
         {
-            if(itembar_old->isactive!=9&&itembar_cmp(itembar_new,itembar_old,t_new,t_old))
+            if(itembar_old->isactive!=9)
             {
-                itembar_new->checked=itembar_old->checked;
-                itembar_new->curpos=itembar_old->curpos;
-                itembar_new->percent=itembar_old->percent;
-                itembar_new->install_status=itembar_old->install_status;
-                itembar_new->val1=itembar_old->val1;
-                itembar_new->val2=itembar_old->val2;
-                wcscpy(itembar_new->txt1,itembar_old->txt1);
+                if(itembar_cmp(itembar_new,itembar_old,t_new,t_old))
+                {
+                    itembar_new->checked=itembar_old->checked;
+                    itembar_new->curpos=itembar_old->curpos;
+                    itembar_new->percent=itembar_old->percent;
+                    itembar_new->install_status=itembar_old->install_status;
+                    itembar_new->val1=itembar_old->val1;
+                    itembar_new->val2=itembar_old->val2;
+                    wcscpy(itembar_new->txt1,itembar_old->txt1);
 
-                itembar_old->isactive=9;
-                break;
+                    itembar_old->isactive=9;
+                    break;
+                }
             }
         }
-/*        if(j==manager_old->items_handle.items)
+        if(show_changes)
+        if(j==manager_old->items_handle.items)
         {
-            log_err("Added %d\n",i);
-            device_print(itembar_new->devicematch,manager_new->matcher->state);
-            int limits[7];
-            hwidmatch_calclen(itembar_new->hwidmatch,limits);
-            hwidmatch_print(itembar_new->hwidmatch,limits);
-        }*/
+            log_err("\nAdded   $%04d|%ws|",i,t_new+itembar_new->devicematch->device->Driver);
+
+            if(itembar_new->hwidmatch)
+            {
+                int limits[7];
+                memset(limits,0,sizeof(limits));
+                log("%d|\n",itembar_new->hwidmatch->HWID_index);
+                hwidmatch_print(itembar_new->hwidmatch,limits);
+            }
+            else
+                device_print(itembar_new->devicematch->device,manager_new->matcher->state);
+        }
     }
 
-/*    log("{Updated\n");
     itembar_old=&manager_old->items_list[RES_SLOTS];
+    if(show_changes)
     for(j=RES_SLOTS;j<manager_old->items_handle.items;j++,itembar_old++)
     {
         if(itembar_old->isactive!=9)
         {
-            int limits[7];
-            hwidmatch_calclen(itembar_old->hwidmatch,limits);
-            hwidmatch_print(itembar_old->hwidmatch,limits);
-//            log_err("UNK %d\n",j);
+            log_err("\nDeleted $%04d|%ws|",j,t_old+itembar_old->devicematch->device->Driver);
+            if(itembar_old->hwidmatch)
+            {
+                int limits[7];
+                memset(limits,0,sizeof(limits));
+                log("%d|\n",itembar_old->hwidmatch->HWID_index);
+                hwidmatch_print(itembar_old->hwidmatch,limits);
+            }
+            else
+                device_print(itembar_old->devicematch->device,manager_old->matcher->state);
+
         }
     }
-    log("}Updated\n");*/
+    log_console=0;
+    log_err("}Updated\n");
 }
 //}
 
@@ -1321,7 +1021,7 @@ void popup_resize(int x,int y)
     }
 }
 
-void popup_driverline(hwidmatch_t *hwidmatch,int *limits,HDC hdcMem,int y,int mode)
+void popup_driverline(hwidmatch_t *hwidmatch,int *limits,HDC hdcMem,int y,int mode,int index)
 {
     version_t *v;
     char buf[BUFLEN];
@@ -1348,7 +1048,8 @@ void popup_driverline(hwidmatch_t *hwidmatch,int *limits,HDC hdcMem,int y,int mo
         td.col=D(POPUP_TEXT_COLOR);
     }
 
-    TextOutP(&td,L"%d",hwidmatch->altsectscore);
+    TextOutP(&td,L"$%04d",index);
+    TextOutP(&td,L"| %d",hwidmatch->altsectscore);
     TextOutP(&td,L"| %08X",hwidmatch->score);
     TextOutP(&td,L"| %s",bufw);
     TextOutP(&td,L"| %3d",hwidmatch->decorscore);
@@ -1396,7 +1097,7 @@ void popup_driverlist(manager_t *manager,HDC hdcMem,RECT rect,int i)
     itembar=manager->items_list;
     for(k=0;k<manager->items_handle.items;k++,itembar++)
         if(itembar->index==group&&itembar->hwidmatch)
-            popup_driverline(itembar->hwidmatch,limits,hdcMem,td.y,0);
+            popup_driverline(itembar->hwidmatch,limits,hdcMem,td.y,0,k);
 
 
     TextOut_CM(hdcMem,10,td.y,STR(STR_HINT_INSTDRV),c0,&maxsz,1);td.y+=lne;
@@ -1407,6 +1108,7 @@ void popup_driverlist(manager_t *manager,HDC hdcMem,RECT rect,int i)
         for(k=0;bufw[k];k++)i_hwid[k]=toupper(bufw[k]);i_hwid[k]=0;
         str_date(&cur_driver->version,bufw);
 
+        TextOutP(&td,L"$%04d",i);
         td.x+=limits[td.i++];
         td.col=c0;
         TextOutP(&td,L"| %08X",calc_score_h(cur_driver,manager->matcher->state));
@@ -1434,7 +1136,7 @@ void popup_driverlist(manager_t *manager,HDC hdcMem,RECT rect,int i)
             SetDCBrushColor(hdcMem,RGB(255,255,255));
             Rectangle(hdcMem,D(POPUP_OFSX)+horiz_sh,td.y,rect.right+horiz_sh-D(POPUP_OFSX),td.y+lne);
         }
-        popup_driverline(itembar->hwidmatch,limits,hdcMem,td.y,1);
+        popup_driverline(itembar->hwidmatch,limits,hdcMem,td.y,1,k);
         td.y+=lne;
     }
 
@@ -1545,7 +1247,7 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int index)
     }
 
     td.x=p0;TextOutF(&td,c0,L"%s",STR(STR_HINT_ANALYSIS));td.x=p1;
-    TextOutF(&td,c0,L"$%d",index);
+    TextOutF(&td,c0,L"$%04d",index);
     if(hwidmatch_f)
     {
         TextOutF(&td,isvalidcat(hwidmatch_f,manager->matcher->state)?cb:D(POPUP_CMP_INVALID_COLOR),

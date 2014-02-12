@@ -20,6 +20,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 //{ Global variables
 FILE *logfile=0;
 int error_count=0;
+int log_console=0;
 WCHAR timestamp[BUFLEN];
 monitor_t mon_vir;
 
@@ -129,6 +130,7 @@ void log(CHAR const *format,...)
     vsprintf(buffer,format,args);
     while(*ptr){if(*ptr=='#')*ptr=' ';ptr++;}
     fputs(buffer,logfile);
+    if(log_console)fputs(buffer,stdout);
     va_end(args);
 }
 
@@ -220,7 +222,7 @@ DWORD RunSilent(WCHAR* file,WCHAR* cmd,int show,int wait)
 
     if(!wcscmp(file,L"open"))
     {
-        printf("Browser\n");
+        log_err("Open '%ws'\n",cmd);
         ShellExecute(NULL, L"open", cmd, NULL, NULL, SW_SHOWNORMAL);
 
     }
@@ -275,8 +277,6 @@ void CALLBACK viruscheck(LPTSTR szFile,DWORD action,LPARAM lParam)
     int type;
     int update=0;
 
-    //GetCurrentDirectory(BUFLEN,dir);
-    //printf("%ws\n",dir);
     printf("Change: %ws\n",szFile);
     type=GetDriveType(0);
 

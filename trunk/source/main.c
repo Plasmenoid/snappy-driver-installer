@@ -113,8 +113,9 @@ HANDLE event;
 // Settings
 WCHAR drp_dir   [BUFLEN]=L"drivers";
 WCHAR drpext_dir[BUFLEN]=L"";
-WCHAR index_dir [BUFLEN]=L"dev_db2";
-WCHAR output_dir[BUFLEN]=L"dev_db1";
+WCHAR index_dir [BUFLEN]=L"indexes";
+WCHAR output_dir[BUFLEN]=L"indexes\\txt";
+WCHAR data_dir  [BUFLEN]=L"tools\\SDI";
 WCHAR log_dir   [BUFLEN]=L"logs";
 WCHAR state_file[BUFLEN]=L"untitled.snp";
 int flags=0;
@@ -147,6 +148,7 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-drp_dir:"))     wcscpy(drp_dir,pr+9);else
         if( wcsstr(pr,L"-index_dir:"))   wcscpy(index_dir,pr+11);else
         if( wcsstr(pr,L"-output_dir:"))  wcscpy(output_dir,pr+12);else
+        if( wcsstr(pr,L"-data_dir:"))    wcscpy(data_dir,pr+10);else
         if( wcsstr(pr,L"-log_dir:"))     wcscpy(log_dir,pr+9);else
         if( wcsstr(pr,L"-lang:"))        wcscpy(curlang,pr+6);else
         if( wcsstr(pr,L"-theme:"))       wcscpy(curtheme,pr+7);else
@@ -159,11 +161,16 @@ void settings_parse(const WCHAR *str,int ind)
             wsprintf(cmd,L"7za %s",wcsstr(GetCommandLineW(),L"-7z")+4);
             log_err("Executing '%ws'\n",cmd);
             registerall();
-            statemode=STATEMODE_7Z;
+            statemode=STATEMODE_EXIT;
             ret_global=Extract7z(cmd);
             log_err("Ret: %d\n",ret_global);
-            log_stop();
             return;
+        }
+        else
+        if(!wcscmp(pr,L"-install"))
+        {
+            log_err("Install");
+            statemode=STATEMODE_EXIT;
         }
         else
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else
@@ -205,7 +212,9 @@ void settings_save()
     }
     f=_wfopen(L"settings.cfg",L"wt");
     if(!f)return;
-    fprintf(f,"\"-drp_dir:%ws\" \"-index_dir:%ws\" \"-output_dir:%ws\" \"-log_dir:%ws\" ",drp_dir,index_dir,output_dir,log_dir);
+    fprintf(f,"\"-drp_dir:%ws\" \"-index_dir:%ws\" \"-output_dir:%ws\" \"-data_dir:%ws\" \"-log_dir:%ws\" ",
+            drp_dir,index_dir,output_dir,data_dir,log_dir);
+
     fprintf(f,"-filters:%d \"-lang:%ws\" \"-theme:%ws\" ",filters,curlang,curtheme);
     if(license)fprintf(f,"-license ");
     if(expertmode)fprintf(f,"-expertmode ");
@@ -268,12 +277,12 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     wcscpy(index_dir,log_dir);
     wcscpy(output_dir,log_dir);
 #endif
-    log_start(log_dir);
-    if(statemode==STATEMODE_7Z)
+    if(statemode==STATEMODE_EXIT)
     {
         if(backtrace)FreeLibrary(backtrace);
         return ret_global;
     }
+    log_start(log_dir);
     signal(SIGSEGV,SignalHandler);
     ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:SW_HIDE);
 
@@ -283,6 +292,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         log_err("  drp_dir='%ws'\n",drp_dir);
         log_err("  index_dir='%ws'\n",index_dir);
         log_err("  output_dir='%ws'\n",output_dir);
+        log_err("  data_dir='%ws'\n",data_dir);
         log_err("  log_dir='%ws'\n",log_dir);
 #ifndef CONSOLE_MODE
         log_err("  lang=%ws\n",curlang);
@@ -735,7 +745,7 @@ void image_loadFile(img_t *img,WCHAR *filename)
     BYTE *imgbuf;
 
     if(!filename||!*filename)return;
-    wsprintf(buf,L"themes\\%s",filename);
+    wsprintf(buf,L"%s\\themes\\%s",data_dir,filename);
     //printf("Loading '%ws'\n",buf);
     f=_wfopen(buf,L"rb");
     if(!f)
@@ -1483,7 +1493,8 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 viruscheck(L"",0,0);
                 manager_restorepos(manager_g,manager_prev);
                 manager_setpos(manager_g);
-                if(MODE_SCANNING)
+                //log_err("Mode in WM_BUNDLEREADY: %d\n",installmode);
+                //if(installmode==MODE_SCANNING)
                 {
                     WCHAR filename[BUFLEN];
 

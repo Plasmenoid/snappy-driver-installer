@@ -74,7 +74,7 @@ typedef struct _matcher_t
 
 // Calc
 int calc_identifierscore(int dev_pos,int dev_ishw,int inf_pos);
-int calc_catalogfile(hwidmatch_t *hwidmatch,state_t *state);
+int calc_catalogfile(hwidmatch_t *hwidmatch);
 int calc_signature(int catalogfile,state_t *state,int isnt);
 unsigned calc_score(int catalogfile,int feature,int rank,state_t *state,int isnt);
 unsigned calc_score_h(driver_t *driver,state_t *state);
