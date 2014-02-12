@@ -107,6 +107,8 @@ const markers_t markers[NUM_MARKERS]=
     {"allnt",   4, 0,-1},
     {"allx86", -1,-1, 0},
     {"allx64", -1,-1, 1},
+    {"all8x86", 6, 2, 0},
+    {"all8x64", 6, 2, 1},
     {"ntx86",  -1,-1, 0},
     {"ntx64",  -1,-1, 1},
 };
@@ -238,7 +240,7 @@ int calc_markerscore(state_t *state,char *path)
     }
 
     if(curmaj>=0&&curmaj!=majver)return 0;
-    if(curmin>=0&&curmin!=minver)return 0;
+    if(curmin>=0&&curmin>=minver)return 0;
     if(curarch>=0&&curarch!=arch)return 0;
 
     if((curmaj<0&&curmin<0&&curarch<0)&&!winall)return 1;

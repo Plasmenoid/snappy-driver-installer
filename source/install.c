@@ -61,7 +61,7 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
     int size;
     FILE *f;
 
-    *ret=1;*needrb=1;
+    *ret=2;*needrb=1;
     wsprintf(cmd,L"%s\\install64.exe",extractdir);
     if(!PathFileExists(cmd))
     {
