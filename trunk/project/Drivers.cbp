@@ -12,7 +12,6 @@
 				<Option output="../drv" prefix_auto="1" extension_auto="1" />
 				<Option working_dir=".." />
 				<Option object_output="../obj/ReleaseU" />
-				<Option external_deps="../resources/install64.exe;../themes/classic.txt;" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
@@ -105,7 +104,7 @@
 		</Linker>
 		<ExtraCommands>
 			<Add before="..\resources\delres.bat" />
-			<Add before="..\SubWCRev32.exe ..\source ..\source\svnrev_template.h ..\source\svnrev.h" />
+			<Add before="..\SubWCRev32.exe .. ..\source\svnrev_template.h ..\source\svnrev.h" />
 		</ExtraCommands>
 		<Unit filename="../langs/english.txt" />
 		<Unit filename="../resources/resources.h" />
@@ -128,6 +127,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../source/indexing.h" />
+		<Unit filename="../source/install.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/install.h" />
 		<Unit filename="../source/langlist.c">
 			<Option compilerVar="CC" />
 		</Unit>
