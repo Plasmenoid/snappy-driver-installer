@@ -61,7 +61,7 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
     int size;
     FILE *f;
 
-    *ret=2;*needrb=1;
+    *ret=3;*needrb=0;
     wsprintf(cmd,L"%s\\install64.exe",extractdir);
     if(!PathFileExists(cmd))
     {
@@ -147,7 +147,7 @@ unsigned int __stdcall thread_install(void *arg)
             else
                 r=ProcAdd(&pRestorePtSpec,&pSMgrStatus);
 
-            printf("rt rest point{ %d(%d)\n",r,pSMgrStatus.nStatus);
+            log_err("rt rest point{ %d(%d)\n",r,pSMgrStatus.nStatus);
             manager_g->items_list[SLOT_RESTORE_POINT].percent=1000;
             if(r)
             {
