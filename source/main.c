@@ -113,11 +113,15 @@ HANDLE event;
 // Settings
 WCHAR drp_dir   [BUFLEN]=L"drivers";
 WCHAR drpext_dir[BUFLEN]=L"";
-WCHAR index_dir [BUFLEN]=L"indexes";
-WCHAR output_dir[BUFLEN]=L"indexes\\txt";
+WCHAR index_dir [BUFLEN]=L"indexes\\SDI";
+WCHAR output_dir[BUFLEN]=L"indexes\\SDI\\txt";
 WCHAR data_dir  [BUFLEN]=L"tools\\SDI";
 WCHAR log_dir   [BUFLEN]=L"logs";
+
 WCHAR state_file[BUFLEN]=L"untitled.snp";
+WCHAR finish    [BUFLEN]=L"";
+WCHAR finish_rb [BUFLEN]=L"";
+
 int flags=0;
 int statemode=0;
 int expertmode=0;
@@ -137,6 +141,7 @@ int virtual_arch_type=0;
 //{ Main
 void settings_parse(const WCHAR *str,int ind)
 {
+    WCHAR buf[BUFLEN];
     WCHAR **argv,*pr;
     int argc;
     int i;
@@ -150,6 +155,8 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-output_dir:"))  wcscpy(output_dir,pr+12);else
         if( wcsstr(pr,L"-data_dir:"))    wcscpy(data_dir,pr+10);else
         if( wcsstr(pr,L"-log_dir:"))     wcscpy(log_dir,pr+9);else
+        if( wcsstr(pr,L"-finish_cmd:"))  wcscpy(finish,pr+12);else
+        if( wcsstr(pr,L"-finishrb_cmd:"))wcscpy(finish_rb,pr+14);else
         if( wcsstr(pr,L"-lang:"))        wcscpy(curlang,pr+6);else
         if( wcsstr(pr,L"-theme:"))       wcscpy(curtheme,pr+7);else
         if(!wcscmp(pr,L"-expertmode"))   expertmode=1;else
@@ -167,10 +174,19 @@ void settings_parse(const WCHAR *str,int ind)
             return;
         }
         else
-        if(!wcscmp(pr,L"-install"))
+        if(!wcscmp(pr,L"-install")&&argc-i==3)
         {
-            log_err("Install");
+            log_err("Install '%ws' '%s'\n",argv[i+1],argv[i+2]);
+            GetEnvironmentVariable(L"TEMP",buf,BUFLEN);
+            wsprintf(extractdir,L"%s\\SDI",buf);
+            installmode=MODE_INSTALLING;
+            driver_install(argv[i+1],argv[i+2],&ret_global,&needreboot);
+            log_err("Ret: %X,%d\n",ret_global,needreboot);
+            if(needreboot)ret_global|=0x80000000;
+            wsprintf(buf,L" /c rd /s /q \"%s\"",extractdir);
+            RunSilent(L"cmd",buf,SW_HIDE,1);
             statemode=STATEMODE_EXIT;
+            return;
         }
         else
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else
@@ -212,12 +228,17 @@ void settings_save()
     }
     f=_wfopen(L"settings.cfg",L"wt");
     if(!f)return;
-    fprintf(f,"\"-drp_dir:%ws\" \"-index_dir:%ws\" \"-output_dir:%ws\" \"-data_dir:%ws\" \"-log_dir:%ws\" ",
-            drp_dir,index_dir,output_dir,data_dir,log_dir);
+    fwprintf(f,L"\"-drp_dir:%s\" \"-index_dir:%s\" \"-output_dir:%s\" "
+              "\"-data_dir:%s\" \"-log_dir:%s\" "
+              "\"-finish_cmd:%s\" \"-finishrb_cmd:%s\" "
+              "-filters:%d \"-lang:%s\" \"-theme:%s\" ",
+            drp_dir,index_dir,output_dir,
+            data_dir,log_dir,
+            finish,finish_rb,
+            filters,curlang,curtheme);
 
-    fprintf(f,"-filters:%d \"-lang:%ws\" \"-theme:%ws\" ",filters,curlang,curtheme);
-    if(license)fprintf(f,"-license ");
-    if(expertmode)fprintf(f,"-expertmode ");
+    if(license)fwprintf(f,L"-license ");
+    if(expertmode)fwprintf(f,L"-expertmode ");
     fclose(f);
 }
 
@@ -1526,7 +1547,13 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                         manager_install(INSTALLDRIVERS);
                     }
                     else
+                    {
+                        WCHAR buf[BUFLEN];
                         installmode=MODE_NONE;
+                        wsprintf(buf,L" /c %s",needreboot?finish_rb:finish);
+                        if(*(needreboot?finish_rb:finish))
+                            RunSilent(L"cmd",buf,SW_HIDE,0);
+                    }
                 }
                 else
                     if(installmode==MODE_SCANNING)installmode=MODE_NONE;

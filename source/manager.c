@@ -116,11 +116,24 @@ void manager_filter(manager_t *manager,int options)
                     itembar->isactive=1;
             }
 
+            if((!o1||!cnt[NUM_STATUS])&&(options&FILTER_SHOW_MISSING)&&itembar->hwidmatch->status&STATUS_MISSING)
+            {
+                itembar->isactive=1;
+                cnt[NUM_STATUS]++;
+            }
+
             for(k=0;k<NUM_STATUS;k++)
                 if((!o1||!cnt[NUM_STATUS])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
             {
                 if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&devicematch->device->problem==0
-                   &&itembar->hwidmatch->altsectscore<2/*&&manager->matcher->state->platform.dwMajorVersion>=6*/)continue;
+                   &&itembar->hwidmatch->altsectscore<2)continue;
+
+                //[X] Newer
+                //[ ] Worse
+                //old, no problem
+                if((options&FILTER_SHOW_NEWER)!=0
+                   &&(options&FILTER_SHOW_WORSE_RANK)==0
+                   &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0)continue;
                 cnt[k]++;
                 cnt[NUM_STATUS]++;
                 itembar->isactive=1;
@@ -327,7 +340,7 @@ void manager_selectall(manager_t *manager)
     itembar_t *itembar;
     int i,group=-1;
 
-    manager->items_list[SLOT_RESTORE_POINT].checked=1;
+    if(manager->items_list[SLOT_RESTORE_POINT].install_status==STR_RESTOREPOINT)manager->items_list[SLOT_RESTORE_POINT].checked=1;
     itembar=&manager->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
     {

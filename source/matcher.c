@@ -217,13 +217,14 @@ int calc_decorscore(int id,state_t *state)
 
 int calc_markerscore(state_t *state,char *path)
 {
-    char buf[4096];
+    char buf[BUFLEN];
     int majver=state->platform.dwMajorVersion,
         minver=state->platform.dwMinorVersion,
         arch=state->architecture,
         curmaj=-1,curmin=-1,curarch=-1;
     int i;
-    int winall=0;
+    //int winall=0;
+    int score=0;
 
     strcpy(buf,path);
     strtolower(buf,strlen(buf));
@@ -232,25 +233,22 @@ int calc_markerscore(state_t *state,char *path)
     {
         if(strstr(buf,markers[i].name))
         {
-            if(markers[i].major==0){winall=1;continue;}
+            score=1;
+            if(markers[i].major==0){/*winall=1;*/continue;}
             if(markers[i].major>curmaj)curmaj=markers[i].major;
             if(markers[i].minor>curmin)curmin=markers[i].minor;
             if(markers[i].arch>curarch)curarch=markers[i].arch;
         }
     }
 
-    if(curmaj>=0&&curmaj!=majver)return 0;
-    if(curmin>=0&&curmin>=minver)return 0;
-    if(curarch>=0&&curarch!=arch)return 0;
-
-    if((curmaj<0&&curmin<0&&curarch<0)&&!winall)return 1;
-
-    return 2;
+    if(curmaj>=0&&curmin>=0&&majver>=curmaj&&minver>=curmin)score+=2;
+    if(curarch>=0&&curarch==arch)score+=4;
+    return score;
 }
 
 int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
 {
-    char buf[4096];
+    char buf[BUFLEN];
     int pos;
     int desc_index,manufacturer_index;
     driverpack_t *drp;

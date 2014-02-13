@@ -156,22 +156,26 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 //}
 
 //{ Global variables
-extern int virtual_os_version;
-extern int virtual_arch_type;
-extern int mainx_c,mainy_c;
 
+// Window
+extern int mainx_c,mainy_c;
 extern HFONT hFont;
 extern HWND hPopup,hMain,hField;
 extern int floating_x,floating_y;
 extern int horiz_sh;
 
+// Manager
 extern manager_t *manager_g;
 extern int volatile installmode;
-extern WCHAR state_file[BUFLEN];
+
+// Settings
 extern WCHAR drpext_dir[BUFLEN];
 extern WCHAR data_dir  [BUFLEN];
+extern WCHAR state_file[BUFLEN];
 extern int flags;
 extern int statemode;
+extern int virtual_os_version;
+extern int virtual_arch_type;
 //}
 
 //{ Structs
