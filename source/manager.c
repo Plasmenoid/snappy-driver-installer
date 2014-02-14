@@ -879,7 +879,7 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
 
 int itembar_cmp(itembar_t *a,itembar_t *b,CHAR *ta,CHAR *tb)
 {
-    if(wcslen(ta+a->devicematch->device->Driver)>2)
+    if(wcslen((WCHAR*)(ta+a->devicematch->device->Driver))>0)
     {
         if(!wcscmp((WCHAR*)(ta+a->devicematch->device->Driver),(WCHAR*)(tb+b->devicematch->device->Driver)))return wcslen((WCHAR*)(ta+a->devicematch->device->Driver))+10;
     }
@@ -1290,8 +1290,8 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int index)
     TextOutF(&td,c0,L"%s%s",STR(STR_HINT_MANUF),t+devicematch_f->device->Mfg);
     TextOutF(&td,c0,L"%s",bufw);
     TextOutF(&td,c0,L"%s",t+devicematch_f->device->Driver);
-    print_status(devicematch_f->device->ret,devicematch_f->device->status,devicematch_f->device->problem,bufw);
-    TextOutF(&td,c0,L"Status: %s",bufw);
+    wsprintf(bufw,STR(STR_STATUS_NOTPRESENT+print_status(devicematch_f->device)),devicematch_f->device->problem);
+    TextOutF(&td,c0,L"%s",bufw);
 
     maxln=td.y;
     td.y=D(POPUP_OFSY);

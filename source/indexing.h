@@ -158,6 +158,7 @@ typedef struct _data_HWID_t // 8
 #define FLAG_DISABLEINSTALL            64
 #define FLAG_AUTOINSTALL              128
 #define FLAG_FAILSAFE                 256
+#define FLAG_AUTOCLOSE                512
 
 typedef struct _collection_t
 {

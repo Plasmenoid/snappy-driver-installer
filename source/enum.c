@@ -20,6 +20,16 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 //{ Global variables
 int isLaptop;
 
+const char *deviceststus_str[]=
+{
+    "Device is not present",
+    "Device is disabled",
+    "The device has the following problem: %d",
+    "The driver reported a problem with the device",
+    "Driver is running",
+    "Device is currently stopped"
+};
+
 #ifdef STORE_PROPS
 const dev devtbl[NUM_PROPS]=
 {
@@ -76,31 +86,31 @@ void print_guid(GUID *g)
     log("%ws\n",buffer);
 }
 
-void print_status(int ret,int status,int problem,WCHAR *buf)
+int print_status(device_t *device)
 {
     int isPhantom=0;
 
-    if(ret!=CR_SUCCESS)
+    if(device->ret!=CR_SUCCESS)
     {
-        if((ret==CR_NO_SUCH_DEVINST)||(ret==CR_NO_SUCH_VALUE))isPhantom=1;
+        if((device->ret==CR_NO_SUCH_DEVINST)||(device->ret==CR_NO_SUCH_VALUE))isPhantom=1;
     }
 
     if(isPhantom)
-        wsprintf(buf,L"Device is not present.");
+        return 0;
     else
     {
-        if((status&DN_HAS_PROBLEM)&&problem==CM_PROB_DISABLED)
-            wsprintf(buf,L"Device is disabled.");
+        if((device->status&DN_HAS_PROBLEM)&&device->problem==CM_PROB_DISABLED)
+            return 1;
         else
         {
-            if(status&DN_HAS_PROBLEM)
-                wsprintf(buf,L"The device has the following problem: %d",problem);
-            else if(status&DN_PRIVATE_PROBLEM)
-                wsprintf(buf,L"The driver reported a problem with the device.");
-            else if(status&DN_STARTED)
-                wsprintf(buf,L"Driver is running.");
+            if(device->status&DN_HAS_PROBLEM)
+                return 2;
+            else if(device->status&DN_PRIVATE_PROBLEM)
+                return 3;
+            else if(device->status&DN_STARTED)
+                return 4;
             else
-                wsprintf(buf,L"Device is currently stopped.");
+                return 5;
         }
     }
 }
@@ -224,13 +234,12 @@ void device_print(device_t *cur_device,state_t *state)
 #endif
 
     char *s=state->text;
-    WCHAR buf[BUFLEN];
 
-    print_status(cur_device->ret,cur_device->status,cur_device->problem,buf);
     log("DeviceInfo\n");
     log("##Name:#########%ws\n",s+cur_device->Devicedesc);
-    log("##Status:#######%ws\n",buf);
-    log("##Manufacturer:#%ws\n",s+cur_device->Mfg);
+    log("##Status:#######");
+    log(deviceststus_str[print_status(cur_device)],cur_device->problem);
+    log("\n##Manufacturer:#%ws\n",s+cur_device->Mfg);
     log("##HWID_reg######%ws\n",s+cur_device->Driver);
     log("##Class:########");    print_guid(&cur_device->DeviceInfoData.ClassGuid);
     log("##Location:#####\n");
@@ -500,7 +509,6 @@ void state_print(state_t *state)
             log("  %dcmx%dcm (%.1fin)\t%.3f %s\n",x,y,sqrt(x*x+y*y)/2.54,(double)y/x,iswide(x,y)?"wide":"");
         }
 
-        isnotebook_a(state);
         log("\nMisc\n");
         log("  Type:        %s\n",isLaptop?"Laptop":"Desktop");
         log("  Locale:      %X\n",state->locale);
@@ -588,6 +596,7 @@ void state_getsysinfo_fast(state_t *state)
     if(*buf)state->architecture=1;
 
     state_fakeOSversion(state);
+    isnotebook_a(state);
 }
 
 void state_getsysinfo_slow(state_t *state)

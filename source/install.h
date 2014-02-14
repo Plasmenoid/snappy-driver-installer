@@ -15,6 +15,19 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define NUM_CLICKDATA 1
+
+typedef struct _wnddata_t
+{
+    // Main wnd
+    int wnd_wx,wnd_wy;
+    int cln_wx,cln_wy;
+
+    // Install button
+    int btn_x, btn_y;
+    int btn_wx,btn_wy;
+}wnddata_t;
+
 extern int instflag;
 extern int itembar_act;
 extern int needreboot;
@@ -23,3 +36,9 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb);
 void _7z_total(long long i);
 void _7z_setcomplited(long long i);
 unsigned int __stdcall thread_install(void *arg);
+
+void calcwnddata(wnddata_t *w,HWND hwnd);
+BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam);
+void wndclicker(int mode);
+unsigned int __stdcall thread_clicker(void *arg);
+

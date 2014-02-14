@@ -21,6 +21,7 @@
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
 					<Add option="-g" />
+					<Add option="-finput-charset=cp1251" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>

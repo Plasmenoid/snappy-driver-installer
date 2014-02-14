@@ -167,8 +167,9 @@ typedef struct _state_t
 }state_t;
 //}
 
+extern const char *deviceststus_str[];
 void print_guid(GUID *g);
-void print_status(int ret,int status,int problem,WCHAR *buf);
+int print_status(device_t *device);
 void print_appinfo();
 
 void read_device_property(HDEVINFO hDevInfo,SP_DEVINFO_DATA *DeviceInfoData,state_t *state,int id,ofst *val);

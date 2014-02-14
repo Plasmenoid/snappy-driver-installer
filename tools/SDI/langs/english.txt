@@ -115,7 +115,7 @@ STR_ABOUT_VER           = "v0.1a"
 STR_ABOUT_DEV_TITLE     = "Developer: "
 STR_ABOUT_DEV_LIST      = "BadPointer"
 STR_ABOUT_TESTERS_TITLE = "Testers: "
-STR_ABOUT_TESTERS_LIST  = "QuarQ, SamLab, WindR"
+STR_ABOUT_TESTERS_LIST  = "QuarQ, SamLab, Sorc, WindR"
 STR_ABOUT_LICENSE       = "This program is licensed under the terms of the GNU General Public License version 3"
 
 // Popup on drivers(while holding Ctrl or spacebar)
@@ -152,6 +152,14 @@ STR_OPENSNAPSHOT        = "Snapshot files (*.snp)\0*.snp\0All files\0*.*\0\0"
 STR_EXTRACTFOLDER       = "Please select the destination folder."
 
 // Device status
+STR_STATUS_NOTPRESENT   = "Device is not present"
+STR_STATUS_DISABLED     = "Device is disabled"
+STR_STATUS_DEVPROBLEM   = "The device has the following problem: %d"
+STR_STATUS_DRVPROBLEM   = "The driver reported a problem with the device"
+STR_STATUS_RUNNING      = "Driver is running"
+STR_STATUS_STOPPED      = "Device is currently stopped"
+
+// Driver status
 STR_STATUS_INVALID      = "Incompatible driver"
 STR_STATUS_MISSING      = "Driver available (driver not installed yet)"
 STR_STATUS_NOTSIGNED    = " (not signed)"

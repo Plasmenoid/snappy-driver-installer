@@ -113,9 +113,9 @@ STR_SYSINF_64BIT        = "64-бит"
 // About
 STR_ABOUT_VER           = "v0.1a"
 STR_ABOUT_DEV_TITLE     = "Разработчик: "
-STR_ABOUT_DEV_LIST      = "BadPointer"
+//STR_ABOUT_DEV_LIST
 STR_ABOUT_TESTERS_TITLE = "Тестеры: "
-STR_ABOUT_TESTERS_LIST  = "QuarQ, SamLab, WindR"
+//STR_ABOUT_TESTERS_LIST
 STR_ABOUT_LICENSE       = "This program is licensed under the terms of the GNU General Public License version 3"
 
 // Всплывающее окно (при удерживании Ctrl или пробела)
@@ -151,7 +151,15 @@ STR_RESTOREPOINT        = "Создать точку восстановлени�
 STR_OPENSNAPSHOT        = "Файлы снимков (*.snp)\0*.snp\0Все файлы\0*.*\0\0"
 STR_EXTRACTFOLDER       = "Выберите папку назначения."
 
-// Статус
+// Статус устройства
+STR_STATUS_NOTPRESENT   = "Устройство отсутствует"
+STR_STATUS_DISABLED     = "Устройство отключено"
+STR_STATUS_DEVPROBLEM   = "Проблема с устройством: %d"
+STR_STATUS_DRVPROBLEM   = "Проблема с драйвером"
+STR_STATUS_RUNNING      = "Драйвер запущен"
+STR_STATUS_STOPPED      = "Устройство остановлено"
+
+// Статус драйвера
 STR_STATUS_INVALID      = "Несовместимый драйвер"
 STR_STATUS_MISSING      = "Устройству требуется драйвер и он доступен для установки"
 STR_STATUS_NOTSIGNED    = " (нет подписи)"
