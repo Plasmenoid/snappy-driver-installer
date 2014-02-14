@@ -112,9 +112,9 @@ STR_SYSINF_64BIT        = "64-біт"
 // About
 STR_ABOUT_VER           = "v0.1a"
 STR_ABOUT_DEV_TITLE     = "Розробник: "
-STR_ABOUT_DEV_LIST      = "BadPointer"
+//STR_ABOUT_DEV_LIST
 STR_ABOUT_TESTERS_TITLE = "Тестеры: "
-STR_ABOUT_TESTERS_LIST  = "QuarQ, SamLab, WindR"
+//STR_ABOUT_TESTERS_LIST
 STR_ABOUT_LICENSE       = "This program is licensed under the terms of the GNU General Public License version 3"
 
 // Всплывающее окно (при удерживании Ctrl или пробела)
@@ -149,6 +149,14 @@ STR_CONT_HWID_CLIP      = "Скопіювати код пристрою в бу�
 STR_RESTOREPOINT        = "Створити точку відновлення"
 STR_OPENSNAPSHOT        = "Файли знімків (*.snp)\0*.snp\0Всі файли\0*.*\0\0"
 STR_EXTRACTFOLDER       = "Виберіть папку призначення."
+
+// Device status
+//STR_STATUS_NOTPRESENT   = "Device is not present"
+//STR_STATUS_DISABLED     = "Device is disabled"
+//STR_STATUS_DEVPROBLEM   = "The device has the following problem: %d"
+//STR_STATUS_DRVPROBLEM   = "The driver reported a problem with the device"
+//STR_STATUS_RUNNING      = "Driver is running"
+//STR_STATUS_STOPPED      = "Device is currently stopped"
 
 // Статус
 STR_STATUS_INVALID      = "Несумісний драйвер"

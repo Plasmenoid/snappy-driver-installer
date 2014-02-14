@@ -162,6 +162,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-expertmode"))   expertmode=1;else
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
+        if(!wcscmp(pr,L"-autoclose"))    flags|=FLAG_AUTOCLOSE;else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
@@ -320,8 +321,10 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         log_err("  theme=%ws\n",curtheme);
         log_err("  expertmode=%d\n",expertmode);
         log_err("  filters=%d\n",filters);
-        log_err("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
+        log_err("  autoinstall=%d\n",flags&FLAG_AUTOINSTALL?1:0);
+        log_err("  autoclose=%d\n",flags&FLAG_AUTOCLOSE?1:0);
         log_err("  failsafe=%d\n",flags&FLAG_FAILSAFE?1:0);
+        log_err("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
 #endif
         log("\n");
         if(*state_file&&statemode)log_err("Virtual system system config '%ws'\n",state_file);
@@ -370,6 +373,10 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     log_stop();
     signal(SIGSEGV,SIG_DFL);
     ShowWindow(GetConsoleWindow(),SW_SHOWNOACTIVATE);
+
+#ifdef CONSOLE_MODE
+    MessageBox(0,L"В папке logs отчет создан!",L"Сообщение",0);
+#endif
 
     if(backtrace)FreeLibrary(backtrace);
     return msg.wParam;
@@ -1553,6 +1560,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                         wsprintf(buf,L" /c %s",needreboot?finish_rb:finish);
                         if(*(needreboot?finish_rb:finish))
                             RunSilent(L"cmd",buf,SW_HIDE,0);
+                        if(flags&FLAG_AUTOCLOSE)PostMessage(hMain,WM_CLOSE,0,0);
                     }
                 }
                 else
@@ -1569,6 +1577,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 manager_testitembars(manager_g);
                 manager_setpos(manager_g);
                 redrawfield();
+            }
+            if(wParam==VK_F7)
+            {
+                wndclicker(2);
+                MessageBox(0,L"Windows data recorded into the log.",L"Message",0);
             }
             break;
 
