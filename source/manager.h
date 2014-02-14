@@ -127,7 +127,7 @@ WCHAR *str_version(version_t *ver);
 // Driver list
 void manager_setpos(manager_t *manager);
 int  manager_animate(manager_t *manager);
-void manager_drawitem(manager_t *manager,HDC hdc,int pos,itembar_t *itembar,int index);
+int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone);
 int  isbehind(manager_t *manager,int pos,int ofs,int j);
 void manager_draw(manager_t *manager,HDC hdc,int ofsy);
 void manager_restorepos(manager_t *manager,manager_t *manager_prev);

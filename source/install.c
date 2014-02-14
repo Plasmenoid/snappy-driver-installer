@@ -31,9 +31,24 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
     {
         396,315,
         390,283,
-        //107,249,// continue
+#ifdef AUTOCLICKER_CONFIRM
+        107,249,// continue
+#else
         245,249,  // stop
+#endif
         132,23
+    },
+    // Windows 7 (64-bit)
+    {
+        500,270,
+        500,270,
+#ifdef AUTOCLICKER_CONFIRM
+        47,139,  // continue
+        448,87   // continue
+#else
+        47,67,     // stop
+        448,72     // stop
+#endif
     }
 };
 volatile int clicker_flag;
@@ -60,7 +75,6 @@ void _7z_setcomplited(long long i)
     }
 
     itembar_settext(manager_g,itembar_act,L"",(int)(i*(instflag&INSTALLDRIVERS?900.:1000.)/total));
-    //double d=(i*1000./total)/_totalitems;
     double d=(manager_g->items_list[itembar_act].percent)/_totalitems;
     itembar_settext(manager_g,SLOT_EXTRACTING,L"",(int)(_processeditems*1000./_totalitems+d));
     manager_g->items_list[SLOT_EXTRACTING].val1=_processeditems;
@@ -389,9 +403,30 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
         if((lParam&2)==0)for(i=0;i<NUM_CLICKDATA;i++)
             if(!memcmp(&w,&clicktbl[i],sizeof(wnddata_t)))
         {
-            SetActiveWindow(hwnd);
-            SendMessage(hwnd,BM_CLICK,0,0);
-            log_err("Autoclicker fired\n");
+            SwitchToThisWindow(hwnd,0);
+            GetWindowInfo(GetParent(hwnd),&pwi);
+            SetCursorPos(pwi.rcClient.left+w.btn_x+w.btn_wx/2,pwi.rcClient.top+w.btn_y+w.btn_wy/2);
+            Sleep(3000);
+            if(IsWindow(hwnd))
+            {
+                GetWindowInfo(hwnd,&pwi);
+                calcwnddata(&w,hwnd);
+
+                if(!memcmp(&w,&clicktbl[i],sizeof(wnddata_t)))
+                {
+                    //SetActiveWindow(hwnd);
+                    //SendMessage(hwnd,BM_CLICK,0,0);
+
+                    GetWindowInfo(GetParent(hwnd),&pwi);
+                    SetCursorPos(pwi.rcClient.left+w.btn_x+w.btn_wx/2,pwi.rcClient.top+w.btn_y+w.btn_wy/2);
+                    int x=w.btn_x+w.btn_wx/2;
+                    int y=w.btn_y+w.btn_wy/2;
+                    int pos=(int)((y<<16)|x);
+                    SendMessage(GetParent(hwnd),WM_LBUTTONDOWN,0,pos);
+                    SendMessage(GetParent(hwnd),WM_LBUTTONUP,  0,pos);
+                    log_err("Autoclicker fired\n");
+                }
+            }
         }
     }
 

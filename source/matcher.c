@@ -268,14 +268,25 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
     return isvalidcat(hwidmatch,state)?2:1;
 }
 
+int isMissing(device_t *device,driver_t *driver,state_t *state)
+{
+    if(driver)
+    {
+       if(!_wcsicmp((WCHAR*)(state->text+driver->MatchingDeviceId),L"PCI\\CC_0300"))return 1;
+    }else
+    {
+        if(device->problem)return 1;
+    }
+    return 0;
+}
+
 int calc_status(hwidmatch_t *hwidmatch,state_t *state)
 {
     int r=0;
     int score;
     driver_t *cur_driver=hwidmatch->devicematch->driver;
 
-    if(!cur_driver||hwidmatch->devicematch->device->problem)return STATUS_MISSING;
-    if(cur_driver&&!_wcsicmp((WCHAR*)(state->text+cur_driver->MatchingDeviceId),L"PCI\\CC_0300"))return STATUS_MISSING;
+    if(isMissing(hwidmatch->devicematch->device,cur_driver,state))return STATUS_MISSING;
 
     int res=cmpdate(&hwidmatch->devicematch->driver->version,getdrp_drvversion(hwidmatch));
     if(res<0)r+=STATUS_NEW;else
@@ -580,6 +591,7 @@ void matcher_populate(matcher_t *matcher)
         {
             heap_allocitem_ptr(&matcher->hwidmatch_handle);
 
+            if(isMissing(cur_device,cur_driver,state))devicematch->status=STATUS_NF_MISSING;else
             if(devicematch->driver)
             {
                 if(!wcscmp((WCHAR *)(state->text+devicematch->driver->ProviderName),L"Microsoft"))

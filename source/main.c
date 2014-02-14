@@ -96,7 +96,7 @@ int panel_lasti;
 int field_lasti,field_lastz;
 int mainx_c,mainy_c;
 int mainx_w,mainy_w;
-int mousex=-1,mousey=-1,mousedown=0;
+int mousex=-1,mousey=-1,mousedown=0,mouseclick=0;
 
 int ctrl_down=0;
 int space_down=0;
@@ -1248,8 +1248,11 @@ LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(mousedown==1||mousedown==2)
             {
                 GetWindowRect(hMain,&rect);
-                if(mousex!=x||mousey!=y)mousedown=2;
-                MoveWindow(hMain,rect.left+x-mousex,rect.top+y-mousey,mainx_w,mainy_w,0);
+                if(mousedown==2||abs(mousex-x)>2||abs(mousey-y)>2)
+                {
+                    mousedown=2;
+                    MoveWindow(hMain,rect.left+x-mousex,rect.top+y-mousey,mainx_w,mainy_w,0);
+                }
             }
             return 1;
 
@@ -1275,8 +1278,10 @@ LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(mousedown==2)
             {
                 mousedown=0;
+                mouseclick=0;
                 break;
             }
+            mouseclick=mousedown&&uMsg==WM_LBUTTONUP?1:0;
             mousedown=0;
             return 1;
 
@@ -1648,6 +1653,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             break;
 
         case WM_LBUTTONUP:
+            if(!mouseclick)break;
             i=panel_hitscan(x,y);
             if(i<0)break;
             if(i<4)
@@ -1975,7 +1981,8 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             break;
 
         case WM_LBUTTONUP:
-            manager_hitscan(manager_g,x,y+getscrollpos(),&floating_itembar,&i);
+            if(!mouseclick)break;
+            manager_hitscan(manager_g,x,y,&floating_itembar,&i);
             if(floating_itembar==SLOT_SNAPSHOT)
             {
                 statemode=0;
@@ -2011,7 +2018,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             break;
 
         case WM_RBUTTONDOWN:
-            manager_hitscan(manager_g,x,y+getscrollpos(),&floating_itembar,&i);
+            manager_hitscan(manager_g,x,y,&floating_itembar,&i);
             if(floating_itembar>=0&&i==0)
                 contextmenu(x,y);
             break;
@@ -2047,7 +2054,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             }
             if(ctrl_down||space_down||expertmode)
             {
-                manager_hitscan(manager_g,x,y+getscrollpos(),&floating_itembar,&i);
+                manager_hitscan(manager_g,x,y,&floating_itembar,&i);
                 if(i==0&&(floating_itembar>=RES_SLOTS||floating_itembar<0))
                     drawpopup(floating_itembar,0,-1,FLOATING_DRIVER,x,y,hField);
                 else
@@ -2056,7 +2063,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             {
                 int a,b;
 
-                manager_hitscan(manager_g,x,y+getscrollpos(),&a,&b);
+                manager_hitscan(manager_g,x,y,&a,&b);
                 if(a!=field_lasti||b!=field_lastz)redrawfield();
                 field_lasti=a;
                 field_lastz=b;

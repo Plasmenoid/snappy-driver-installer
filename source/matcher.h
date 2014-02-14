@@ -73,6 +73,7 @@ typedef struct _matcher_t
 }matcher_t;
 
 // Calc
+int isMissing(device_t *device,driver_t *driver,state_t *state);
 int calc_identifierscore(int dev_pos,int dev_ishw,int inf_pos);
 int calc_catalogfile(hwidmatch_t *hwidmatch);
 int calc_signature(int catalogfile,state_t *state,int isnt);
