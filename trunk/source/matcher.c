@@ -272,7 +272,7 @@ int isMissing(device_t *device,driver_t *driver,state_t *state)
 {
     if(driver)
     {
-       if(!_wcsicmp((WCHAR*)(state->text+driver->MatchingDeviceId),L"PCI\\CC_0300"))return 1;
+        if(!_wcsicmp((WCHAR*)(state->text+driver->MatchingDeviceId),L"PCI\\CC_0300"))return 1;
     }else
     {
         if(device->problem)return 1;
@@ -288,16 +288,19 @@ int calc_status(hwidmatch_t *hwidmatch,state_t *state)
 
     if(isMissing(hwidmatch->devicematch->device,cur_driver,state))return STATUS_MISSING;
 
-    int res=cmpdate(&hwidmatch->devicematch->driver->version,getdrp_drvversion(hwidmatch));
-    if(res<0)r+=STATUS_NEW;else
-    if(res>0)r+=STATUS_OLD;else
-        r+=STATUS_CURRENT;
+    if(hwidmatch->devicematch->driver&&getdrp_drvversion(hwidmatch))
+    {
+        int res=cmpdate(&hwidmatch->devicematch->driver->version,getdrp_drvversion(hwidmatch));
+        if(res<0)r+=STATUS_NEW;else
+        if(res>0)r+=STATUS_OLD;else
+            r+=STATUS_CURRENT;
 
-    score=calc_score_h(cur_driver,state);
-    res=cmpunsigned(score,hwidmatch->score);
-    if(res>0)r+=STATUS_BETTER;else
-    if(res<0)r+=STATUS_WORSE;else
-        r+=STATUS_SAME;
+        score=calc_score_h(cur_driver,state);
+        res=cmpunsigned(score,hwidmatch->score);
+        if(res>0)r+=STATUS_BETTER;else
+        if(res<0)r+=STATUS_WORSE;else
+            r+=STATUS_SAME;
+    }
 
     if(!hwidmatch->altsectscore)r+=STATUS_INVALID;
     return r;

@@ -48,7 +48,7 @@ static const char *kUnknownError = "Unknown Error";
 extern "C"
 {
 void _7z_total(long long  i);
-void _7z_setcomplited(long long i);
+int  _7z_setcomplited(long long i);
 }
 STDMETHODIMP CExtractCallbackConsole::SetTotal(UInt64 a)
 {
@@ -60,10 +60,7 @@ STDMETHODIMP CExtractCallbackConsole::SetTotal(UInt64 a)
 
 STDMETHODIMP CExtractCallbackConsole::SetCompleted(const UInt64 *a)
 {
-  _7z_setcomplited(*a);
-  if (NConsoleClose::TestBreakSignal())
-    return E_ABORT;
-  return S_OK;
+  return _7z_setcomplited(*a);
 }
 
 STDMETHODIMP CExtractCallbackConsole::AskOverwrite(
