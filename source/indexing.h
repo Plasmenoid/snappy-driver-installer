@@ -43,6 +43,20 @@ enum
 };
 
 //{ Misc
+#define LSTCNT 1000
+typedef struct _inflist_t
+{
+    driverpack_t *drp;
+    WCHAR pathinf[4096];
+    WCHAR inffile[4096];
+    char *adr;
+    int len;
+
+    HANDLE dataready;
+    HANDLE slotvacant;
+    int type;
+}inflist_t;
+
 typedef struct _sect_data_t
 {
     int ofs,len;
@@ -169,6 +183,9 @@ typedef struct _collection_t
 
     driverpack_t *driverpack_list;
     heap_t driverpack_handle;
+
+    inflist_t *inflist;
+    int pos_in,pos_out;
 }collection_t;
 //}
 
@@ -212,8 +229,8 @@ void driverpack_print(driverpack_t *drp);
 void collection_printstates(collection_t *col);
 void driverpack_genhashes(driverpack_t *drp);
 unsigned int __stdcall thread_indexinf(void *arg);
-void driverpack_indexinf_async(driverpack_t *drp,WCHAR const *pathinf,WCHAR const *inffile,char *adr,int len);
+void driverpack_indexinf_async(driverpack_t *drp,collection_t *col,WCHAR const *pathinf,WCHAR const *inffile,char *adr,int len);
 void driverpack_parsecat(driverpack_t *drp,WCHAR const *pathinf,WCHAR const *inffile,char *adr,int len);
 int  driverpack_genindex(driverpack_t *drp);
-void driverpack_indexinf1(driverpack_t *drp,WCHAR const *drpdir,WCHAR const *inffile,char *inf_base,int inf_len);
+void driverpack_indexinf_ansi(driverpack_t *drp,WCHAR const *drpdir,WCHAR const *inffile,char *inf_base,int inf_len);
 void driverpack_indexinf(driverpack_t *drp,WCHAR const *drpdir,WCHAR const *inffile,char *inf_base,int inf_len);

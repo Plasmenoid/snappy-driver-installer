@@ -219,18 +219,16 @@ void manager_clear(manager_t *manager)
     int i;
 
     log_err("Clear\n");
-    itembar=manager->items_list;
-    for(i=0;i<manager->items_handle.items;i++,itembar++)
+    itembar=&manager->items_list[RES_SLOTS];
+    for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
     {
         itembar->install_status=0;
-        itembar->isactive=0;
         itembar->percent=0;
     }
-    PostMessage(hMain,WM_DEVICECHANGE,7,0);
-
     manager->items_list[SLOT_EXTRACTING].isactive=0;
     manager->items_list[SLOT_RESTORE_POINT].install_status=STR_RESTOREPOINT;
     manager_setpos(manager);
+    PostMessage(hMain,WM_DEVICECHANGE,7,0);
 }
 
 void manager_testitembars(manager_t *manager)
@@ -890,6 +888,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
     int show_changes=manager_old->items_handle.items>20;
 
     if(statemode==STATEMODE_LOAD)show_changes=0;
+    //show_changes=1;
 
     t_old=manager_old->matcher->state->text;
     t_new=manager_new->matcher->state->text;
@@ -911,13 +910,19 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
             {
                 if(itembar_cmp(itembar_new,itembar_old,t_new,t_old))
                 {
-                    itembar_new->checked=itembar_old->checked;
-                    itembar_new->curpos=itembar_old->curpos;
-                    itembar_new->percent=itembar_old->percent;
+                    wcscpy(itembar_new->txt1,itembar_old->txt1);
                     itembar_new->install_status=itembar_old->install_status;
                     itembar_new->val1=itembar_old->val1;
                     itembar_new->val2=itembar_old->val2;
-                    wcscpy(itembar_new->txt1,itembar_old->txt1);
+                    itembar_new->percent=itembar_old->percent;
+
+                    //itembar_new->isactive=itembar_old->isactive;
+                    itembar_new->checked=itembar_old->checked;
+
+                    itembar_new->oldpos=itembar_old->oldpos;
+                    itembar_new->curpos=itembar_old->curpos;
+                    itembar_new->tagpos=itembar_old->tagpos;
+                    itembar_new->accel=itembar_old->accel;
 
                     itembar_old->isactive=9;
                     break;

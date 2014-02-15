@@ -1265,6 +1265,9 @@ LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 mousedown=1;
                 SetCapture(hwnd);
             }
+            else
+                mousedown=3;
+
             break;
 
         case WM_CANCELMODE:
@@ -1796,18 +1799,22 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
                 case ID_OPENLOGS:
                     ShellExecute(hwnd,L"explore",log_dir,0,0,SW_SHOW);
+                    InvalidateRect(hMain,0,0);
                     break;
 
                 case ID_SNAPSHOT:
                     snapshot();
+                    InvalidateRect(hMain,0,0);
                     break;
 
                 case ID_EXTRACT:
                     extractto();
+                    InvalidateRect(hMain,0,0);
                     break;
 
                 case ID_DRVDIR:
                     drvdir();
+                    InvalidateRect(hMain,0,0);
                     break;
 
                 case ID_SHOW_MISSING:

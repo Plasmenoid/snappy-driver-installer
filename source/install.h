@@ -16,7 +16,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define NUM_CLICKDATA 2
-//#define AUTOCLICKER_CONFIRM
+#define AUTOCLICKER_CONFIRM
 
 typedef struct _wnddata_t
 {
@@ -35,7 +35,7 @@ extern int needreboot;
 
 void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb);
 void _7z_total(long long i);
-void _7z_setcomplited(long long i);
+int _7z_setcomplited(long long i);
 unsigned int __stdcall thread_install(void *arg);
 
 void calcwnddata(wnddata_t *w,HWND hwnd);

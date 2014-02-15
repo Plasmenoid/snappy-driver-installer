@@ -38,7 +38,7 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
 #endif
         132,23
     },
-    // Windows 7 (64-bit)
+    // Windows 7 and Windows 8.1
     {
         500,270,
         500,270,
@@ -59,14 +59,19 @@ void _7z_total(long long i)
     total=i;
 }
 
-void _7z_setcomplited(long long i)
+#define S_OK    ((HRESULT)0x00000000L)
+#define E_ABORT ((HRESULT)0x80004004L)
+
+int _7z_setcomplited(long long i)
 {
     int j;
     int _totalitems=0;
     int _processeditems=0;
 
-    if(statemode==STATEMODE_EXIT)return;
+    if(statemode==STATEMODE_EXIT)return S_OK;
     itembar_t *itembar=manager_g->items_list;
+    if(installmode==MODE_STOPPING)return E_ABORT;
+    if(!manager_g->items_list[itembar_act].checked)return E_ABORT;
     for(j=0;j<manager_g->items_handle.items;j++,itembar++)
     if(j>=RES_SLOTS)
     {
@@ -79,6 +84,7 @@ void _7z_setcomplited(long long i)
     itembar_settext(manager_g,SLOT_EXTRACTING,L"",(int)(_processeditems*1000./_totalitems+d));
     manager_g->items_list[SLOT_EXTRACTING].val1=_processeditems;
     manager_g->items_list[SLOT_EXTRACTING].val2=_totalitems;
+    return S_OK;
 }
 
 void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
