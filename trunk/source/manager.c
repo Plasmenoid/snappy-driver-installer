@@ -85,8 +85,6 @@ void manager_filter(manager_t *manager,int options)
     int cnt[NUM_STATUS+1];
     int o1=options&FILTER_SHOW_ONE;
 
-    manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==STATEMODE_LOAD?0:1;
-    manager->items_list[SLOT_RESTORE_POINT].install_status=STR_RESTOREPOINT;
     for(i=RES_SLOTS;i<manager->items_handle.items;i++)
     {
         devicematch=manager->items_list[i].devicematch;
@@ -96,6 +94,8 @@ void manager_filter(manager_t *manager,int options)
         for(j=0;j<devicematch->num_matches;j++,itembar++)
         {
             itembar->isactive=0;
+
+            if(itembar->checked)itembar->isactive=1;
 
             if((options&FILTER_SHOW_INVALID)==0&&!isdrivervalid(itembar->hwidmatch))
                 continue;
@@ -147,6 +147,15 @@ void manager_filter(manager_t *manager,int options)
             if(options&FILTER_SHOW_NF_MISSING&&devicematch->status&STATUS_NF_MISSING)itembar->isactive=1;
         }
     }
+    i=0;
+    itembar=&manager->items_list[RES_SLOTS];
+    for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
+        if(itembar->isactive)i++;else itembar->checked=0;
+
+    manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==
+        STATEMODE_LOAD||i==0||(flags&FLAG_NORESTOREPOINT)?0:1;
+    if(!manager->items_list[SLOT_RESTORE_POINT].install_status)
+        manager->items_list[SLOT_RESTORE_POINT].install_status=STR_RESTOREPOINT;
 }
 
 void manager_print(manager_t *manager)
@@ -240,7 +249,7 @@ void manager_testitembars(manager_t *manager)
 
     manager_filter(manager,FILTER_SHOW_CURRENT|FILTER_SHOW_NEWER);
     wcscpy(drpext_dir,L"drpext");
-    manager->items_list[SLOT_EMPTY].percent=1;
+    manager->items_list[SLOT_EMPTY].curpos=1;
 
     for(i=0;i<manager->items_handle.items;i++,itembar++)
     if(i>SLOT_EMPTY&&i<RES_SLOTS)
@@ -314,13 +323,18 @@ void manager_expand(manager_t *manager,int index)
     {
         for(i=0;i<manager->items_handle.items;i++,itembar++)
             if(itembar->index==group)
-                itembar->isactive|=2;
+                {
+                    itembar->isactive|=2;
+                }
     }
     else
     {
         for(i=0;i<manager->items_handle.items;i++,itembar++)
             if(itembar->index==group)
+            {
                 itembar->isactive&=1;
+                if(itembar->checked)itembar->isactive|=1;
+            }
     }
 }
 
@@ -666,7 +680,25 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
             pos+=D(ITEM_TEXT_OFS_Y);
             if(installmode)
             {
-                wsprintf(bufw,L"%s (%d%s%d)",STR(instflag&INSTALLDRIVERS?STR_INST_INSTALL_ALL:STR_INST_EXTRACT_ALL),
+{
+
+    int _totalitems=0;
+    int _processeditems=0;
+    int j;
+    itembar_t *itembar1=&manager->items_list[RES_SLOTS];
+    for(j=RES_SLOTS;j<manager->items_handle.items;j++,itembar1++)
+    {
+        if(itembar1->checked||itembar1->install_status){_totalitems++;}
+        if(itembar1->install_status&&!itembar1->checked){_processeditems++;}
+    }
+    double d=(manager->items_list[itembar_act].percent)/_totalitems;
+    if(manager->items_list[itembar_act].checked==0)d=0;
+    manager->items_list[SLOT_EXTRACTING].percent=(int)(_processeditems*1000./_totalitems+d);
+    manager->items_list[SLOT_EXTRACTING].val1=_processeditems;
+    manager->items_list[SLOT_EXTRACTING].val2=_totalitems;
+}
+
+                wsprintf(bufw,L"%s (%d%s%d)",STR(instflag&INSTALLDRIVERS?STR_INST_INSTALLING:STR_EXTR_EXTRACTING),
                         manager->items_list[SLOT_EXTRACTING].val1+1,STR(STR_OF),
                         manager->items_list[SLOT_EXTRACTING].val2);
                 if(itembar_act==SLOT_RESTORE_POINT)wcscpy(bufw,STR(STR_REST_CREATING));
@@ -684,7 +716,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
                 wsprintf(bufw,L"%s",STR(needreboot?STR_INST_COMPLITED_RB:STR_INST_COMPLITED));
                 SetTextColor(hdc,D(boxindex[box_status(index)]+14));
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
-                wsprintf(bufw,L"%s",STR(STR_INSR_CLOSE));
+                wsprintf(bufw,L"%s",STR(STR_INST_CLOSE));
                 SetTextColor(hdc,D(boxindex[box_status(index)]+15));
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
             }
@@ -840,6 +872,7 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
     ScreenToClient(hField,&p);
     manager_hitscan(manager,p.x,p.y,&cur_i,&zone);
 
+    updatecur();
     for(i=manager->items_handle.items-1;i>=0;i--)
     {
         itembar=&manager->items_list[i];
@@ -863,6 +896,11 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
 
 int itembar_cmp(itembar_t *a,itembar_t *b,CHAR *ta,CHAR *tb)
 {
+    if(a->hwidmatch&&b->hwidmatch)
+    {
+        if(a->hwidmatch->HWID_index==b->hwidmatch->HWID_index)return 3;
+        return 0;
+    }
     if(wcslen((WCHAR*)(ta+a->devicematch->device->Driver))>0)
     {
         if(!wcscmp((WCHAR*)(ta+a->devicematch->device->Driver),(WCHAR*)(tb+b->devicematch->device->Driver)))return wcslen((WCHAR*)(ta+a->devicematch->device->Driver))+10;
@@ -873,9 +911,7 @@ int itembar_cmp(itembar_t *a,itembar_t *b,CHAR *ta,CHAR *tb)
         {
             if(!wcscmp((WCHAR*)(ta+a->devicematch->device->Devicedesc),(WCHAR*)(tb+b->devicematch->device->Devicedesc)))return 100+wcslen((WCHAR*)(ta+a->devicematch->device->Devicedesc));
         }
-
     }
-    if(a->hwidmatch&&b->hwidmatch&&a->hwidmatch->HWID_index==b->hwidmatch->HWID_index)return 3;
 
     return 0;
 }
@@ -893,7 +929,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
     t_old=manager_old->matcher->state->text;
     t_new=manager_new->matcher->state->text;
 
-    if(manager_old->items_list[SLOT_EMPTY].percent==1)
+    if(manager_old->items_list[SLOT_EMPTY].curpos==1)
     {
         return;
     }
@@ -904,6 +940,13 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
     for(i=RES_SLOTS;i<manager_new->items_handle.items;i++,itembar_new++)
     {
         itembar_old=&manager_old->items_list[RES_SLOTS];
+
+        if(itembar_act&&itembar_cmp(itembar_new,&manager_old->items_list[itembar_act],t_new,t_old))
+        {
+            log_err("Act %d -> %d\n",itembar_act,i);
+            itembar_act=i;
+        }
+
         for(j=RES_SLOTS;j<manager_old->items_handle.items;j++,itembar_old++)
         {
             if(itembar_old->isactive!=9)
@@ -932,13 +975,14 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
         if(show_changes)
         if(j==manager_old->items_handle.items)
         {
-            log_err("\nAdded   $%04d|%ws|",i,t_new+itembar_new->devicematch->device->Driver);
+            log_err("\nAdded   $%04d|%ws|%ws|",i,t_new+itembar_new->devicematch->device->Driver,
+                    t_new+itembar_new->devicematch->device->Devicedesc);
 
             if(itembar_new->hwidmatch)
             {
                 int limits[7];
                 memset(limits,0,sizeof(limits));
-                log("%d|\n",itembar_new->hwidmatch->HWID_index);
+                log_err("%d|\n",itembar_new->hwidmatch->HWID_index);
                 hwidmatch_print(itembar_new->hwidmatch,limits);
             }
             else
@@ -952,12 +996,13 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
     {
         if(itembar_old->isactive!=9)
         {
-            log_err("\nDeleted $%04d|%ws|",j,t_old+itembar_old->devicematch->device->Driver);
+            log_err("\nDeleted $%04d|%ws|%ws|",j,t_old+itembar_old->devicematch->device->Driver,
+                    t_old+itembar_old->devicematch->device->Devicedesc);
             if(itembar_old->hwidmatch)
             {
                 int limits[7];
                 memset(limits,0,sizeof(limits));
-                log("%d|\n",itembar_old->hwidmatch->HWID_index);
+                log_err("%d|\n",itembar_old->hwidmatch->HWID_index);
                 hwidmatch_print(itembar_old->hwidmatch,limits);
             }
             else

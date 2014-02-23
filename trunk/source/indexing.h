@@ -100,10 +100,10 @@ typedef struct _driverpack_t
     int type;
 
     collection_t *col;
-    FILE *fi;
+    FILE *fi;// deprecated
 
     hashtable_t section_list;
-    hashtable_t dup_list;
+    hashtable_t dup_list;// deprecated
     hashtable_t string_list;
     hashtable_t indexes;
     hashtable_t cat_list;
@@ -163,16 +163,17 @@ typedef struct _data_HWID_t // 8
     ofst HWID;
 }data_HWID_t;
 
-#define COLLECTION_FORCE_REINDEXING     1
-#define COLLECTION_USE_LZMA             2
-#define COLLECTION_PRINT_INDEX          4
-#define COLLECTION_PRINT_LINEAR_INDEX   8
-#define FLAG_NOGUI                     16
-#define FLAG_NOSLOWSYSINFO             32
-#define FLAG_DISABLEINSTALL            64
-#define FLAG_AUTOINSTALL              128
-#define FLAG_FAILSAFE                 256
-#define FLAG_AUTOCLOSE                512
+#define COLLECTION_FORCE_REINDEXING  0x0001
+#define COLLECTION_USE_LZMA          0x0002
+#define COLLECTION_PRINT_INDEX       0x0004
+//#define COLLECTION_PRINT_LINEAR_INDEX   0x0008
+#define FLAG_NOGUI                   0x0010
+#define FLAG_NOSLOWSYSINFO           0x0020
+#define FLAG_DISABLEINSTALL          0x0040
+#define FLAG_AUTOINSTALL             0x0080
+#define FLAG_FAILSAFE                0x0100
+#define FLAG_AUTOCLOSE               0x0200
+#define FLAG_NORESTOREPOINT          0x0400
 
 typedef struct _collection_t
 {

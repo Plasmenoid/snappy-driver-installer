@@ -72,7 +72,6 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define BUFLEN              4096
 
 // Mode
-#define STATEMODE_SAVE      1
 #define STATEMODE_LOAD      2
 #define STATEMODE_EXIT        3
 
@@ -153,6 +152,9 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define MODE_INSTALLING     1
 #define MODE_STOPPING       2
 #define MODE_SCANNING       3
+
+#define UF_DRPS          0x01
+#define UF_DEVICES       0x02
 //}
 
 //{ Global variables
@@ -167,6 +169,9 @@ extern int horiz_sh;
 // Manager
 extern manager_t *manager_g;
 extern int volatile installmode;
+extern int volatile updateflags;
+//extern int volatile blockupdate;
+extern CRITICAL_SECTION sync;
 
 // Settings
 extern WCHAR drpext_dir[BUFLEN];

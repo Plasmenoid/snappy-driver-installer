@@ -514,6 +514,7 @@ void collection_load(collection_t *col)
         itembar_settext(manager_g,SLOT_INFO,L"",0);
     driverpack_genhashes(&col->driverpack_list[0]);
     time_indexes=GetTickCount()-time_indexes;
+    flags&=~COLLECTION_FORCE_REINDEXING;
 
 //{thread
     driverpack_indexinf_async(0,col,L"",L"",0,0);
@@ -584,7 +585,7 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
                 int index=heap_allocitem_i(&col->driverpack_handle);
                 drp=&col->driverpack_list[index];
                 driverpack_init(drp,path,FindFileData.cFileName,col);
-                if(col->flags&COLLECTION_FORCE_REINDEXING||!driverpack_loadindex(drp))
+                if(flags&COLLECTION_FORCE_REINDEXING||!driverpack_loadindex(drp))
                 {
                     WCHAR bufw1[4096];
                     WCHAR bufw2[4096];
@@ -598,7 +599,7 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
                     drp=&col->driverpack_list[index];
                     driverpack_genindex(drp);
                 }
-            }
+            }else
             if(_wcsicmp(FindFileData.cFileName+len-4,L".inf")==0)
             {
                 FILE *f;
@@ -614,6 +615,23 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
                 wsprintf(buf,L"%s\\",path+wcslen(col->driverpack_dir)+1);
                 driverpack_indexinf(&col->driverpack_list[0],buf,FindFileData.cFileName,buft,len);
                 free(buft);
+            }else
+            if(_wcsicmp(FindFileData.cFileName+len-4,L".cat")==0)
+            {
+                FILE *f;
+                char *buft;
+                wsprintf(buf,L"%s\\%s",path,FindFileData.cFileName);
+                f=_wfopen(buf,L"rb");
+                fseek(f,0,SEEK_END);
+                len=ftell(f);
+                fseek(f,0,SEEK_SET);
+                buft=(char *)malloc(len);
+                fread(buft,len,1,f);
+                fclose(f);
+                wsprintf(buf,L"%s\\",path+wcslen(col->driverpack_dir)+1);
+//                driverpack_indexinf(&col->driverpack_list[0],buf,FindFileData.cFileName,buft,len);
+                driverpack_parsecat(&col->driverpack_list[0],buf,FindFileData.cFileName,buft,len);
+                free(buft);
             }
         }
     }
@@ -624,8 +642,7 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
 //{ Driverpack
 void driverpack_init(driverpack_t *drp,WCHAR const *driverpack_path,WCHAR const *driverpack_filename,collection_t *col)
 {
-    char buf[1024];
-    WCHAR filename[BUFLEN];
+    char buf[BUFLEN];
 
     drp->col=col;
 
@@ -637,7 +654,6 @@ void driverpack_init(driverpack_t *drp,WCHAR const *driverpack_path,WCHAR const 
 
     hash_init(&drp->string_list,ID_STRINGS,16,HASH_FLAG_KEYS_ARE_POINTERS|HASH_FLAG_STR_TO_LOWER);
     hash_init(&drp->section_list,ID_SECTIONS,16,HASH_FLAG_KEYS_ARE_POINTERS|HASH_FLAG_STR_TO_LOWER);
-    hash_init(&drp->dup_list,ID_DUP_LIST,512,0);
     hash_init(&drp->cat_list,ID_CAT_LIST,512,HASH_FLAG_STR_TO_LOWER);
 
     sprintf(buf,"%ws",driverpack_path);
@@ -646,19 +662,6 @@ void driverpack_init(driverpack_t *drp,WCHAR const *driverpack_path,WCHAR const 
     sprintf(buf,"%ws",driverpack_filename);
     drp->drpfilename=heap_memcpy(&drp->text_handle,driverpack_filename,wcslen(driverpack_filename)*2+2);
     log("init '%ws'\n",drp->text+drp->drpfilename);
-
-    if(col->flags&COLLECTION_PRINT_LINEAR_INDEX)
-    {
-        driverpack_getindexfilename(drp,col->index_linear_dir,L"txt",filename);
-        if(canWrite(filename))
-        {
-            drp->fi=_wfopen(filename,L"wt");
-            fprintf(drp->fi,"Version3;\n");
-        }
-        else
-            log_err("ERROR in driverpack_init(): Write-protected,'%ws'\n",filename);
-
-    }else drp->fi=0;
 }
 
 void driverpack_free(driverpack_t *drp)
@@ -671,12 +674,9 @@ void driverpack_free(driverpack_t *drp)
 
     hash_free(&drp->string_list);
     hash_free(&drp->section_list);
-    hash_free(&drp->dup_list);
     hash_free(&drp->cat_list);
 
     if(drp->indexes.size)hash_free(&drp->indexes);
-
-    if(drp->fi)fclose(drp->fi);
 }
 
 void driverpack_saveindex(driverpack_t *drp)
@@ -1216,7 +1216,6 @@ void driverpack_indexinf_ansi(driverpack_t *drp,WCHAR const *drpdir,WCHAR const 
 
     hashtable_t *string_list=&drp->string_list;
     hashtable_t *section_list=&drp->section_list;
-    hashtable_t *dup_list=&drp->dup_list;
 
     parse_init(&parse_info,drp);
     parse_init(&parse_info2,drp);
@@ -1411,7 +1410,6 @@ void driverpack_indexinf_ansi(driverpack_t *drp,WCHAR const *drpdir,WCHAR const 
                         sprintf(secttry,"%s",drp->text+strs[0]);
 
                     memcpy(&savedfind0,&section_list->finddata,sizeof(find_t));
-                    hash_clear(dup_list,1);
                     lnk2=(sect_data_t *)hash_find_str(section_list,secttry);
                     if(!lnk2&&cur_manuf->sections_n>1)log_index("ERROR: missing [%s] in %ws%ws\n",secttry,drpdir,inffile);
                     while(lnk2)
@@ -1540,33 +1538,12 @@ void driverpack_indexinf_ansi(driverpack_t *drp,WCHAR const *drpdir,WCHAR const 
                                 cur_HWID->HWID=heap_memcpyz_dup(&drp->text_handle,s1b,s1e-s1b);
                                 cur_HWID->inf_pos=hwid_pos++;
 
-                                sprintf(line,"%s%s",drp->text+cur_HWID->HWID,drp->text+cur_desc->desc);
+                                /*sprintf(line,"%s%s",drp->text+cur_HWID->HWID,drp->text+cur_desc->desc);
                                 if(drp->fi&&!hash_find_str(dup_list,line))
                                 {
                                     hash_add(dup_list,line,strlen(line),1,HASH_MODE_INTACT);
                                     trap_mode=0;
-
-                                    sprintf(line,
-                                        "%s\t"          // HWID
-                                        "%s\t%s\t"      // inffile
-                                        "%s%s%s\t"      // section
-                                        "%s%s"          // date
-                                        "%d.%d.%d.%d\t" // version
-                                        "%s\n",         // desc
-
-                                        drp->text+cur_HWID->HWID,
-                                        drp->text+cur_inffile->infpath,
-                                        drp->text+cur_inffile->inffilename,
-                                        drp->text+strs[0],
-                                        cur_manuf->sections_n>1?".":"",
-                                        cur_manuf->sections_n>1?drp->text+strs[cur_manuf->sections_n-1]:"",
-                                        date_s[0]?date_s:"Unknown",
-                                        ",",
-                                        cur_ver->v1,cur_ver->v2,cur_ver->v3,cur_ver->v4,
-                                        drp->text+cur_desc->desc);
-
-                                    fputs(line,drp->fi);
-                                }
+                                }*/
                             }
                         }
                         lnk2=(sect_data_t *)hash_findnext(section_list);
@@ -1597,6 +1574,5 @@ void driverpack_indexinf_ansi(driverpack_t *drp,WCHAR const *drpdir,WCHAR const 
 
     hash_clear(string_list,1);
     hash_clear(section_list,1);
-    hash_clear(dup_list,1);
 }
 //}
