@@ -382,8 +382,6 @@ int  state_load(state_t *state,const WCHAR *filename)
     if(!f)
     {
         log_err("FAILED(%ws)\n",errno_str());
-        //wsprintf(txt2,L"Failed to load: %s\n",errno_str());
-        //itembar_settext(manager_g,SLOT_SNAPSHOT,txt2,0);
         return 0;
     }
 
@@ -397,14 +395,12 @@ int  state_load(state_t *state,const WCHAR *filename)
 
     if(memcmp(buf,VER_MARKER,3))
     {
-        log("FAILED(invalid snapshot)\n");
-        //itembar_settext(manager_g,SLOT_SNAPSHOT,L"Failed to load: invalid snapshot",0);
+        log_err("FAILED(invalid snapshot)\n");
         return 0;
     }
     if(version!=VER_STATE)
     {
-        log("FAILED(invalid version)\n");
-        //itembar_settext(manager_g,SLOT_SNAPSHOT,L"Failed to load: invalid version",0);
+        log_err("FAILED(invalid version)\n");
         return 0;
     }
 
@@ -611,7 +607,9 @@ void state_getsysinfo_slow(state_t *state)
     wsprintf(filename,L"%s\\output.txt",state->text+state->temp);
     wsprintf(buf,L"/c wmic baseboard GET /value >\"%s\\output.txt\"",state->text+state->temp);
     time_test=GetTickCount()-time_test;
+    log_err("1");
     RunSilent(L"cmd",buf,SW_HIDE,1);
+    log_err("2");
     f=_wfopen(filename,L"rb");
     if(!f)return;
     fseek(f,0,SEEK_END);
@@ -622,6 +620,7 @@ void state_getsysinfo_slow(state_t *state)
     fclose(f);
     buf[sz/2]=0;
 
+    log_err("3");
     pw=wcsstr(buf,L"Manufacturer=");
     if(!pw)return;
     pw+=13;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
@@ -631,8 +630,10 @@ void state_getsysinfo_slow(state_t *state)
     *pe=pchar;pw=wcsstr(buf,L"Model=");pw+=6;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
     state->model=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
 
+    log_err("4");
     _wremove(filename);
     time_sysinfo=GetTickCount()-time_sysinfo;
+    log_err("5");
 }
 
 void state_scandevices(state_t *state)
@@ -1034,7 +1035,9 @@ void isnotebook_a(state_t *state)
 
     if((battery->BatteryFlag&128)==0)
     {
-        if(iswide(min_x,min_y))
+        if(!buf[0])
+            isLaptop=1;
+        else if(iswide(min_x,min_y))
             isLaptop=min_v<=18?1:0;
         else
             isLaptop=0;

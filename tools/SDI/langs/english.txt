@@ -147,7 +147,6 @@ STR_CONT_HWID_SEARCH    = "Search the Internet for HardwareID"
 STR_CONT_HWID_CLIP      = "Copy a HardwareID to clipboard"
 
 // Misc
-STR_RESTOREPOINT        = "Create a restore point"
 STR_OPENSNAPSHOT        = "Snapshot files (*.snp)\0*.snp\0All files\0*.*\0\0"
 STR_EXTRACTFOLDER       = "Please select the destination folder."
 
@@ -199,15 +198,21 @@ STR_INST_INSTALL        = "Installing... (stage 2 of 2)"
 STR_INST_OK             = "Successfully installed"
 STR_INST_REBOOT         = "Successfully installed (system restart required)"
 STR_INST_FAILED         = "Failed to install, error "
-STR_INST_EXTRACT_ALL    = "Extracting... "
-STR_INST_INSTALL_ALL    = "Installing... "
-STR_INST_STOPPING       = "Stopping installation"
-STR_INDEXING            = "Indexing..."
-STR_NEEDREBOOT          = "You need to restart your PC for changes to take effect"
+
+STR_INST_INSTALLING     = "Installing... "
 STR_INST_COMPLITED      = "Installation completed"
 STR_INST_COMPLITED_RB   = "Installation completed (system restart required)"
-STR_INSR_CLOSE          = "(Click here to close hide installed drivers)"
+STR_INST_CLOSE          = "(Click here to close hide installed drivers)"
+
+STR_EXTR_EXTRACTING     = "Extracting... "
+STR_EXTR_OK             = "Successfully extracted"
+STR_EXTR_FAILED         = "Failed to extract, error "
+
+STR_INST_STOPPING       = "Stopping installation"
+STR_INDEXING            = "Indexing..."
 STR_OF                  = " of "
+
+STR_RESTOREPOINT        = "Create a restore point"
 STR_REST_CREATING       = "Creating a restore point..."
 STR_REST_CREATED        = "Restore point created"
 STR_REST_FAILED         = "Failed to create a restore point"

@@ -35,6 +35,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
+				<Option parameters="-disableinstall" />
 				<Compiler>
 					<Add option="-pg" />
 					<Add option="-g" />

@@ -29,10 +29,12 @@ typedef struct _wnddata_t
     int btn_wx,btn_wy;
 }wnddata_t;
 
+extern long long ar_total,ar_proceed;
 extern int instflag;
 extern int itembar_act;
 extern int needreboot;
 
+void updatecur();
 void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb);
 void _7z_total(long long i);
 int _7z_setcomplited(long long i);

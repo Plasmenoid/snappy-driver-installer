@@ -72,8 +72,10 @@ manager_t *manager_g=&manager_v[0];
 int manager_active=0;
 int bundle_display=1;
 int bundle_shadow=0;
-int firstrun=1;
 int volatile installmode=MODE_NONE;
+int volatile updateflags=0;
+int volatile blockupdate=0;
+CRITICAL_SECTION sync;
 
 // Window
 HINSTANCE ghInst;
@@ -116,7 +118,8 @@ WCHAR drpext_dir[BUFLEN]=L"";
 WCHAR index_dir [BUFLEN]=L"indexes\\SDI";
 WCHAR output_dir[BUFLEN]=L"indexes\\SDI\\txt";
 WCHAR data_dir  [BUFLEN]=L"tools\\SDI";
-WCHAR log_dir   [BUFLEN]=L"logs";
+WCHAR logO_dir  [BUFLEN]=L"logs";
+WCHAR log_dir   [BUFLEN];
 
 WCHAR state_file[BUFLEN]=L"untitled.snp";
 WCHAR finish    [BUFLEN]=L"";
@@ -154,7 +157,7 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-index_dir:"))   wcscpy(index_dir,pr+11);else
         if( wcsstr(pr,L"-output_dir:"))  wcscpy(output_dir,pr+12);else
         if( wcsstr(pr,L"-data_dir:"))    wcscpy(data_dir,pr+10);else
-        if( wcsstr(pr,L"-log_dir:"))     wcscpy(log_dir,pr+9);else
+        if( wcsstr(pr,L"-log_dir:"))     wcscpy(logO_dir,pr+9);else
         if( wcsstr(pr,L"-finish_cmd:"))  wcscpy(finish,pr+12);else
         if( wcsstr(pr,L"-finishrb_cmd:"))wcscpy(finish_rb,pr+14);else
         if( wcsstr(pr,L"-lang:"))        wcscpy(curlang,pr+6);else
@@ -162,6 +165,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-expertmode"))   expertmode=1;else
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
+        if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
         if(!wcscmp(pr,L"-autoclose"))    flags|=FLAG_AUTOCLOSE;else
         if(!wcscmp(pr,L"-7z"))
         {
@@ -191,7 +195,6 @@ void settings_parse(const WCHAR *str,int ind)
         }
         else
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else
-        if(!wcscmp(pr,L"-index_lr"))     flags|=COLLECTION_PRINT_LINEAR_INDEX|COLLECTION_FORCE_REINDEXING;else
         if(!wcscmp(pr,L"-index_hr"))     flags|=COLLECTION_PRINT_INDEX;else
         if(!wcscmp(pr,L"-lzma"))         flags|=COLLECTION_USE_LZMA;else
         if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI;else
@@ -200,7 +203,6 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-disableinstall"))flags|=FLAG_DISABLEINSTALL;else
         if(!wcscmp(pr,L"-failsafe"))     flags|=FLAG_FAILSAFE;else
         if( wcsstr(pr,L"-verbose:"))     log_verbose=_wtoi(pr+9);else
-        if( wcsstr(pr,L"-ss:"))          {wcscpy(state_file,pr+4);statemode=STATEMODE_SAVE;}else
         if( wcsstr(pr,L"-ls:"))          {wcscpy(state_file,pr+4);statemode=STATEMODE_LOAD;}else
         if(!wcscmp(pr,L"-a:32"))         virtual_arch_type=32;else
         if(!wcscmp(pr,L"-a:64"))         virtual_arch_type=64;else
@@ -234,12 +236,13 @@ void settings_save()
               "\"-finish_cmd:%s\" \"-finishrb_cmd:%s\" "
               "-filters:%d \"-lang:%s\" \"-theme:%s\" ",
             drp_dir,index_dir,output_dir,
-            data_dir,log_dir,
+            data_dir,logO_dir,
             finish,finish_rb,
             filters,curlang,curtheme);
 
     if(license)fwprintf(f,L"-license ");
     if(expertmode)fwprintf(f,L"-expertmode ");
+    if(flags&FLAG_NORESTOREPOINT)fwprintf(f,L"-norestorepnt ");
     fclose(f);
 }
 
@@ -292,6 +295,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 
     settings_load();
     settings_parse(GetCommandLineW(),1);
+    ExpandEnvironmentStrings(logO_dir,log_dir,BUFLEN);
 #ifdef CONSOLE_MODE
     flags|=FLAG_NOGUI;
     license=1;
@@ -305,7 +309,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         return ret_global;
     }
     log_start(log_dir);
-    signal(SIGSEGV,SignalHandler);
+    //signal(SIGSEGV,SignalHandler);
     ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:SW_HIDE);
 
     if(log_verbose&LOG_VERBOSE_ARGS)
@@ -324,6 +328,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         log_err("  autoinstall=%d\n",flags&FLAG_AUTOINSTALL?1:0);
         log_err("  autoclose=%d\n",flags&FLAG_AUTOCLOSE?1:0);
         log_err("  failsafe=%d\n",flags&FLAG_FAILSAFE?1:0);
+        log_err("  norestorepnt=%d\n",flags&FLAG_NORESTOREPOINT?1:0);
         log_err("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
 #endif
         log("\n");
@@ -337,7 +342,6 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     mkdir_r(index_dir);
     mkdir_r(output_dir);
 #endif
-    //*(int*)(0)=0;
     bundle_init(&bundle[0]);
     bundle_init(&bundle[1]);
     manager_init(&manager_v[0],&bundle[bundle_display].matcher);
@@ -371,7 +375,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     time_total=GetTickCount()-time_total;
     log_times();
     log_stop();
-    signal(SIGSEGV,SIG_DFL);
+    //signal(SIGSEGV,SIG_DFL);
     ShowWindow(GetConsoleWindow(),SW_SHOWNOACTIVATE);
 
 #ifdef CONSOLE_MODE
@@ -389,7 +393,7 @@ unsigned int __stdcall thread_scandevices(void *arg)
     bundle_t *bundle=(bundle_t *)arg;
     state_t *state=&bundle->state;
 
-    if(statemode==0||statemode==STATEMODE_SAVE)
+    if(statemode==0)
         state_scandevices(state);else
     if(statemode==STATEMODE_LOAD)
         state_load(state,state_file);
@@ -401,7 +405,7 @@ unsigned int __stdcall thread_loadindexes(void *arg)
     bundle_t *bundle=(bundle_t *)arg;
     collection_t *collection=&bundle->collection;
 
-    if(manager_g->items_list[SLOT_EMPTY].percent==1)*drpext_dir=0;
+    if(manager_g->items_list[SLOT_EMPTY].curpos==1)*drpext_dir=0;
     collection->driverpack_dir=*drpext_dir?drpext_dir:drp_dir;
     printf("'%ws'\n",collection->driverpack_dir);
     collection_load(collection);
@@ -412,6 +416,7 @@ unsigned int __stdcall thread_loadall(void *arg)
 {
     bundle_t *bundle=(bundle_t *)arg;
 
+    InitializeCriticalSection(&sync);
     do
     {
         int cancel_update=0;
@@ -442,7 +447,6 @@ unsigned int __stdcall thread_loadall(void *arg)
         else
         {
             printf("*** FINISH ***\n\n");
-            printf("*** FINISH ***(%ws)\n\n",STR(STR_EXPERT));
             bundle_display^=1;
             bundle_shadow^=1;
         }
@@ -453,6 +457,7 @@ unsigned int __stdcall thread_loadall(void *arg)
         WaitForSingleObject(event,INFINITE);
         //printf("%ld\n",GetTickCount()-t);
     }while(!exitflag);
+    DeleteCriticalSection(&sync);
     return 0;
 }
 //}
@@ -495,33 +500,35 @@ void bundle_lowprioirity(bundle_t *bundle)
 {
     time_startup=GetTickCount()-time_startup;
 
+    log_err("lowprioirity.[");
     if(!(flags&FLAG_NOSLOWSYSINFO)&&statemode!=STATEMODE_LOAD)
     {
         state_getsysinfo_slow(&bundle->state);
         InvalidateRect(hMain,0,0);
+        log_err("6");
     }
 
     collection_printstates(&bundle->collection);
     state_print(&bundle->state);
     matcher_print(&bundle->matcher);
     manager_print(manager_g);
+    log_err("7");
 
     collection_save(&bundle->collection);
-
-    if(!firstrun)return;
-    if(statemode==STATEMODE_SAVE)
-        state_save(&bundle->state,state_file);
-    else
     {
         WCHAR filename[BUFLEN];
+        gen_timestamp();
         wsprintf(filename,L"%s\\%s_state.snp",log_dir,timestamp);
         state_save(&bundle->state,filename);
     }
+    log_err("8");
 
     if(flags&COLLECTION_PRINT_INDEX)
+    {
         collection_print(&bundle->collection);
-
-    firstrun=0;
+        flags&=~COLLECTION_PRINT_INDEX;
+    }
+    log_err("9]\n");
 }
 //}
 
@@ -1242,6 +1249,11 @@ LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
     {
         case WM_MOUSELEAVE:
             ShowWindow(hPopup,SW_HIDE);
+            InvalidateRect(hwnd,0,0);
+            break;
+
+        case WM_ACTIVATE:
+            InvalidateRect(hwnd,0,0);
             break;
 
         case WM_MOUSEMOVE:
@@ -1504,40 +1516,26 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             {
                 bundle_t *bb=(bundle_t *)wParam;
                 manager_t *manager_prev=manager_g;
+
+                log_err("{Sync");
+                EnterCriticalSection(&sync);
+                log_err("...\n");
                 manager_active++;
                 manager_active&=1;
                 manager_g=&manager_v[manager_active];
 
                 manager_g->matcher=&bb->matcher;
-                for(i=0;i<RES_SLOTS;i++)
-                {
-                    manager_g->items_list[i].isactive=0;
-                    manager_g->items_list[i].curpos=manager_prev->items_list[i].curpos;
-                }
+                memcpy(manager_g->items_list,manager_prev->items_list,sizeof(itembar_t)*RES_SLOTS);
                 manager_populate(manager_g);
                 manager_filter(manager_g,filters);
                 manager_g->items_list[SLOT_SNAPSHOT].isactive=statemode==STATEMODE_LOAD?1:0;
                 manager_g->items_list[SLOT_DPRDIR].isactive=*drpext_dir?1:0;
-                //manager_g->items_list[SLOT_RESTORE_POINT].curpos=manager_prev->items_list[SLOT_RESTORE_POINT].curpos;
-                manager_g->items_list[SLOT_RESTORE_POINT].isactive=statemode==STATEMODE_LOAD?0:1;
-                manager_g->items_list[SLOT_RESTORE_POINT].install_status=STR_RESTOREPOINT;
-                //manager_g->items_list[SLOT_EXTRACTING].curpos=manager_prev->items_list[SLOT_EXTRACTING].curpos;
-                manager_g->items_list[SLOT_INDEXING].install_status=manager_prev->items_list[SLOT_INDEXING].install_status;
-                manager_g->items_list[SLOT_EXTRACTING].install_status=manager_prev->items_list[SLOT_EXTRACTING].install_status;
-                manager_g->items_list[SLOT_EXTRACTING].isactive=manager_prev->items_list[SLOT_EXTRACTING].isactive;
-                manager_g->items_list[SLOT_EXTRACTING].percent=manager_prev->items_list[SLOT_EXTRACTING].percent;
-                viruscheck(L"",0,0);
                 manager_restorepos(manager_g,manager_prev);
+                viruscheck(L"",0,0);
                 manager_setpos(manager_g);
+                log_err("}Sync\n");
+                LeaveCriticalSection(&sync);
                 //log_err("Mode in WM_BUNDLEREADY: %d\n",installmode);
-                //if(installmode==MODE_SCANNING)
-                {
-                    WCHAR filename[BUFLEN];
-
-                    gen_timestamp();
-                    wsprintf(filename,L"%s\\%s_state.snp",log_dir,timestamp);
-                    state_save(manager_g->matcher->state,filename);
-                }
                 if(flags&FLAG_AUTOINSTALL)
                 {
                     int cnt=0;
@@ -1598,7 +1596,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             return DefWindowProc(hwnd,uMsg,wParam,lParam);
 
         case WM_DEVICECHANGE:
-            if(installmode==MODE_INSTALLING)break;
+            //if(installmode==MODE_INSTALLING)break;
             printf("WM_DEVICECHANGE(%x,%x)\n",wParam,lParam);
             SetEvent(event);
             break;
@@ -1613,7 +1611,6 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             manager_setpos(manager_g);
 
             InvalidateRect(hMain,0,0);
-            //redrawfield();
 
             GetWindowRect(hwnd,&rect);
             mainx_w=rect.right-rect.left;
@@ -1799,22 +1796,18 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
                 case ID_OPENLOGS:
                     ShellExecute(hwnd,L"explore",log_dir,0,0,SW_SHOW);
-                    InvalidateRect(hMain,0,0);
                     break;
 
                 case ID_SNAPSHOT:
                     snapshot();
-                    InvalidateRect(hMain,0,0);
                     break;
 
                 case ID_EXTRACT:
                     extractto();
-                    InvalidateRect(hMain,0,0);
                     break;
 
                 case ID_DRVDIR:
                     drvdir();
-                    InvalidateRect(hMain,0,0);
                     break;
 
                 case ID_SHOW_MISSING:
@@ -2049,12 +2042,6 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
                 si.fMask=SIF_POS;
                 SetScrollInfo(hwnd,SB_VERT,&si,TRUE);
 
-                /*si.fMask=SIF_ALL;
-                si.nPos=0;
-                GetScrollInfo(hwnd,SB_HORZ,&si);
-                si.nPos+=mousex-x;
-                si.fMask=SIF_POS;
-                SetScrollInfo(hwnd,SB_HORZ,&si,TRUE);*/
                 mousex=x;
                 mousey=y;
                 redrawfield();
@@ -2145,7 +2132,6 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
 
                 case FLOATING_ABOUT:
                     SelectObject(canvasPopup.hdcMem,hFont);
-//                    popup_sysinfo(manager_g,canvasPopup.hdcMem);
                     popup_about(canvasPopup.hdcMem);
                     break;
 

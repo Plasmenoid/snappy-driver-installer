@@ -18,7 +18,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "main.h"
 
 //{ Global vars
-long long total;
+long long ar_total,ar_proceed;
 int itembar_act;
 WCHAR extractdir[BUFLEN];
 int instflag;
@@ -56,34 +56,28 @@ volatile int clicker_flag;
 
 void _7z_total(long long i)
 {
-    total=i;
+    ar_total=i;
 }
 
 #define S_OK    ((HRESULT)0x00000000L)
 #define E_ABORT ((HRESULT)0x80004004L)
 
+void updatecur()
+{
+    if(manager_g->items_list[itembar_act].install_status==0)manager_g->items_list[itembar_act].percent=0;else
+    manager_g->items_list[itembar_act].percent=
+        (int)(ar_proceed*(instflag&INSTALLDRIVERS&&
+        manager_g->items_list[itembar_act].checked?900.:1000.)/ar_total);
+}
+
 int _7z_setcomplited(long long i)
 {
-    int j;
-    int _totalitems=0;
-    int _processeditems=0;
-
     if(statemode==STATEMODE_EXIT)return S_OK;
-    itembar_t *itembar=manager_g->items_list;
     if(installmode==MODE_STOPPING)return E_ABORT;
     if(!manager_g->items_list[itembar_act].checked)return E_ABORT;
-    for(j=0;j<manager_g->items_handle.items;j++,itembar++)
-    if(j>=RES_SLOTS)
-    {
-        if(itembar->checked||itembar->install_status){_totalitems++;}
-        if(itembar->install_status&&!itembar->checked){_processeditems++;}
-    }
 
-    itembar_settext(manager_g,itembar_act,L"",(int)(i*(instflag&INSTALLDRIVERS?900.:1000.)/total));
-    double d=(manager_g->items_list[itembar_act].percent)/_totalitems;
-    itembar_settext(manager_g,SLOT_EXTRACTING,L"",(int)(_processeditems*1000./_totalitems+d));
-    manager_g->items_list[SLOT_EXTRACTING].val1=_processeditems;
-    manager_g->items_list[SLOT_EXTRACTING].val2=_totalitems;
+    ar_proceed=i;
+    redrawfield();
     return S_OK;
 }
 
@@ -153,16 +147,17 @@ unsigned int __stdcall thread_install(void *arg)
     STATEMGRSTATUS pSMgrStatus;
     HINSTANCE hinstLib=0;
     MYPROC ProcAdd;
-    manager_t *manager=manager_g;
     int r=0;
+
+    EnterCriticalSection(&sync);
 
     // Prepare extract dir
     installmode=MODE_INSTALLING;
-    manager->items_list[SLOT_EXTRACTING].isactive=1;
-    manager_setpos(manager);
+    manager_g->items_list[SLOT_EXTRACTING].isactive=1;
+    manager_setpos(manager_g);
 
     // Restore point
-    if(manager->items_list[SLOT_RESTORE_POINT].checked)
+    if(manager_g->items_list[SLOT_RESTORE_POINT].checked)
     {
         hinstLib=LoadLibrary(L"SrClient.dll");
         ProcAdd=(MYPROC)GetProcAddress(hinstLib,"SRSetRestorePointW");
@@ -179,10 +174,12 @@ unsigned int __stdcall thread_install(void *arg)
             pRestorePtSpec.dwRestorePtType=DEVICE_DRIVER_INSTALL;
             wcscpy(pRestorePtSpec.szDescription,L"Installed drivers");
             r=0;
+            LeaveCriticalSection(&sync);
             if(flags&FLAG_DISABLEINSTALL)
                 Sleep(2000);
             else
                 r=ProcAdd(&pRestorePtSpec,&pSMgrStatus);
+            EnterCriticalSection(&sync);
 
             log_err("rt rest point{ %d(%d)\n",r,pSMgrStatus.nStatus);
             manager_g->items_list[SLOT_RESTORE_POINT].percent=1000;
@@ -203,11 +200,11 @@ unsigned int __stdcall thread_install(void *arg)
         }
         redrawfield();
         if(hinstLib)FreeLibrary(hinstLib);
-        manager->items_list[SLOT_RESTORE_POINT].checked=0;
+        manager_g->items_list[SLOT_RESTORE_POINT].checked=0;
     }
 goaround:
-    itembar=manager->items_list;
-    for(i=0;i<manager->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
+    itembar=manager_g->items_list;
+    for(i=0;i<manager_g->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
         if(i>=RES_SLOTS&&itembar->checked&&itembar->isactive&&itembar->hwidmatch)
     {
         int unpacked=0;
@@ -241,7 +238,7 @@ goaround:
                     getdrp_infpath(hwidmatch));
 
             itembar1=itembar;
-            for(j=i;j<manager->items_handle.items;j++,itembar1++)
+            for(j=i;j<manager_g->items_handle.items;j++,itembar1++)
                 if(itembar1->checked&&
                    !wcscmp(getdrp_packpath(hwidmatch),getdrp_packpath(itembar1->hwidmatch))&&
                    !wcscmp(getdrp_packname(hwidmatch),getdrp_packname(itembar1->hwidmatch)))
@@ -250,9 +247,14 @@ goaround:
                 if(!wcsstr(cmd,buf))wcscat(cmd,buf);
             }
             log_err("Extracting via '%ws'\n",cmd);
-            itembar->install_status=STR_INST_EXTRACT;
+            itembar->install_status=instflag&INSTALLDRIVERS?STR_INST_EXTRACT:STR_EXTR_EXTRACTING;
             redrawfield();
+            LeaveCriticalSection(&sync);
             r=Extract7z(cmd);
+            EnterCriticalSection(&sync);
+            itembar=&manager_g->items_list[itembar_act];
+            //itembar->percent=manager_g->items_list[SLOT_EMPTY].percent;
+            hwidmatch=itembar->hwidmatch;
             log_err("Ret %d\n",r);
         }
 
@@ -269,13 +271,31 @@ goaround:
             itembar->install_status=STR_INST_INSTALL;
             redrawfield();
 
+            LeaveCriticalSection(&sync);
             if(installmode==MODE_INSTALLING)
                 driver_install(hwid,inf,&ret,&needrb);
             else
                 ret=1;
+            EnterCriticalSection(&sync);
+            itembar=&manager_g->items_list[itembar_act];
 
             log_err("Ret %d(%X),%d\n\n",ret,ret,needrb);
-
+            if(installmode==MODE_STOPPING||!itembar->checked)
+            {
+                itembar->checked=0;
+                itembar->install_status=0;
+                itembar->percent=0;
+                if(installmode==MODE_STOPPING)
+                {
+                    manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
+                    manager_selectnone(manager_g);
+                }
+                wsprintf(buf,L" /c rd /s /q \"%s\"",extractdir);
+                RunSilent(L"cmd",buf,SW_HIDE,1);
+            }
+            else
+            {
+                itembar->checked=0;
             if(ret==1)
             {
                 if(needrb)
@@ -290,16 +310,6 @@ goaround:
             }
 
             if(needrb)needreboot=1;
-            if(installmode==MODE_STOPPING||!itembar->checked)
-            {
-                itembar->percent=0;
-                itembar->checked=0;
-                itembar->install_status=0;
-            }
-            else
-            {
-                itembar->checked=0;
-                itembar->percent=0;
             }
             redrawfield();
         }
@@ -307,15 +317,14 @@ goaround:
         {
             itembar->checked=0;
             itembar->install_status=0;
-            itembar->percent=0;
             redrawfield();
         }
     }
     if(installmode==MODE_INSTALLING)
     {
-        itembar=manager_g->items_list;
-        for(j=0;j<manager_g->items_handle.items;j++,itembar++)
-            if(j>=RES_SLOTS&&itembar->checked)
+        itembar=&manager_g->items_list[RES_SLOTS];
+        for(j=RES_SLOTS;j<manager_g->items_handle.items;j++,itembar++)
+            if(itembar->checked)
                 goto goaround;
     }
     // Instalation competed by this point
@@ -327,8 +336,8 @@ goaround:
         *p=0;
         log_err("%ws\n",extractdir);
         ShellExecute(0,L"explore",extractdir,0,0,SW_SHOW);
-        manager->items_list[SLOT_EXTRACTING].isactive=0;
-        manager_setpos(manager);
+        manager_g->items_list[SLOT_EXTRACTING].isactive=0;
+        manager_setpos(manager_g);
     }
     if(instflag&INSTALLDRIVERS)
     {
@@ -343,8 +352,8 @@ goaround:
     }
     if(installmode==MODE_INSTALLING)installmode=MODE_SCANNING;
     log_err("Mode:%d\n",installmode);
+    LeaveCriticalSection(&sync);
     PostMessage(hMain,WM_DEVICECHANGE,7,0);
-    manager->items_list[SLOT_EXTRACTING].percent=1000;
     redrawfield();
 
     return 0;
