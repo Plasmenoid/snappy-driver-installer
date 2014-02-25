@@ -1596,7 +1596,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             return DefWindowProc(hwnd,uMsg,wParam,lParam);
 
         case WM_DEVICECHANGE:
-            //if(installmode==MODE_INSTALLING)break;
+            if(installmode==MODE_INSTALLING)break;
             printf("WM_DEVICECHANGE(%x,%x)\n",wParam,lParam);
             SetEvent(event);
             break;

@@ -62,12 +62,30 @@ void _7z_total(long long i)
 #define S_OK    ((HRESULT)0x00000000L)
 #define E_ABORT ((HRESULT)0x80004004L)
 
+int showpercent(int a)
+{
+    switch(a)
+    {
+        case STR_INST_EXTRACT:
+        case STR_INST_INSTALL:
+        case STR_INST_INSTALLING:
+        case STR_EXTR_EXTRACTING:
+        case STR_REST_CREATING:
+            return 1;
+
+        default:
+            return 0;
+    }
+}
+
 void updatecur()
 {
-    if(manager_g->items_list[itembar_act].install_status==0)manager_g->items_list[itembar_act].percent=0;else
-    manager_g->items_list[itembar_act].percent=
-        (int)(ar_proceed*(instflag&INSTALLDRIVERS&&
-        manager_g->items_list[itembar_act].checked?900.:1000.)/ar_total);
+    if(showpercent(manager_g->items_list[itembar_act].install_status))
+        manager_g->items_list[itembar_act].percent=
+            (int)(ar_proceed*(instflag&INSTALLDRIVERS&&
+            manager_g->items_list[itembar_act].checked?900.:1000.)/ar_total);
+    else
+        manager_g->items_list[itembar_act].percent=0;
 }
 
 int _7z_setcomplited(long long i)
@@ -90,7 +108,7 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
     int size;
     FILE *f;
 
-    *ret=3;*needrb=0;
+    *ret=1;*needrb=1;
     wsprintf(cmd,L"%s\\install64.exe",extractdir);
     if(!PathFileExists(cmd))
     {
@@ -152,7 +170,10 @@ unsigned int __stdcall thread_install(void *arg)
     EnterCriticalSection(&sync);
 
     // Prepare extract dir
+
     installmode=MODE_INSTALLING;
+    manager_g->items_list[SLOT_EXTRACTING].install_status=
+        instflag&INSTALLDRIVERS?STR_INST_INSTALLING:STR_EXTR_EXTRACTING;
     manager_g->items_list[SLOT_EXTRACTING].isactive=1;
     manager_setpos(manager_g);
 
@@ -173,7 +194,7 @@ unsigned int __stdcall thread_install(void *arg)
             pRestorePtSpec.dwEventType=BEGIN_SYSTEM_CHANGE;
             pRestorePtSpec.dwRestorePtType=DEVICE_DRIVER_INSTALL;
             wcscpy(pRestorePtSpec.szDescription,L"Installed drivers");
-            r=0;
+            r=1;
             LeaveCriticalSection(&sync);
             if(flags&FLAG_DISABLEINSTALL)
                 Sleep(2000);
@@ -201,6 +222,7 @@ unsigned int __stdcall thread_install(void *arg)
         redrawfield();
         if(hinstLib)FreeLibrary(hinstLib);
         manager_g->items_list[SLOT_RESTORE_POINT].checked=0;
+        manager_g->items_list[SLOT_RESTORE_POINT].percent=0;
     }
 goaround:
     itembar=manager_g->items_list;
@@ -296,20 +318,21 @@ goaround:
             else
             {
                 itembar->checked=0;
-            if(ret==1)
-            {
-                if(needrb)
-                    itembar->install_status=STR_INST_REBOOT;
+                itembar->percent=0;
+                if(ret==1)
+                {
+                    if(needrb)
+                        itembar->install_status=STR_INST_REBOOT;
+                    else
+                        itembar->install_status=STR_INST_OK;
+                }
                 else
-                    itembar->install_status=STR_INST_OK;
-            }
-            else
-            {
-                itembar->install_status=STR_INST_FAILED;
-                itembar->val1=ret;
-            }
+                {
+                    itembar->install_status=STR_INST_FAILED;
+                    itembar->val1=ret;
+                }
 
-            if(needrb)needreboot=1;
+                if(needrb)needreboot=1;
             }
             redrawfield();
         }
@@ -348,9 +371,17 @@ goaround:
     if(installmode==MODE_STOPPING)
     {
         flags&=~FLAG_AUTOINSTALL;
+        manager_g->items_list[SLOT_EXTRACTING].percent=0;
+        manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
         installmode=MODE_NONE;
     }
-    if(installmode==MODE_INSTALLING)installmode=MODE_SCANNING;
+    if(installmode==MODE_INSTALLING)
+    {
+        manager_g->items_list[SLOT_EXTRACTING].install_status=
+            needreboot?STR_INST_COMPLITED_RB:STR_INST_COMPLITED;
+        installmode=MODE_SCANNING;
+    }
+    itembar_act=0;
     log_err("Mode:%d\n",installmode);
     LeaveCriticalSection(&sync);
     PostMessage(hMain,WM_DEVICECHANGE,7,0);
@@ -429,9 +460,6 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
 
                 if(!memcmp(&w,&clicktbl[i],sizeof(wnddata_t)))
                 {
-                    //SetActiveWindow(hwnd);
-                    //SendMessage(hwnd,BM_CLICK,0,0);
-
                     GetWindowInfo(GetParent(hwnd),&pwi);
                     SetCursorPos(pwi.rcClient.left+w.btn_x+w.btn_wx/2,pwi.rcClient.top+w.btn_y+w.btn_wy/2);
                     int x=w.btn_x+w.btn_wx/2;
@@ -439,6 +467,8 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
                     int pos=(int)((y<<16)|x);
                     SendMessage(GetParent(hwnd),WM_LBUTTONDOWN,0,pos);
                     SendMessage(GetParent(hwnd),WM_LBUTTONUP,  0,pos);
+                    SetActiveWindow(hwnd);
+                    SendMessage(hwnd,BM_CLICK,0,0);
                     log_err("Autoclicker fired\n");
                 }
             }
