@@ -474,6 +474,43 @@ int box_status(int index)
         case SLOT_SNAPSHOT:
             return BOX_DRVITEM_IF;
 
+        case SLOT_RESTORE_POINT:
+            switch(itembar->install_status)
+            {
+                case STR_REST_CREATING:
+                    return BOX_DRVITEM_D0;
+
+                case STR_REST_CREATED:
+                    return BOX_DRVITEM_D1;
+
+                case STR_REST_FAILED:
+                    return BOX_DRVITEM_DE;
+
+                default:
+                    break;
+            }
+            break;
+
+        case SLOT_EXTRACTING:
+            switch(itembar->install_status)
+            {
+                case STR_EXTR_EXTRACTING:
+                case STR_INST_INSTALLING:
+                    return BOX_DRVITEM_D0;
+
+                case STR_INST_COMPLITED:
+                    return BOX_DRVITEM_D1;
+
+                case STR_INST_COMPLITED_RB:
+                    return BOX_DRVITEM_D2;
+
+                case STR_INST_STOPPING:
+                    return BOX_DRVITEM_DE;
+
+                default:break;
+            }
+            break;
+
         default:
             break;
     }
@@ -646,8 +683,8 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
     {
         //printf("%d\n",itembar->percent);
         int a=BOX_PROGR;
-        if(index==SLOT_EXTRACTING&&installmode==MODE_STOPPING)a=BOX_PROGR_S;
-        if(index>=RES_SLOTS&&(!itembar->checked||installmode==MODE_STOPPING))a=BOX_PROGR_S;
+        //if(index==SLOT_EXTRACTING&&installmode==MODE_STOPPING)a=BOX_PROGR_S;
+        //if(index>=RES_SLOTS&&(!itembar->checked||installmode==MODE_STOPPING))a=BOX_PROGR_S;
         box_draw(hdc,x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX)*itembar->percent/1000.,pos+D(DRVITEM_WY),a);
     }
 
@@ -691,18 +728,28 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
         if(itembar1->checked||itembar1->install_status){_totalitems++;}
         if(itembar1->install_status&&!itembar1->checked){_processeditems++;}
     }
-    double d=(manager->items_list[itembar_act].percent)/_totalitems;
-    if(manager->items_list[itembar_act].checked==0)d=0;
-    manager->items_list[SLOT_EXTRACTING].percent=(int)(_processeditems*1000./_totalitems+d);
-    manager->items_list[SLOT_EXTRACTING].val1=_processeditems;
-    manager->items_list[SLOT_EXTRACTING].val2=_totalitems;
+    if(_totalitems)
+    {
+        double d=(manager->items_list[itembar_act].percent)/_totalitems;
+        if(manager->items_list[itembar_act].checked==0)d=0;
+        manager->items_list[SLOT_EXTRACTING].percent=(int)(_processeditems*1000./_totalitems+d);
+        manager->items_list[SLOT_EXTRACTING].val1=_processeditems;
+        manager->items_list[SLOT_EXTRACTING].val2=_totalitems;
+    }
 }
 
-                wsprintf(bufw,L"%s (%d%s%d)",STR(instflag&INSTALLDRIVERS?STR_INST_INSTALLING:STR_EXTR_EXTRACTING),
+                if(installmode==MODE_INSTALLING)
+                {
+                wsprintf(bufw,L"%s (%d%s%d)",STR(itembar->install_status),
                         manager->items_list[SLOT_EXTRACTING].val1+1,STR(STR_OF),
                         manager->items_list[SLOT_EXTRACTING].val2);
-                if(itembar_act==SLOT_RESTORE_POINT)wcscpy(bufw,STR(STR_REST_CREATING));
-                if(installmode==MODE_STOPPING)wcscpy(bufw,STR(STR_INST_STOPPING));
+
+                }
+                else
+                    if(itembar->install_status)wcscpy(bufw,STR(itembar->install_status));
+
+                //if(itembar_act==SLOT_RESTORE_POINT)wcscpy(bufw,STR(STR_REST_CREATING));
+                //if(installmode==MODE_STOPPING)wcscpy(bufw,STR(STR_INST_STOPPING));
                 SetTextColor(hdc,D(boxindex[box_status(index)]+14));
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
                 if(itembar_act>=RES_SLOTS)
@@ -713,7 +760,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
                 }
             }else
             {
-                wsprintf(bufw,L"%s",STR(needreboot?STR_INST_COMPLITED_RB:STR_INST_COMPLITED));
+                wsprintf(bufw,L"%s",STR(itembar->install_status));
                 SetTextColor(hdc,D(boxindex[box_status(index)]+14));
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
                 wsprintf(bufw,L"%s",STR(STR_INST_CLOSE));
