@@ -193,7 +193,7 @@ STR_EMPTYDRP            = "Put driverpack or unpacked drivers in the following f
 STR_CLOSE_DRPEXT        = "(Click here to return to the default folder)"
 
 // Progressbar
-STR_INST_EXTRACT        = "Extracting... (stage 1 of 2)"
+STR_INST_EXTRACT        = "Extracting... %d%% (stage 1 of 2)"
 STR_INST_INSTALL        = "Installing... (stage 2 of 2)"
 STR_INST_OK             = "Successfully installed"
 STR_INST_REBOOT         = "Successfully installed (system restart required)"
@@ -208,7 +208,7 @@ STR_EXTR_EXTRACTING     = "Extracting... "
 STR_EXTR_OK             = "Successfully extracted"
 STR_EXTR_FAILED         = "Failed to extract, error "
 
-STR_INST_STOPPING       = "Stopping installation"
+STR_INST_STOPPING       = "Installation stopped"
 STR_INDEXING            = "Indexing..."
 STR_OF                  = " of "
 
@@ -216,3 +216,7 @@ STR_RESTOREPOINT        = "Create a restore point"
 STR_REST_CREATING       = "Creating a restore point..."
 STR_REST_CREATED        = "Restore point created"
 STR_REST_FAILED         = "Failed to create a restore point"
+
+STR_HINT_STOPINST       = "Click here to cancel installation"
+STR_HINT_STOPINST       = "Click here to stop extracting"
+STR_HINT_DRIVER         = "Click here to show alternate drivers\nHold spacebar to display info about alternate drivers"

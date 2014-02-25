@@ -930,14 +930,14 @@ void drawrevision(HDC hdcMem,int y)
     TextOut(hdcMem,D(PANEL_OFSX),y-20,buf,wcslen(buf));
 }
 
-void drawpopup(int itembar,WCHAR *str,int i,int type,int x,int y,HWND hwnd)
+void drawpopup(int itembar,WCHAR *str,int type,int x,int y,HWND hwnd)
 {
     POINT p={x,y};
     HMONITOR hMonitor;
     MONITORINFO mi;
 
     if(type==FLOATING_DRIVER&&floating_itembar<0)type=FLOATING_NONE;
-    if(type==FLOATING_TOOLTIP&&(i<0||!*str))type=FLOATING_NONE;
+    if(type==FLOATING_TOOLTIP&&!*str)type=FLOATING_NONE;
 
     ClientToScreen(hwnd,&p);
     floating_str=str;
@@ -1216,7 +1216,7 @@ void gui(int nCmd)
                 {
                     if(msg.wParam==VK_CONTROL||msg.wParam==VK_SPACE)
                     {
-                        drawpopup(-1,0,-1,FLOATING_NONE,0,0,hField);
+                        drawpopup(-1,0,FLOATING_NONE,0,0,hField);
                     }
                     if(msg.wParam==VK_CONTROL)ctrl_down=0;
                     if(msg.wParam==VK_SPACE)  space_down=0;
@@ -1571,7 +1571,6 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 }
                 else
                     if(installmode==MODE_SCANNING)installmode=MODE_NONE;
-
             }
             break;
 
@@ -1644,9 +1643,9 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             i=panel_hitscan(x,y);
 
             if(i<0&&y>rect.bottom-20&&x<D(PANEL_WX))
-                drawpopup(-1,L"",0,FLOATING_ABOUT,x,y,hwnd);
+                drawpopup(-1,L"",FLOATING_ABOUT,x,y,hwnd);
             else
-                drawpopup(-1,i>=0?STR(panelitems[i].str_id+1):L"",i,i>0&&i<4?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
+                drawpopup(-1,i>=0?STR(panelitems[i].str_id+1):L"",i>0&&i<4?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
 
             if(panel_lasti!=i)InvalidateRect(hwnd,0,0);
             panel_lasti=i;
@@ -2050,9 +2049,9 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             {
                 manager_hitscan(manager_g,x,y,&floating_itembar,&i);
                 if(i==0&&(floating_itembar>=RES_SLOTS||floating_itembar<0))
-                    drawpopup(floating_itembar,0,-1,FLOATING_DRIVER,x,y,hField);
+                    drawpopup(floating_itembar,0,FLOATING_DRIVER,x,y,hField);
                 else
-                    drawpopup(-1,0,-1,FLOATING_NONE,0,0,hField);
+                    drawpopup(-1,0,FLOATING_NONE,0,0,hField);
             }
             {
                 int a,b;

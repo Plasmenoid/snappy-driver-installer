@@ -56,6 +56,7 @@ volatile int clicker_flag;
 
 void _7z_total(long long i)
 {
+    ar_proceed=0;
     ar_total=i;
 }
 
@@ -75,6 +76,33 @@ int showpercent(int a)
 
         default:
             return 0;
+    }
+}
+
+void updateoverall(manager_t *manager)
+{
+    int _totalitems=0;
+    int _processeditems=0;
+    int j;
+
+    if(installmode==MODE_NONE)
+    {
+        manager->items_list[SLOT_EXTRACTING].percent=0;
+        return;
+    }
+    itembar_t *itembar1=&manager->items_list[RES_SLOTS];
+    for(j=RES_SLOTS;j<manager->items_handle.items;j++,itembar1++)
+    {
+        if(itembar1->checked||itembar1->install_status){_totalitems++;}
+        if(itembar1->install_status&&!itembar1->checked){_processeditems++;}
+    }
+    if(_totalitems)
+    {
+        double d=(manager->items_list[itembar_act].percent)/_totalitems;
+        if(manager->items_list[itembar_act].checked==0)d=0;
+        manager->items_list[SLOT_EXTRACTING].percent=(int)(_processeditems*1000./_totalitems+d);
+        manager->items_list[SLOT_EXTRACTING].val1=_processeditems;
+        manager->items_list[SLOT_EXTRACTING].val2=_totalitems;
     }
 }
 
@@ -108,7 +136,7 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
     int size;
     FILE *f;
 
-    *ret=1;*needrb=1;
+    *ret=1;*needrb=0;
     wsprintf(cmd,L"%s\\install64.exe",extractdir);
     if(!PathFileExists(cmd))
     {
@@ -234,6 +262,7 @@ goaround:
 
         memset(limits,0,sizeof(limits));
         itembar_act=i;
+        ar_proceed=0;
         hwidmatch_t *hwidmatch=itembar->hwidmatch;
         log_err("Installing $%04d\n",i);
         hwidmatch_print(hwidmatch,limits);
@@ -368,6 +397,7 @@ goaround:
         RunSilent(L"cmd",buf,SW_HIDE,1);
     }
 
+    manager_g->items_list[SLOT_EXTRACTING].percent=0;
     if(installmode==MODE_STOPPING)
     {
         flags&=~FLAG_AUTOINSTALL;
