@@ -177,6 +177,7 @@ extern CRITICAL_SECTION sync;
 extern WCHAR drpext_dir[BUFLEN];
 extern WCHAR data_dir  [BUFLEN];
 extern WCHAR state_file[BUFLEN];
+extern int filters;
 extern int flags;
 extern int statemode;
 extern int virtual_os_version;
@@ -258,7 +259,7 @@ void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int i);
 void drawcheckbox(HDC hdc,int x,int y,int wx,int wy,int checked,int active);
 void drawrect(HDC hdc,int x1,int y1,int x2,int y2,int color1,int color2,int w,int r);
 void drawrevision(HDC hdcMem,int y);
-void drawpopup(int itembar,WCHAR *str,int i,int type,int x,int y,HWND hwnd);
+void drawpopup(int itembar,WCHAR *str,int type,int x,int y,HWND hwnd);
 
 // Canvas
 void canvas_init(canvas_t *canvas);

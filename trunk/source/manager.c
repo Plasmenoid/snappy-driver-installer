@@ -95,7 +95,7 @@ void manager_filter(manager_t *manager,int options)
         {
             itembar->isactive=0;
 
-            if(itembar->checked)itembar->isactive=1;
+            if(itembar->checked||itembar->install_status)itembar->isactive=1;
 
             if((options&FILTER_SHOW_INVALID)==0&&!isdrivervalid(itembar->hwidmatch))
                 continue;
@@ -236,6 +236,7 @@ void manager_clear(manager_t *manager)
     }
     manager->items_list[SLOT_EXTRACTING].isactive=0;
     manager->items_list[SLOT_RESTORE_POINT].install_status=STR_RESTOREPOINT;
+    manager_filter(manager,filters);
     manager_setpos(manager);
     PostMessage(hMain,WM_DEVICECHANGE,7,0);
 }
@@ -717,27 +718,6 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
             pos+=D(ITEM_TEXT_OFS_Y);
             if(installmode)
             {
-{
-
-    int _totalitems=0;
-    int _processeditems=0;
-    int j;
-    itembar_t *itembar1=&manager->items_list[RES_SLOTS];
-    for(j=RES_SLOTS;j<manager->items_handle.items;j++,itembar1++)
-    {
-        if(itembar1->checked||itembar1->install_status){_totalitems++;}
-        if(itembar1->install_status&&!itembar1->checked){_processeditems++;}
-    }
-    if(_totalitems)
-    {
-        double d=(manager->items_list[itembar_act].percent)/_totalitems;
-        if(manager->items_list[itembar_act].checked==0)d=0;
-        manager->items_list[SLOT_EXTRACTING].percent=(int)(_processeditems*1000./_totalitems+d);
-        manager->items_list[SLOT_EXTRACTING].val1=_processeditems;
-        manager->items_list[SLOT_EXTRACTING].val2=_totalitems;
-    }
-}
-
                 if(installmode==MODE_INSTALLING)
                 {
                 wsprintf(bufw,L"%s (%d%s%d)",STR(itembar->install_status),
@@ -746,10 +726,8 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
 
                 }
                 else
-                    if(itembar->install_status)wcscpy(bufw,STR(itembar->install_status));
+                    if(itembar->install_status)wsprintf(bufw,STR(itembar->install_status),itembar->percent);
 
-                //if(itembar_act==SLOT_RESTORE_POINT)wcscpy(bufw,STR(STR_REST_CREATING));
-                //if(installmode==MODE_STOPPING)wcscpy(bufw,STR(STR_INST_STOPPING));
                 SetTextColor(hdc,D(boxindex[box_status(index)]+14));
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
                 if(itembar_act>=RES_SLOTS)
@@ -846,16 +824,27 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
                 // Available driver status
                 SetTextColor(hdc,D(boxindex[box_status(index)]+15));
                 str_status(bufw,itembar);
-                if(itembar->install_status)
+                switch(itembar->install_status)
                 {
-                    wsprintf(bufw,itembar->install_status==STR_INST_FAILED?L"%s %X":L"%s",
-                             STR(itembar->install_status),itembar->val1);
-//                    if(itembar->install_status==STR_INST_INSTALL&&(installmode==2||!itembar->checked))
-//                    if(installmode==2&&!itembar->checked)
-                    if(itembar->install_status==STR_INST_EXTRACT&&(installmode==MODE_STOPPING||!itembar->checked))
-                        wcscpy(bufw,STR(STR_INST_STOPPING));
+                    case STR_INST_FAILED:
+                        wsprintf(bufw,L"%s %X",STR(itembar->install_status),itembar->val1);
+                        break;
 
-                    SetTextColor(hdc,0);
+                    case STR_INST_EXTRACT:
+                        SetTextColor(hdc,0);//todo
+                        wsprintf(bufw,STR(STR_INST_EXTRACT),(itembar->percent+100)/10);
+                        break;
+
+                    case STR_EXTR_EXTRACTING:
+                        SetTextColor(hdc,0);//todo
+                        wsprintf(bufw,L"%s %d%%",STR(STR_EXTR_EXTRACTING),itembar->percent/10);
+                        break;
+
+                    case 0:
+                        break;
+
+                    default:
+                        wcscpy(bufw,STR(itembar->install_status));
                 }
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
             }
@@ -920,6 +909,7 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
     manager_hitscan(manager,p.x,p.y,&cur_i,&zone);
 
     updatecur();
+    updateoverall(manager);
     for(i=manager->items_handle.items-1;i>=0;i--)
     {
         itembar=&manager->items_list[i];
@@ -1006,7 +996,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
                     itembar_new->val2=itembar_old->val2;
                     itembar_new->percent=itembar_old->percent;
 
-                    //itembar_new->isactive=itembar_old->isactive;
+                    itembar_new->isactive=itembar_old->isactive;
                     itembar_new->checked=itembar_old->checked;
 
                     itembar_new->oldpos=itembar_old->oldpos;
