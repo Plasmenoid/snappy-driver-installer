@@ -65,7 +65,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 
 // Misc
 //#define CONSOLE_MODE
-#define APPTITLE            L"Snappy Driver Installer v0.1a"
+#define APPTITLE            L"Snappy Driver Installer v0.1"
 #define VER_MARKER          "SDW"
 #define VER_STATE           0x101
 #define VER_INDEX           0x202
@@ -215,7 +215,7 @@ typedef struct _bundle_t
 // Main
 void settings_parse(const WCHAR *str,int ind);
 void settings_save();
-void settings_load();
+int  settings_load(WCHAR *filename);
 void SignalHandler(int signum);
 void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam);
 //int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd);
@@ -273,6 +273,7 @@ void panel_draw(HDC hdc);
 
 // GUI
 void gui(int nCmd);
+void checktimer(WCHAR *str,long long t,int uMsg);
 LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
 LRESULT CALLBACK WindowGraphProcedure(HWND,UINT,WPARAM,LPARAM);

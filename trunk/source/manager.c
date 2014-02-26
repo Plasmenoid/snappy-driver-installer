@@ -150,7 +150,9 @@ void manager_filter(manager_t *manager,int options)
     i=0;
     itembar=&manager->items_list[RES_SLOTS];
     for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
-        if(itembar->isactive)i++;else itembar->checked=0;
+        if(itembar->isactive&&itembar->hwidmatch)i++;else itembar->checked=0;
+
+    manager->items_list[SLOT_NOUPDATES].isactive=(i==0&&statemode==0)?1:0;
 
     manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==
         STATEMODE_LOAD||i==0||(flags&FLAG_NORESTOREPOINT)?0:1;
@@ -470,7 +472,7 @@ int box_status(int index)
         case SLOT_VIRUS_HIDDEN:
             return BOX_DRVITEM_VI;
 
-        case SLOT_INFO:
+        case SLOT_NODRIVERS:
         case SLOT_DPRDIR:
         case SLOT_SNAPSHOT:
             return BOX_DRVITEM_IF;
@@ -641,7 +643,8 @@ int manager_animate(manager_t *manager)
         if(itembar->accel<0&&pos<itembar->tagpos)pos=itembar->tagpos;
         itembar->curpos=pos;
     }
-    return chg;
+    return chg||
+        (installmode==MODE_NONE&&manager->items_list[SLOT_EXTRACTING].install_status);
 }
 
 int groupsize(manager_t *manager,int index)
@@ -676,8 +679,11 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
     SelectObject(hdc,hFont);
 
     hrgn=CreateRectRgn(x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY));
+    int cl=((zone>=0)?1:0);
+    if(index==SLOT_EXTRACTING&&itembar->install_status&&installmode==MODE_NONE)
+        cl=((GetTickCount()-manager->animstart)/200)%2;
     box_draw(hdc,x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY),
-             box_status(index)+((zone>=0)?1:0));
+             box_status(index)+cl);
     SelectClipRgn(hdc,hrgn);
 
     if(itembar->percent)
@@ -747,7 +753,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
             }
             break;
 
-        case SLOT_INFO:
+        case SLOT_NODRIVERS:
             pos+=D(ITEM_TEXT_OFS_Y);
             wsprintf(bufw,L"%s",STR(STR_EMPTYDRP));
             SetTextColor(hdc,D(boxindex[box_status(index)]+14));
@@ -755,6 +761,13 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
             wsprintf(bufw,L"%s",manager->matcher->col->driverpack_dir);
             SetTextColor(hdc,D(boxindex[box_status(index)]+15));
             TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+            break;
+
+        case SLOT_NOUPDATES:
+            pos+=D(ITEM_TEXT_OFS_Y);
+            wsprintf(bufw,L"%s",STR(manager->items_handle.items>RES_SLOTS?STR_NOUPDATES:STR_INITIALIZING));
+            SetTextColor(hdc,D(boxindex[box_status(index)]+14));
+            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y)/2,bufw,wcslen(bufw));
             break;
 
         case SLOT_SNAPSHOT:

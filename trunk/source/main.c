@@ -246,16 +246,17 @@ void settings_save()
     fclose(f);
 }
 
-void settings_load()
+int  settings_load(WCHAR *filename)
 {
     FILE *f;
     WCHAR buf[BUFLEN];
 
-    f=_wfopen(L"settings.cfg",L"rt");
-    if(!f)return;
+    f=_wfopen(filename,L"rt");
+    if(!f)return 0;
     fgetws(buf,BUFLEN,f);
     settings_parse(buf,0);
     fclose(f);
+    return 1;
 }
 
 void SignalHandler(int signum)
@@ -289,11 +290,14 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     HANDLE thr;
     HMODULE backtrace;
 
+    ShowWindow(GetConsoleWindow(),SW_HIDE);
     time_startup=time_total=GetTickCount();
     backtrace=LoadLibraryA("backtrace.dll");
     ghInst=hInst;
 
-    settings_load();
+    if(!settings_load(L"settings.cfg"))
+        settings_load(L"tools\\SDI\\settings.cfg");
+
     settings_parse(GetCommandLineW(),1);
     ExpandEnvironmentStrings(logO_dir,log_dir,BUFLEN);
 #ifdef CONSOLE_MODE
@@ -309,6 +313,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         return ret_global;
     }
     log_start(log_dir);
+
     //signal(SIGSEGV,SignalHandler);
     ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:SW_HIDE);
 
@@ -593,7 +598,7 @@ void theme_refresh()
         return;
     }
     GetWindowRect(hMain,&rect);
-    MoveWindow(hMain,rect.left,rect.top,D(MAINWND_WX),D(MAINWND_WY)+1,0);
+    MoveWindow(hMain,rect.left,rect.top,D(MAINWND_WX),D(MAINWND_WY)+1,1);
     MoveWindow(hMain,rect.left,rect.top,D(MAINWND_WX),D(MAINWND_WY),1);
 }
 
@@ -1045,6 +1050,7 @@ void canvas_end(canvas_t *canvas)
             canvas->hdcMem,
             canvas->ps.rcPaint.left,canvas->ps.rcPaint.top,
             SRCCOPY);
+    SelectClipRgn(canvas->hdcMem,0);
     if(!r)log_err("ERROR in canvas_end(): failed BitBlt\n");
     r=DeleteObject(canvas->clipping);
     if(!r)log_err("ERROR in canvas_end(): failed DeleteObject\n");
@@ -1144,6 +1150,7 @@ void gui(int nCmd)
     wcx.hIcon=          LoadIcon(ghInst,MAKEINTRESOURCE(IDI_ICON1));
     wcx.hCursor=        (HCURSOR)LoadCursor(0,IDC_ARROW);
     wcx.lpszClassName=  classMain;
+    wcx.hbrBackground=  (HBRUSH)(COLOR_WINDOW+1);
     if(!RegisterClassEx(&wcx))
     {
         log_err("ERROR in gui(): failed to register '%ws' class\n",wcx.lpszClassName);
@@ -1175,7 +1182,8 @@ void gui(int nCmd)
 
     if(license)
     {
-        hMain=CreateWindowEx(WS_EX_LAYERED|WS_EX_COMPOSITED,
+//        hMain=CreateWindowEx(/*WS_EX_LAYERED|WS_EX_COMPOSITED(*/0,
+        hMain=CreateWindowEx(0,
                             classMain,
                             APPTITLE,
                             WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN,
@@ -1263,7 +1271,7 @@ LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 if(mousedown==2||abs(mousex-x)>2||abs(mousey-y)>2)
                 {
                     mousedown=2;
-                    MoveWindow(hMain,rect.left+x-mousex,rect.top+y-mousey,mainx_w,mainy_w,0);
+                    MoveWindow(hMain,rect.left+x-mousex,rect.top+y-mousey,mainx_w,mainy_w,1);
                 }
             }
             return 1;
@@ -1435,6 +1443,11 @@ void escapeAmpUrl(WCHAR *buf,WCHAR *source)
     *p1=0;
 }
 
+void checktimer(WCHAR *str,long long t,int uMsg)
+{
+    if(GetTickCount()-t>40)log_err("GUI lag in %ws[%X]: %ld\n",str,uMsg,GetTickCount()-t);
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
     RECT rect;
@@ -1442,6 +1455,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
     int i,j,f;
     int wp;
+    long long timer=GetTickCount();
 
     x=LOWORD(lParam);
     y=HIWORD(lParam);
@@ -1837,8 +1851,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             break;
 
         default:
-            return DefWindowProc(hwnd,uMsg,wParam,lParam);
+            i=DefWindowProc(hwnd,uMsg,wParam,lParam);
+            checktimer(L"MainD",timer,uMsg);
+            return i;
     }
+    checktimer(L"Main",timer,uMsg);
     return 0;
 }
 
@@ -1924,6 +1941,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
     SCROLLINFO si;
     RECT rect;
     short x,y;
+    long long timer=GetTickCount();
     int i;
 
     x=LOWORD(lParam);
@@ -2064,8 +2082,11 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             break;
 
         default:
-            return DefWindowProc(hwnd,message,wParam,lParam);
+            i=DefWindowProc(hwnd,message,wParam,lParam);
+            checktimer(L"ListD",timer,message);
+            return i;
     }
+    checktimer(L"List",timer,message);
     return 0;
 }
 
@@ -2140,6 +2161,9 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
 
             canvas_end(&canvasPopup);
             break;
+
+        case WM_ERASEBKGND:
+            return 1;
 
         default:
             return DefWindowProc(hwnd,message,wParam,lParam);
