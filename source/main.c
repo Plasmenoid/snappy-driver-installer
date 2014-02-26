@@ -1471,7 +1471,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             hField=CreateWindowM(classField,NULL,hwnd,0);
 
             // Popup
-            hPopup=CreateWindowEx(WS_EX_COMPOSITED|WS_EX_LAYERED|WS_EX_NOACTIVATE|WS_EX_TOPMOST|WS_EX_TRANSPARENT,
+            hPopup=CreateWindowEx(/*WS_EX_COMPOSITED|WS_EX_LAYERED|*/WS_EX_NOACTIVATE|WS_EX_TOPMOST|WS_EX_TRANSPARENT,
                 classPopup,L"",WS_POPUP,
                 0,0,0,0,hwnd,(HMENU)0,ghInst,0);
 
