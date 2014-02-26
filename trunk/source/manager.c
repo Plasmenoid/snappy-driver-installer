@@ -477,6 +477,9 @@ int box_status(int index)
         case SLOT_SNAPSHOT:
             return BOX_DRVITEM_IF;
 
+        case SLOT_NOUPDATES:
+            return manager_g->items_handle.items>RES_SLOTS?BOX_NOUPDATES:BOX_DRVITEM_IF;
+
         case SLOT_RESTORE_POINT:
             switch(itembar->install_status)
             {
