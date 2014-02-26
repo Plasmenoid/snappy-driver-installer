@@ -111,7 +111,7 @@ STR_SYSINF_32BIT        = "32-bit"
 STR_SYSINF_64BIT        = "64-bit"
 
 // About
-STR_ABOUT_VER           = "v0.1a"
+STR_ABOUT_VER           = "v0.1"
 STR_ABOUT_DEV_TITLE     = "Developer: "
 STR_ABOUT_DEV_LIST      = "BadPointer"
 STR_ABOUT_TESTERS_TITLE = "Testers: "
@@ -191,6 +191,9 @@ STR_VIRUS_HIDDEN        = "There are hidden folders in the root folder"
 STR_CLOSE_SNAPSHOT      = "(Click here to stop emulation)"
 STR_EMPTYDRP            = "Put driverpack or unpacked drivers in the following folder"
 STR_CLOSE_DRPEXT        = "(Click here to return to the default folder)"
+STR_NOUPDATES           = "Drivers are up to date"
+STR_INITIALIZING        = "Initializing..."
+
 
 // Progressbar
 STR_INST_EXTRACT        = "Extracting... %d%% (stage 1 of 2)"

@@ -82,7 +82,7 @@ void log_start(WCHAR *log_dir)
     WCHAR filename[BUFLEN];
 
     setlocale(LC_ALL,"");
-    system("chcp 1251");
+    //system("chcp 1251");
 
     gen_timestamp();
 
@@ -91,9 +91,10 @@ void log_start(WCHAR *log_dir)
     if(!canWrite(filename))
     {
         log_err("ERROR in log_start(): Write-protected,'%ws'\n",filename);
-        GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
-        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
-        wcscat(log_dir,L"\\SDI");
+//        GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
+//        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
+        GetEnvironmentVariable(L"TEMP",log_dir,BUFLEN);
+        wcscat(log_dir,L"\\SDI_logs");
         wsprintf(filename,L"%s\\%s_log.txt",log_dir,timestamp);
     }
 
@@ -102,9 +103,10 @@ void log_start(WCHAR *log_dir)
     if(!logfile)
     {
         log_err("ERROR in log_start(): Write-protected,'%ws'\n",filename);
-        GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
-        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
-        wcscat(log_dir,L"\\SDI");
+//        GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
+//        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
+        GetEnvironmentVariable(L"TEMP",log_dir,BUFLEN);
+        wcscat(log_dir,L"\\SDI_logs");
         wsprintf(filename,L"%s\\%s_log.txt",log_dir,timestamp);
         mkdir_r(log_dir);
         logfile=_wfopen(filename,L"wb");

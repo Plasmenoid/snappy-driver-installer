@@ -195,20 +195,21 @@ int vault_findvar(entry_t *a,int num,WCHAR *str)
 {
     int i;
     WCHAR *p;
+    WCHAR c;
 
     while(*str&&(*str==L' '||*str==L'\t'))str++;
+    p=str;
+    while(*p&&(*p!=L' '&&*p!=L'\t'))p++;
+    c=*p;
+    *p=0;
 
-    for(i=0;i<num;i++)
-        if(wcsstr(str,a[i].name))
+    for(i=0;i<num;i++)if(!wcscmp(str,a[i].name))
     {
-        if(wcsstr(str,a[i].name)!=str)continue;
-        p=wcsstr(str,a[i].name)+wcslen(a[i].name);
-        if(*p==L' '||*p==L'\t'||*p==0)
-        {
-            return i;
-        }
+        *p=c;
+        return i;
     }
 
+    *p=c;
     return -1;
 }
 
@@ -329,7 +330,6 @@ void vault_loadfromfile(WCHAR *filename,entry_t *entry,int num,WCHAR **origdata)
     }
     data[sz]=0;
     vault_parse(data,entry,num,origdata);
-    //printf("}%ws (%d)\n",filename,sz);
 }
 
 void vault_loadfromres(int id,entry_t *entry,int num,WCHAR **origdata)
@@ -400,25 +400,21 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
     langauto[0]=0;
     wcscpy(langauto2,L"Auto");
 
-    wsprintf(buf,L"%s\\%s\\*.*",data_dir,path);
+    wsprintf(buf,L"%s\\%s\\*.txt",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
     while(FindNextFile(hFind,&FindFileData)!=0)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
-        int len=lstrlen(FindFileData.cFileName);
-        if(lstrcmp(FindFileData.cFileName+len-4,L".txt")==0)
+        wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
+        vault_loadfromfile(buf,language,STR_NM,&langdata);
+        if(language[STR_LANG_CODE].val==(locale&0xFF))
         {
-            wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
-            lang_load(buf);
-            if(language[STR_LANG_CODE].val==(locale&0xFF))
-            {
-                wsprintf(langauto2,L"Auto (%s)",STR(STR_LANG_NAME));
-                wcscpy(langauto,buf);
-            }
-            SendMessage(hwnd,CB_ADDSTRING,0,(int)STR(STR_LANG_NAME));
-            wcscpy(langlist[i],buf);
-            i++;
+            wsprintf(langauto2,L"Auto (%s)",STR(STR_LANG_NAME));
+            wcscpy(langauto,buf);
         }
+        SendMessage(hwnd,CB_ADDSTRING,0,(int)STR(STR_LANG_NAME));
+        wcscpy(langlist[i],buf);
+        i++;
     }
     FindClose(hFind);
 
@@ -443,20 +439,16 @@ void theme_enum(HWND hwnd,WCHAR *path)
     int i=0;
 
     //SendMessage(hwnd,CB_ADDSTRING,0,(int)L"Classic(default)");langs=1;
-    wsprintf(buf,L"%s\\%s\\*.*",data_dir,path);
+    wsprintf(buf,L"%s\\%s\\*.txt",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
     while(FindNextFile(hFind,&FindFileData)!=0)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
-        int len=lstrlen(FindFileData.cFileName);
-        if(lstrcmp(FindFileData.cFileName+len-4,L".txt")==0)
-        {
-            wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
-            theme_load(buf);
-            SendMessage(hwnd,CB_ADDSTRING,0,(int)D(THEME_NAME));
-            wcscpy(themelist[i],buf);
-            i++;
-        }
+        wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
+        vault_loadfromfile(buf,theme,THEME_NM,&themedata);
+        SendMessage(hwnd,CB_ADDSTRING,0,(int)D(THEME_NAME));
+        wcscpy(themelist[i],buf);
+        i++;
     }
     FindClose(hFind);
 
