@@ -402,7 +402,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
 
     wsprintf(buf,L"%s\\%s\\*.txt",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
-    while(FindNextFile(hFind,&FindFileData)!=0)
+    do
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
         wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
@@ -416,6 +416,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
         wcscpy(langlist[i],buf);
         i++;
     }
+    while(FindNextFile(hFind,&FindFileData)!=0);
     FindClose(hFind);
 
     if(i)
@@ -441,7 +442,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
     //SendMessage(hwnd,CB_ADDSTRING,0,(int)L"Classic(default)");langs=1;
     wsprintf(buf,L"%s\\%s\\*.txt",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
-    while(FindNextFile(hFind,&FindFileData)!=0)
+    do
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
         wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
@@ -450,6 +451,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
         wcscpy(themelist[i],buf);
         i++;
     }
+    while(FindNextFile(hFind,&FindFileData)!=0);
     FindClose(hFind);
 
     if(!i)
