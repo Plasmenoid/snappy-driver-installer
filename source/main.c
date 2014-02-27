@@ -523,7 +523,7 @@ void bundle_lowprioirity(bundle_t *bundle)
     if(!(flags&FLAG_NOSLOWSYSINFO)&&statemode!=STATEMODE_LOAD)
     {
         state_getsysinfo_slow(&bundle->state);
-        InvalidateRect(hMain,0,0);
+        redrawmainwnd();
         log_err("6");
     }
 
@@ -586,6 +586,17 @@ void redrawfield()
     UpdateWindow(hField);
 }
 
+void redrawmainwnd()
+{
+    if(!hMain)
+    {
+        log_err("ERROR in redrawfield(): hField is 0\n");
+        return;
+    }
+    InvalidateRect(hMain,NULL,TRUE);
+    UpdateWindow(hMain);
+}
+
 void lang_refresh()
 {
     if(!hMain||!hField)
@@ -593,8 +604,7 @@ void lang_refresh()
         log_err("ERROR in theme_refresh(): hMain is %d, hField is %d\n",hMain,hField);
         return;
     }
-    InvalidateRect(hMain,0,0);
-    InvalidateRect(hField,0,0);
+    redrawmainwnd();
 
     POINT p;
     GetCursorPos(&p);
@@ -1285,11 +1295,11 @@ LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
     {
         case WM_MOUSELEAVE:
             ShowWindow(hPopup,SW_HIDE);
-            InvalidateRect(hwnd,0,0);
+            InvalidateRect(hwnd,0,0);//common
             break;
 
         case WM_ACTIVATE:
-            InvalidateRect(hwnd,0,0);
+            InvalidateRect(hwnd,0,0);//common
             break;
 
         case WM_MOUSEMOVE:
@@ -1551,6 +1561,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             SendMessage(hTheme,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
             SendMessage(hLang,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
             SendMessage(hTheme,CB_SETCURSEL,f,0);
+            redrawmainwnd();
             theme_refresh();
             break;
 
@@ -1647,11 +1658,10 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             SetLayeredWindowAttributes(hPopup,0,D(POPUP_TRANSPARENCY),LWA_ALPHA);
 
             MoveWindow(hField,D(DRVLIST_OFSX),D(DRVLIST_OFSY),x-D(DRVLIST_OFSX)-D(DRVLIST_OFSY),y-D(DRVLIST_OFSY)*2,TRUE);
-            MoveWindow(hLang,D(PANEL_OFSX)+D(PNLITEM_OFSX),D(PANEL_OFSY)+9*D(PANEL_WY)-2,D(PANEL_WX)-D(PNLITEM_OFSX)*2,190,1);
-            MoveWindow(hTheme,D(PANEL_OFSX)+D(PNLITEM_OFSX),D(PANEL_OFSY)+11*D(PANEL_WY)-2,D(PANEL_WX)-D(PNLITEM_OFSX)*2,190,1);
+            MoveWindow(hLang,D(PANEL_OFSX)+D(PNLITEM_OFSX),D(PANEL_OFSY)+9*D(PANEL_WY)-2,D(PANEL_WX)-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hTheme,D(PANEL_OFSX)+D(PNLITEM_OFSX),D(PANEL_OFSY)+11*D(PANEL_WY)-2,D(PANEL_WX)-D(PNLITEM_OFSX)*2,190,0);
             manager_setpos(manager_g);
-
-            InvalidateRect(hMain,0,0);
+            redrawmainwnd();
 
             GetWindowRect(hwnd,&rect);
             mainx_w=rect.right-rect.left;
@@ -1669,12 +1679,13 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             GetClientRect(hwnd,&rect);
             canvas_begin(&canvasMain,hwnd,rect.right,rect.bottom);
 
-            box_draw(canvasMain.hdcMem,0,0,rect.right,rect.bottom,BOX_MAINWND);
+            box_draw(canvasMain.hdcMem,0,0,rect.right+1,rect.bottom+1,BOX_MAINWND);
             SelectObject(canvasMain.hdcMem,hFont);
             drawrevision(canvasMain.hdcMem,rect.bottom);
             panel_draw(canvasMain.hdcMem);
 
             canvas_end(&canvasMain);
+            redrawfield();
             break;
 
         case WM_ERASEBKGND:
@@ -1689,7 +1700,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             else
                 drawpopup(-1,i>=0?STR(panelitems[i].str_id+1):L"",i>0&&i<4?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
 
-            if(panel_lasti!=i)InvalidateRect(hwnd,0,0);
+            if(panel_lasti!=i)redrawmainwnd();
             panel_lasti=i;
             break;
 
@@ -1711,7 +1722,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 else
                     PostMessage(hwnd,WM_COMMAND,panelitems[i].action_id+(BN_CLICKED<<16),0);
 
-                InvalidateRect(hwnd,NULL,TRUE);
+                //InvalidateRect(hwnd,NULL,TRUE);
             }
             break;
 

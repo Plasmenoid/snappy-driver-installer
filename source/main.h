@@ -241,6 +241,7 @@ HWND CreateWindowM(const WCHAR *type,const WCHAR *name,HWND hwnd,int id);
 HWND CreateWindowMF(const WCHAR *type,const WCHAR *name,HWND hwnd,int id,int f);
 void setfont();
 void redrawfield();
+void redrawmainwnd();
 void lang_refresh();
 void theme_refresh();
 void setscrollrange(int y);
