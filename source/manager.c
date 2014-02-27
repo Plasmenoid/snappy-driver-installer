@@ -311,6 +311,7 @@ void manager_toggle(manager_t *manager,int index)
     for(i=0;i<manager->items_handle.items;i++,itembar++)
         if(itembar!=itembar1&&itembar->index==group)
             itembar->checked=0;
+    InvalidateRect(hMain,0,0);
 }
 
 void manager_expand(manager_t *manager,int index)
