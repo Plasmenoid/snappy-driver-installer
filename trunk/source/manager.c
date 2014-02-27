@@ -311,7 +311,7 @@ void manager_toggle(manager_t *manager,int index)
     for(i=0;i<manager->items_handle.items;i++,itembar++)
         if(itembar!=itembar1&&itembar->index==group)
             itembar->checked=0;
-    InvalidateRect(hMain,0,0);
+    redrawmainwnd();
 }
 
 void manager_expand(manager_t *manager,int index)
@@ -357,7 +357,9 @@ void manager_selectall(manager_t *manager)
     itembar_t *itembar;
     int i,group=-1;
 
-    if(manager->items_list[SLOT_RESTORE_POINT].install_status==STR_RESTOREPOINT)manager->items_list[SLOT_RESTORE_POINT].checked=1;
+    itembar=&manager->items_list[SLOT_RESTORE_POINT];
+    if(itembar->install_status==STR_RESTOREPOINT&&itembar->isactive)itembar->checked=1;
+
     itembar=&manager->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
     {
