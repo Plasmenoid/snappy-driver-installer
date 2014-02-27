@@ -28,6 +28,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #define IDR_UP_H      207
 #define IDR_DOWN_H    208
 #define IDR_INSTALL64 209
+#define IDR_CLI_HELP  210
 
 #define IDD_DIALOG1   301
 #define IDC_EDIT1     302

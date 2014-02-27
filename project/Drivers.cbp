@@ -113,6 +113,10 @@
 		<Unit filename="../resources/resources.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
+		<Unit filename="../source/cli.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/cli.h" />
 		<Unit filename="../source/common.c">
 			<Option compilerVar="CC" />
 		</Unit>

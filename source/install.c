@@ -177,6 +177,7 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
     clicker_flag=0;
     WaitForSingleObject(thr,INFINITE);
     CloseHandle_log(thr,L"driver_install",L"thr");
+    if(*ret==1)SaveHWID(hwid);
 }
 
 unsigned int __stdcall thread_install(void *arg)

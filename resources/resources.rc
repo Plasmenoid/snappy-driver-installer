@@ -30,12 +30,13 @@ IDR_LICENSE     RESFILE     "gpl-3.0.txt"
 IDR_THEME       RESFILE     "..\\tools\\SDI\\themes\\metallic.txt"
 IDR_LANG        RESFILE     "..\\tools\\SDI\\langs\\english.txt"
 IDR_INSTALL64   RESFILE     "install64.exe"
+IDR_CLI_HELP    RESFILE     "CLI.txt"
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "drv.exe.manifest"
 
 IDD_DIALOG1 DIALOGEX DISCARDABLE 0, 0, 340, 349
 STYLE DS_MODALFRAME|WS_POPUP|WS_CAPTION|WS_SYSMENU|DS_CENTER
-CAPTION "Dialog"
+CAPTION "Snappy Driver Installer License"
 {
     LTEXT           "Please read the following License Agreement carefully before using this program.",0,10,10,300,20
     DEFPUSHBUTTON   "&Decline", IDCANCEL, 10, 318, 70, 20
