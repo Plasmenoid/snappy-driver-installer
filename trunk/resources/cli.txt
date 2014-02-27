@@ -1,0 +1,73 @@
+-------------
+Task-oriented
+-------------
+/?           Show this help window.
+
+/7z          Run in 7z archiver mode.
+             Example: SDI.exe -7z x DP_TV_Beholder_14020.7z
+
+/install <hwid> <inffile>  -- Install driver with hwid from <inffile>
+
+/HWIDInstalled:<hwid>=<Filename> -- Check if driver <hwid> installed in
+                sesion <Filename> (see save-installed-id options).
+                <hwid> is VID_xxxx&PID_XXXX.
+                <hwid> can be in short (VID_xxxx&PID_XXXX) or
+                long form (PCI\VEN_XXXX&DEV_XXXX&SUBSYS_XXXXXXXX&REV_XX,
+                PCI\VEN_XXXX&DEV_XXXX&SUBSYS_XXXXXXXX, PCI\VEN_XXXX&DEV_XXXX).
+                If driver installed exit code = 1 else 0. SDI not run.
+
+/save-installed-id[:<Filename>] -- Save installed driver id (hwid) (VID_xxxx&PID_XXXX)
+                in file <Filename> used with options 'HWIDInstalled'.
+                If <Filename> absent used %temp%\SDI2\InstalledID.txt
+/verbose:<flags>  Set log detail level.
+/ls:<file>        Load snapshot.
+/lzma             Compress driverpacks.
+/nogui            Run without GUI-interface.
+
+------------
+Settings.cfg
+------------
+/drp_dir:<dir>    Path to driverpacks.
+/index_dir:<dir>  Path to indexes.
+/output_dir:<dir> Path to indexes in human-readable format.
+/data_dir:<dir>   Path to translations and themes.
+/log_dir:<dir>    Path to logs and snapshots.
+/lang:<name>      Current interface language.
+/theme:<name>     Current theme.
+/filters:<flags>  Set filters.
+/expertmode       Enable the expert mode.
+/license          Suppress the license dialog.
+/norestorepnt     Suppress creating of restore point.
+
+---------
+Emulation
+---------
+/a:32        Emulate 32-bit Windows.
+/a:64        Emulate 64-bit Windows.
+/v:<version> Emulate Windows of specific version.
+             For example in order to emulate Windows Vista) use -v:60.
+
+-----------
+Autoinstall
+-----------
+/autoinstall         Immediately start driver installation.
+/autoclose           Close the application after installation.
+/finish_cmd:<cmd>    Specifies a command executed upon completion of driver installation.
+/finishrb_cmd:<cmd>  Specifies a command executed upon completion of driver installation when reboot is required.
+
+-----
+Debug
+-----
+/failsafe       Disable indexing of WINDOWS\inf.
+/disableinstall Suppress driver installation and creation of a restore point.
+/noslowsysinfo  Suppress gathering information about motherboard.
+/reindex        Force reindexing of all driverpacks.
+/index_hr       Create indexes in human-readable format.
+
+----------
+Exit codes
+----------
+Command: -HWIDInstalled
+ 0 -- driver not installed in session saved in <Filename>
+ 1 -- driver has been installed in session saved in <Filename>
+24 -- Invalid length.  HWID less 17 chars (VID_xxxx&PID_XXXX).

@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define BUFLEN              4096
+
 //{ Includes
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -51,6 +53,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #include "manager.h"
 #include "theme.h"
 #include "install.h"
+#include "cli.h"
 
 #include "7z.h"
 #include "7zAlloc.h"
@@ -69,7 +72,6 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define VER_MARKER          "SDW"
 #define VER_STATE           0x101
 #define VER_INDEX           0x202
-#define BUFLEN              4096
 
 // Mode
 #define STATEMODE_LOAD      2
@@ -159,19 +161,21 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 
 //{ Global variables
 
-// Window
-extern int mainx_c,mainy_c;
-extern HFONT hFont;
-extern HWND hPopup,hMain,hField;
-extern int floating_x,floating_y;
-extern int horiz_sh;
-
 // Manager
 extern manager_t *manager_g;
 extern int volatile installmode;
-extern int volatile updateflags;
-//extern int volatile blockupdate;
 extern CRITICAL_SECTION sync;
+
+// Window
+extern HINSTANCE ghInst;
+extern int mainx_c,mainy_c;
+extern HFONT hFont;
+extern HWND hPopup,hMain,hField;
+
+// Window helpers
+extern int floating_x,floating_y;
+extern int horiz_sh;
+extern int ret_global;
 
 // Settings
 extern WCHAR drpext_dir[BUFLEN];

@@ -73,8 +73,6 @@ int manager_active=0;
 int bundle_display=1;
 int bundle_shadow=0;
 int volatile installmode=MODE_NONE;
-int volatile updateflags=0;
-int volatile blockupdate=0;
 CRITICAL_SECTION sync;
 
 // Window
@@ -153,6 +151,7 @@ void settings_parse(const WCHAR *str,int ind)
     for(i=ind;i<argc;i++)
     {
         pr=argv[i];
+        if (pr[0] == '/') pr[0]='-';
         if( wcsstr(pr,L"-drp_dir:"))     wcscpy(drp_dir,pr+9);else
         if( wcsstr(pr,L"-index_dir:"))   wcscpy(index_dir,pr+11);else
         if( wcsstr(pr,L"-output_dir:"))  wcscpy(output_dir,pr+12);else
@@ -207,10 +206,17 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-a:32"))         virtual_arch_type=32;else
         if(!wcscmp(pr,L"-a:64"))         virtual_arch_type=64;else
         if( wcsstr(pr,L"-v:"))           virtual_os_version=_wtoi(pr+3);else
+        if(_wcsnicmp (pr, SAVE_INSTALLED_ID_DEF, wcslen(SAVE_INSTALLED_ID_DEF)) == 0)
+         Parse_save_installed_id_swith(pr);  else
+        if(wcsstr(pr,L"-?")) CLIParam.ShowHelp = TRUE; else
+        if (_wcsnicmp (pr, HWIDINSTALLED_DEF, wcslen(HWIDINSTALLED_DEF)) == 0)
+         Parse_HWID_installed_swith(pr);
+        else
             log_err("Unknown argument '%ws'\n",pr);
+       if (statemode==STATEMODE_EXIT) break; //по текущей команде выяснили что параметры не верны.
     }
     LocalFree(argv);
-
+    if (statemode == STATEMODE_EXIT) return;
     // Expert mode
     panelitems[13].checked=expertmode;
 
@@ -294,7 +300,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     time_startup=time_total=GetTickCount();
     backtrace=LoadLibraryA("backtrace.dll");
     ghInst=hInst;
-
+    init_CLIParam();
     if(!settings_load(L"settings.cfg"))
         settings_load(L"tools\\SDI\\settings.cfg");
 
@@ -310,10 +316,18 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     if(statemode==STATEMODE_EXIT)
     {
         if(backtrace)FreeLibrary(backtrace);
+        ShowWindow(GetConsoleWindow(),SW_SHOW);
         return ret_global;
     }
     log_start(log_dir);
+    RUN_CLI(CLIParam);
 
+    if(statemode==STATEMODE_EXIT)
+    {
+        if(backtrace)FreeLibrary(backtrace);
+        ShowWindow(GetConsoleWindow(),SW_SHOW);
+        return ret_global;
+    }
     //signal(SIGSEGV,SignalHandler);
     ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:SW_HIDE);
 
@@ -1471,7 +1485,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             hField=CreateWindowM(classField,NULL,hwnd,0);
 
             // Popup
-            hPopup=CreateWindowEx(/*WS_EX_COMPOSITED|WS_EX_LAYERED|*/WS_EX_NOACTIVATE|WS_EX_TOPMOST|WS_EX_TRANSPARENT,
+            hPopup=CreateWindowEx(/*WS_EX_COMPOSITED|*/WS_EX_LAYERED|WS_EX_NOACTIVATE|WS_EX_TOPMOST|WS_EX_TRANSPARENT,
                 classPopup,L"",WS_POPUP,
                 0,0,0,0,hwnd,(HMENU)0,ghInst,0);
 
