@@ -1128,7 +1128,21 @@ void panel_draw(HDC hdc)
             case TYPE_BUTTON:
                 box_draw(hdc,x+ofsx,y+ofsy,x+D(PANEL_WX)-ofsx,y+ofsy+D(PNLITEM_WY),i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
                 SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-                TextOut(hdc,x+ofsx+5,y+ofsy+2,STR(panelitems[i].str_id),wcslen(STR(panelitems[i].str_id)));
+                if(i==5)
+                {
+                    int j,cnt=0;
+                    itembar_t *itembar;
+
+                    itembar=&manager_g->items_list[RES_SLOTS];
+                    for(j=RES_SLOTS;j<manager_g->items_handle.items;j++,itembar++)
+                    if(itembar->checked)cnt++;
+
+                    wsprintf(buf,L"%s (%d)",STR(panelitems[i].str_id),cnt);
+                    TextOut(hdc,x+ofsx+5,y+ofsy+2,buf,wcslen(buf));
+                }
+                else
+                    TextOut(hdc,x+ofsx+5,y+ofsy+2,STR(panelitems[i].str_id),wcslen(STR(panelitems[i].str_id)));
+
                 y+=D(PANEL_WY);
                 break;
 
