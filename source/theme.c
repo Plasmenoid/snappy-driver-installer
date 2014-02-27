@@ -402,6 +402,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
 
     wsprintf(buf,L"%s\\%s\\*.txt",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
+    if(hFind!=INVALID_HANDLE_VALUE)
     do
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
@@ -442,6 +443,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
     //SendMessage(hwnd,CB_ADDSTRING,0,(int)L"Classic(default)");langs=1;
     wsprintf(buf,L"%s\\%s\\*.txt",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
+    if(hFind!=INVALID_HANDLE_VALUE)
     do
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
