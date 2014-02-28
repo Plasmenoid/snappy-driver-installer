@@ -1,2 +1,2 @@
-set %PATH%;C:\MinGW_481\bin
-make
+set path=C:\MinGW_481\bin
+mingw32-make.exe

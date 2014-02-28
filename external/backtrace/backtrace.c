@@ -373,3 +373,100 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
         }
         return TRUE;
 }
+
+#if defined __GNUC__ || defined __clang__
+# define ATTRIBUTE(attrlist) __attribute__(attrlist)
+#else
+# define ATTRIBUTE(attrlist)
+#endif
+
+char *libintl_dgettext (const char *domain_name ATTRIBUTE((unused)), const char *msgid ATTRIBUTE((unused)))
+{
+    static char buf[1024] = "XXX placeholder XXX";
+    return buf;
+}
+
+int __printf__ ( const char * format, ... );
+int libintl_fprintf ( FILE * stream, const char * format, ... );
+int libintl_sprintf ( char * str, const char * format, ... );
+int libintl_snprintf ( char *buffer, int buf_size, const char *format, ... );
+int libintl_vprintf ( const char * format, va_list arg );
+int libintl_vfprintf ( FILE * stream, const char * format, va_list arg );
+int libintl_vsprintf ( char * str, const char * format, va_list arg );
+
+int __printf__ ( const char * format, ... )
+{
+    int value;
+    va_list arg;
+    va_start(arg, format);
+    value = vprintf ( format, arg );
+    va_end(arg);
+    return value;
+}
+
+int libintl_fprintf ( FILE * stream, const char * format, ... )
+{
+    int value;
+    va_list arg;
+    va_start(arg, format);
+    value = vfprintf ( stream, format, arg );
+    va_end(arg);
+    return value;
+}
+int libintl_sprintf ( char * str, const char * format, ... )
+{
+    int value;
+    va_list arg;
+    va_start(arg, format);
+    value = vsprintf ( str, format, arg );
+    va_end(arg);
+    return value;
+}
+int libintl_snprintf ( char *buffer, int buf_size, const char *format, ... )
+{
+    int value;
+    va_list arg;
+    va_start(arg, format);
+    value = vsnprintf ( buffer, buf_size, format, arg );
+    va_end(arg);
+    return value;
+}
+int libintl_vprintf ( const char * format, va_list arg )
+{
+    return vprintf ( format, arg );
+}
+int libintl_vfprintf ( FILE * stream, const char * format, va_list arg )
+{
+    return vfprintf ( stream, format, arg );
+}
+int libintl_vsprintf ( char * str, const char * format, va_list arg )
+{
+    return vsprintf ( str, format, arg );
+}
+
+/* cut dependence on zlib... libbfd needs this */
+
+int compress (unsigned char *dest ATTRIBUTE((unused)), unsigned long destLen ATTRIBUTE((unused)), const unsigned char source ATTRIBUTE((unused)), unsigned long sourceLen ATTRIBUTE((unused)))
+{
+    return 0;
+}
+unsigned long compressBound (unsigned long sourceLen)
+{
+    return sourceLen + (sourceLen >> 12) + (sourceLen >> 14) + (sourceLen >> 25) + 13;
+}
+int inflateEnd(void *strm ATTRIBUTE((unused)))
+{
+    return 0;
+}
+int inflateInit_(void *strm ATTRIBUTE((unused)), const char *version ATTRIBUTE((unused)), int stream_size ATTRIBUTE((unused)))
+{
+    return 0;
+}
+int inflateReset(void *strm ATTRIBUTE((unused)))
+{
+    return 0;
+}
+int inflate(void *strm ATTRIBUTE((unused)), int flush ATTRIBUTE((unused)))
+{
+    return 0;
+}
