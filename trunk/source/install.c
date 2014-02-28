@@ -141,12 +141,12 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
     if(!PathFileExists(cmd))
     {
         mkdir_r(extractdir);
-        log_err("Dir: (%ws)\n",extractdir);
+        log_con("Dir: (%ws)\n",extractdir);
         f=_wfopen(cmd,L"wb");
         if(f)
-            log_err("Created '%ws'\n",cmd);
+            log_con("Created '%ws'\n",cmd);
         else
-            log_err("Failed to create '%ws'\n",cmd);
+            log_con("Failed to create '%ws'\n",cmd);
         get_resource(IDR_INSTALL64,&install64bin,&size);
         fwrite(install64bin,1,size,f);
         fclose(f);
@@ -166,7 +166,7 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
     {
         wsprintf(buf,L"\"%s\" \"%s\"",hwid,inf);
         wsprintf(cmd,L"%s\\install64.exe",extractdir);
-        log_err("'%ws %ws'\n",cmd,buf);
+        log_con("'%ws %ws'\n",cmd,buf);
         *ret=RunSilent(cmd,buf,SW_HIDE,1);
         if((*ret&0x7FFFFFFF)==1)
         {
@@ -231,7 +231,7 @@ unsigned int __stdcall thread_install(void *arg)
                 r=ProcAdd(&pRestorePtSpec,&pSMgrStatus);
             EnterCriticalSection(&sync);
 
-            log_err("rt rest point{ %d(%d)\n",r,pSMgrStatus.nStatus);
+            log_con("rt rest point{ %d(%d)\n",r,pSMgrStatus.nStatus);
             manager_g->items_list[SLOT_RESTORE_POINT].percent=1000;
             if(r)
             {
@@ -265,14 +265,14 @@ goaround:
         itembar_act=i;
         ar_proceed=0;
         hwidmatch_t *hwidmatch=itembar->hwidmatch;
-        log_err("Installing $%04d\n",i);
+        log_con("Installing $%04d\n",i);
         hwidmatch_print(hwidmatch,limits);
         wsprintf(cmd,L"%s\\%S",extractdir,getdrp_infpath(hwidmatch));
 
         // Extract
         if(PathFileExists(cmd))
         {
-            log_err("Already unpacked\n");
+            log_con("Already unpacked\n");
             _7z_total(100);
             _7z_setcomplited(100);
             redrawfield();
@@ -280,7 +280,7 @@ goaround:
         else
         if(wcsstr(getdrp_packname(hwidmatch),L"unpacked.7z"))
         {
-            printf("Unpacked '%ws'\n",getdrp_packpath(hwidmatch));
+            log_con("Unpacked '%ws'\n",getdrp_packpath(hwidmatch));
             unpacked=1;
         }
         else
@@ -298,7 +298,7 @@ goaround:
                 wsprintf(buf,L" \"%S\"",getdrp_infpath(itembar1->hwidmatch));
                 if(!wcsstr(cmd,buf))wcscat(cmd,buf);
             }
-            log_err("Extracting via '%ws'\n",cmd);
+            log_con("Extracting via '%ws'\n",cmd);
             itembar->install_status=instflag&INSTALLDRIVERS?STR_INST_EXTRACT:STR_EXTR_EXTRACTING;
             redrawfield();
             LeaveCriticalSection(&sync);
@@ -307,7 +307,7 @@ goaround:
             itembar=&manager_g->items_list[itembar_act];
             //itembar->percent=manager_g->items_list[SLOT_EMPTY].percent;
             hwidmatch=itembar->hwidmatch;
-            log_err("Ret %d\n",r);
+            log_con("Ret %d\n",r);
         }
 
         // Install driver
@@ -319,7 +319,7 @@ goaround:
                    getdrp_infpath(hwidmatch),
                    getdrp_infname(hwidmatch));
             wsprintf(hwid,L"%S",getdrp_drvHWID(hwidmatch));
-            log_err("Install32 '%ws','%ws'\n",hwid,inf);
+            log_con("Install32 '%ws','%ws'\n",hwid,inf);
             itembar->install_status=STR_INST_INSTALL;
             redrawfield();
 
@@ -331,7 +331,7 @@ goaround:
             EnterCriticalSection(&sync);
             itembar=&manager_g->items_list[itembar_act];
 
-            log_err("Ret %d(%X),%d\n\n",ret,ret,needrb);
+            log_con("Ret %d(%X),%d\n\n",ret,ret,needrb);
             if(installmode==MODE_STOPPING||!itembar->checked)
             {
                 itembar->checked=0;
@@ -387,7 +387,7 @@ goaround:
         WCHAR *p=extractdir+wcslen(extractdir);
         while(*(--p)!='\\');
         *p=0;
-        log_err("%ws\n",extractdir);
+        log_con("%ws\n",extractdir);
         ShellExecute(0,L"explore",extractdir,0,0,SW_SHOW);
         manager_g->items_list[SLOT_EXTRACTING].isactive=0;
         manager_setpos(manager_g);
@@ -413,7 +413,7 @@ goaround:
         installmode=MODE_SCANNING;
     }
     itembar_act=0;
-    log_err("Mode:%d\n",installmode);
+    log_con("Mode:%d\n",installmode);
     LeaveCriticalSection(&sync);
     PostMessage(hMain,WM_DEVICECHANGE,7,0);
     redrawfield();
@@ -500,7 +500,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
                     SendMessage(GetParent(hwnd),WM_LBUTTONUP,  0,pos);
                     SetActiveWindow(hwnd);
                     SendMessage(hwnd,BM_CLICK,0,0);
-                    log_err("Autoclicker fired\n");
+                    log_con("Autoclicker fired\n");
                 }
             }
         }
