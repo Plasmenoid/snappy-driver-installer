@@ -49,6 +49,17 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
         47,67,     // stop
         448,72     // stop
 #endif
+    },
+    {
+        704,212,
+        704,212,
+#ifdef AUTOCLICKER_CONFIRM
+        465,118,  // continue
+        94,23     // continue
+#else
+        565,118,  // stop
+        129,23    // stop
+#endif
     }
 };
 volatile int clicker_flag;
