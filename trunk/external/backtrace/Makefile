@@ -3,7 +3,7 @@
 all : backtrace.dll test.exe
 
 backtrace.dll : backtrace.c
-	gcc -O3 -Os -fexpensive-optimizations -fomit-frame-pointer -s -shared -Wall -o $@ $^ -lbfd -liberty -limagehlp -lz -lintl
+	gcc -O3 -Os -fexpensive-optimizations -fomit-frame-pointer -s -shared -static-libgcc -Wall -o $@ $^ -lbfd -liberty -limagehlp
 
 test.exe : test.c
 	gcc -g -Wall -o $@ $^

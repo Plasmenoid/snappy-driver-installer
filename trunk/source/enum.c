@@ -830,6 +830,11 @@ void state_scandevices(state_t *state)
                 {
                     //log("Looking for '%ws'\n",filename);
                     f=_wfopen(filename,L"rb");
+                    if(!f)
+                    {
+                        log_err("ERROR: Not found '%ws'\n",filename);
+                        goto sskp;
+                    }
                     fseek(f,0,SEEK_END);
                     len=ftell(f);
                     if(len<0)len=0;
@@ -864,6 +869,7 @@ void state_scandevices(state_t *state)
                     hash_add(&inf_list,bufa,strlen(bufa),(int)infdata,HASH_MODE_INTACT);
                 }
             }
+            sskp:
             cur_driver->identifierscore=calc_identifierscore(dev_pos,ishw,inf_pos);
             //log("%d,%d,%d\n",dev_pos,ishw,inf_pos);
 
