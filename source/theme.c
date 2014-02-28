@@ -46,7 +46,7 @@ void box_init(img_t *img,int i)
         if(box[j].index&&j!=i)
             if(!wcscmp(filename,(WCHAR *)D(box[j].index+4)))
     {
-        printf("Match %d,'%ws'\n",j,D(box[j].index+4));
+        //printf("Match %d,'%ws'\n",j,D(box[j].index+4));
         img->big=box[j].big;
         img->bitmap=box[j].bitmap;
         img->dc=box[j].dc;
@@ -468,7 +468,7 @@ void CALLBACK lang_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
     UNREFERENCED_PARAMETER(action);
     UNREFERENCED_PARAMETER(lParam);
 
-    printf("Change %ws\n",szFile);
+    log_con("Change %ws\n",szFile);
     PostMessage(hMain,WM_UPDATELANG,0,0);
 }
 
@@ -477,7 +477,7 @@ void CALLBACK theme_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
     UNREFERENCED_PARAMETER(action);
     UNREFERENCED_PARAMETER(lParam);
 
-    printf("Change %ws\n",szFile);
+    log_con("Change %ws\n",szFile);
     PostMessage(hMain,WM_UPDATETHEME,0,0);
 }
 //}

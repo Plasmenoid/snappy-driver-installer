@@ -324,6 +324,7 @@ void state_save(state_t *state,const WCHAR *filename)
     int version=VER_STATE;
     char *mem,*mem_pack,*p;
 
+    if(flags&FLAG_NOSNAPSHOT)return;
     log("Saving state in '%ws'...",filename);
     if(!canWrite(filename))
     {
@@ -377,7 +378,7 @@ int  state_load(state_t *state,const WCHAR *filename)
     int version;
     char *mem,*p,*mem_unpack=0;
 
-    log_err("Loading state from '%ws'...",filename);
+    log_con("Loading state from '%ws'...",filename);
     f=_wfopen(filename,L"rb");
     if(!f)
     {
@@ -607,9 +608,9 @@ void state_getsysinfo_slow(state_t *state)
     wsprintf(filename,L"%s\\output.txt",state->text+state->temp);
     wsprintf(buf,L"/c wmic baseboard GET /value >\"%s\\output.txt\"",state->text+state->temp);
     time_test=GetTickCount()-time_test;
-    log_err("1");
+    log_con("1");
     RunSilent(L"cmd",buf,SW_HIDE,1);
-    log_err("2");
+    log_con("2");
     f=_wfopen(filename,L"rb");
     if(!f)return;
     fseek(f,0,SEEK_END);
@@ -620,7 +621,7 @@ void state_getsysinfo_slow(state_t *state)
     fclose(f);
     buf[sz/2]=0;
 
-    log_err("3");
+    log_con("3");
     pw=wcsstr(buf,L"Manufacturer=");
     if(!pw)return;
     pw+=13;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
@@ -630,10 +631,10 @@ void state_getsysinfo_slow(state_t *state)
     *pe=pchar;pw=wcsstr(buf,L"Model=");pw+=6;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
     state->model=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
 
-    log_err("4");
+    log_con("4");
     _wremove(filename);
     time_sysinfo=GetTickCount()-time_sysinfo;
-    log_err("5");
+    log_con("5");
 }
 
 void state_scandevices(state_t *state)

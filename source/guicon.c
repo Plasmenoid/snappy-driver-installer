@@ -32,6 +32,10 @@ int log_verbose=
     LOG_VERBOSE_MANAGER|
     LOG_VERBOSE_DRP|
     LOG_VERBOSE_TIMES|
+    LOG_VERBOSE_LOG_ERR|
+    LOG_VERBOSE_LOG_CON|
+    //LOG_VERBOSE_LAGCOUNTER|
+    //LOG_VERBOSE_DEVSYNC|
     0;
 
 long
@@ -72,7 +76,10 @@ void gen_timestamp()
     GetComputerName(pcname,&sz);
     time(&rawtime);
     ti=localtime(&rawtime);
-    wsprintf(timestamp,L"%4d_%02d_%02d__%02d_%02d_%02d__%s",
+    if(flags&FLAG_NOSTAMP)
+        *timestamp=0;
+    else
+        wsprintf(timestamp,L"%4d_%02d_%02d__%02d_%02d_%02d__%s_",
              1900+ti->tm_year,ti->tm_mon+1,ti->tm_mday,
              ti->tm_hour,ti->tm_min,ti->tm_sec,pcname);
 }
@@ -87,7 +94,7 @@ void log_start(WCHAR *log_dir)
     gen_timestamp();
 
     wcscpy(filename,L"log.txt");
-    wsprintf(filename,L"%s\\%s_log.txt",log_dir,timestamp);
+    wsprintf(filename,L"%s\\%slog.txt",log_dir,timestamp);
     if(!canWrite(filename))
     {
         log_err("ERROR in log_start(): Write-protected,'%ws'\n",filename);
@@ -95,10 +102,11 @@ void log_start(WCHAR *log_dir)
 //        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
         GetEnvironmentVariable(L"TEMP",log_dir,BUFLEN);
         wcscat(log_dir,L"\\SDI_logs");
-        wsprintf(filename,L"%s\\%s_log.txt",log_dir,timestamp);
+        wsprintf(filename,L"%s\\%slog.txt",log_dir,timestamp);
     }
 
     mkdir_r(log_dir);
+    if(flags&FLAG_NOLOGFILE)return;
     logfile=_wfopen(filename,L"wb");
     if(!logfile)
     {
@@ -107,7 +115,7 @@ void log_start(WCHAR *log_dir)
 //        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
         GetEnvironmentVariable(L"TEMP",log_dir,BUFLEN);
         wcscat(log_dir,L"\\SDI_logs");
-        wsprintf(filename,L"%s\\%s_log.txt",log_dir,timestamp);
+        wsprintf(filename,L"%s\\%slog.txt",log_dir,timestamp);
         mkdir_r(log_dir);
         logfile=_wfopen(filename,L"wb");
     }
@@ -140,6 +148,23 @@ void log_err(CHAR const *format,...)
 {
     CHAR buffer[1024*16];
     CHAR *ptr=buffer;
+
+    if((log_verbose&LOG_VERBOSE_LOG_ERR)==0)return;
+    va_list args;
+    va_start(args,format);
+    vsprintf(buffer,format,args);
+    while(*ptr){if(*ptr=='#')*ptr=' ';ptr++;}
+    if(logfile)fputs(buffer,logfile);
+    fputs(buffer,stdout);
+    va_end(args);
+}
+
+void log_con(CHAR const *format,...)
+{
+    CHAR buffer[1024*16];
+    CHAR *ptr=buffer;
+
+    if((log_verbose&LOG_VERBOSE_LOG_CON)==0)return;
     va_list args;
     va_start(args,format);
     vsprintf(buffer,format,args);
@@ -224,7 +249,7 @@ DWORD RunSilent(WCHAR* file,WCHAR* cmd,int show,int wait)
 
     if(!wcscmp(file,L"open"))
     {
-        log_err("Open '%ws'\n",cmd);
+        log_con("Open '%ws'\n",cmd);
         ShellExecute(NULL, L"open", cmd, NULL, NULL, SW_SHOWNORMAL);
 
     }

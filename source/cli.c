@@ -11,7 +11,7 @@ void SaveHWID(WCHAR *hwid)
         FILE *f=_wfopen(CLIParam.SaveInstalledFileName,L"a+");
         if (!f)
           log_err("Failed to create '%ws'\n",CLIParam.SaveInstalledFileName);
-        fwprintf(f, hwid);
+        fwprintf(f, L"%s",hwid);
         fwprintf(f, L"\n");
         fclose(f);
     }
@@ -21,9 +21,8 @@ void ExpandPath(WCHAR * Apath)
 {
   #define INFO_BUFFER_SIZE 32767
   WCHAR  infoBuf[INFO_BUFFER_SIZE];
-  DWORD  bufCharCount;
   memset( infoBuf, 0, sizeof(infoBuf) );
-  bufCharCount = ExpandEnvironmentStringsW(Apath, infoBuf, INFO_BUFFER_SIZE );
+  ExpandEnvironmentStringsW(Apath, infoBuf, INFO_BUFFER_SIZE );
   wcscpy(Apath,infoBuf);
 }
 
@@ -105,7 +104,7 @@ void init_CLIParam()
 
 void Parse_save_installed_id_swith(const WCHAR *ParamStr)
 {
-  int tmpLen = wcslen(SAVE_INSTALLED_ID_DEF);
+  unsigned tmpLen = wcslen(SAVE_INSTALLED_ID_DEF);
   if (wcslen(ParamStr) > tmpLen)
   {
     if (ParamStr[tmpLen]==L':') wcscpy(CLIParam.SaveInstalledFileName,ParamStr+tmpLen+1);  else
@@ -145,7 +144,7 @@ void RUN_CLI(CommandLineParam_t ACLIParam)
       if(!f) log_err("Failed to open '%ws'\n",CLIParam.SaveInstalledFileName);
 
       while(fgetws(buf,sizeof(buf),f))
-	  { log_err("'%ws'\n", buf);
+	  { log_con("'%ws'\n", buf);
 	    RStr = wcsstr(buf, CLIParam.HWIDSTR);
 	    if (RStr != NULL)
         {
@@ -162,7 +161,7 @@ void RUN_CLI(CommandLineParam_t ACLIParam)
 
 void Parse_HWID_installed_swith(const WCHAR *ParamStr)
 {
-  int tmpLen = wcslen(HWIDINSTALLED_DEF);
+  unsigned tmpLen = wcslen(HWIDINSTALLED_DEF);
   if (wcslen(ParamStr) < (tmpLen+17)) //-HWIDInstalled:VEN_xxxx&DEV_xxxx
   {
     log_err("invalid parameter %ws\n", ParamStr);
@@ -183,7 +182,7 @@ void Parse_HWID_installed_swith(const WCHAR *ParamStr)
     {
       tmpLen = chB-buf+1;
       wcscpy(CLIParam.SaveInstalledFileName, buf+tmpLen);
-      buf [tmpLen-1] = NULL;
+      buf [tmpLen-1] = 0;
     }
     wcscpy(CLIParam.HWIDSTR, buf);
     CLIParam.HWIDInstalled = TRUE;

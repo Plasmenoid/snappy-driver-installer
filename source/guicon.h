@@ -15,13 +15,17 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define LOG_VERBOSE_ARGS        1
-#define LOG_VERBOSE_SYSINFO     2
-#define LOG_VERBOSE_DEVICES     4
-#define LOG_VERBOSE_MATCHER     8
-#define LOG_VERBOSE_MANAGER    16
-#define LOG_VERBOSE_DRP        32
-#define LOG_VERBOSE_TIMES      64
+#define LOG_VERBOSE_ARGS       0x0001
+#define LOG_VERBOSE_SYSINFO    0x0002
+#define LOG_VERBOSE_DEVICES    0x0004
+#define LOG_VERBOSE_MATCHER    0x0008
+#define LOG_VERBOSE_MANAGER    0x0010
+#define LOG_VERBOSE_DRP        0x0020
+#define LOG_VERBOSE_TIMES      0x0040
+#define LOG_VERBOSE_LOG_ERR    0x0080
+#define LOG_VERBOSE_LOG_CON    0x0100
+#define LOG_VERBOSE_LAGCOUNTER 0x0200
+#define LOG_VERBOSE_DEVSYNC    0x0400
 
 extern int log_verbose;
 extern int log_console;
@@ -56,6 +60,7 @@ void log_start(WCHAR *log_dir);
 void log_stop();
 void log(CHAR const *format,...);
 void log_err(CHAR const *format,...);
+void log_con(CHAR const *format,...);
 void log_nul(CHAR const *format,...);
 
 WCHAR *errno_str();

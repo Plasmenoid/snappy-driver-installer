@@ -23,6 +23,9 @@ Task-oriented
 /ls:<file>        Load snapshot.
 /lzma             Compress driverpacks.
 /nogui            Run without GUI-interface.
+/nologfile        Suppress creating logs
+/nosnapshot       Suppress creating snapshots
+/nostamp          Create logs and snapshot without timestamps
 
 ------------
 Settings.cfg

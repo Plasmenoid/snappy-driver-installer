@@ -116,7 +116,7 @@ void heap_init(heap_t *t,int id,void **mem,int sz, int itemsize)
     if(!sz)sz=heapsz[id];
     //log("initsize %s: %d\n",heaps[t->id],sz);
     t->base=malloc(sz);
-    if(!t->base)printf("No mem %d\n",sz);
+    if(!t->base)log_err("No mem %d\n",sz);
     t->membck=mem;
     t->used=0;
     t->allocated=sz;

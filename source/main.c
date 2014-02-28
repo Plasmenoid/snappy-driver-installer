@@ -165,27 +165,26 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
-        if(!wcscmp(pr,L"-autoclose"))    flags|=FLAG_AUTOCLOSE;else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
             wsprintf(cmd,L"7za %s",wcsstr(GetCommandLineW(),L"-7z")+4);
-            log_err("Executing '%ws'\n",cmd);
+            log_con("Executing '%ws'\n",cmd);
             registerall();
             statemode=STATEMODE_EXIT;
             ret_global=Extract7z(cmd);
-            log_err("Ret: %d\n",ret_global);
+            log_con("Ret: %d\n",ret_global);
             return;
         }
         else
         if(!wcscmp(pr,L"-install")&&argc-i==3)
         {
-            log_err("Install '%ws' '%s'\n",argv[i+1],argv[i+2]);
+            log_con("Install '%ws' '%s'\n",argv[i+1],argv[i+2]);
             GetEnvironmentVariable(L"TEMP",buf,BUFLEN);
             wsprintf(extractdir,L"%s\\SDI",buf);
             installmode=MODE_INSTALLING;
             driver_install(argv[i+1],argv[i+2],&ret_global,&needreboot);
-            log_err("Ret: %X,%d\n",ret_global,needreboot);
+            log_con("Ret: %X,%d\n",ret_global,needreboot);
             if(needreboot)ret_global|=0x80000000;
             wsprintf(buf,L" /c rd /s /q \"%s\"",extractdir);
             RunSilent(L"cmd",buf,SW_HIDE,1);
@@ -199,6 +198,10 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI;else
         if(!wcscmp(pr,L"-noslowsysinfo"))flags|=FLAG_NOSLOWSYSINFO;else
         if(!wcscmp(pr,L"-autoinstall"))  flags|=FLAG_AUTOINSTALL;else
+        if(!wcscmp(pr,L"-autoclose"))    flags|=FLAG_AUTOCLOSE;else
+        if(!wcscmp(pr,L"-nologfile"))    flags|=FLAG_NOLOGFILE;else
+        if(!wcscmp(pr,L"-nosnapshot"))   flags|=FLAG_NOSNAPSHOT;else
+        if(!wcscmp(pr,L"-nostamp"))      flags|=FLAG_NOSTAMP;else
         if(!wcscmp(pr,L"-disableinstall"))flags|=FLAG_DISABLEINSTALL;else
         if(!wcscmp(pr,L"-failsafe"))     flags|=FLAG_FAILSAFE;else
         if( wcsstr(pr,L"-verbose:"))     log_verbose=_wtoi(pr+9);else
@@ -206,17 +209,17 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-a:32"))         virtual_arch_type=32;else
         if(!wcscmp(pr,L"-a:64"))         virtual_arch_type=64;else
         if( wcsstr(pr,L"-v:"))           virtual_os_version=_wtoi(pr+3);else
-        if(_wcsnicmp (pr, SAVE_INSTALLED_ID_DEF, wcslen(SAVE_INSTALLED_ID_DEF)) == 0)
-         Parse_save_installed_id_swith(pr);  else
-        if(wcsstr(pr,L"-?")) CLIParam.ShowHelp = TRUE; else
-        if (_wcsnicmp (pr, HWIDINSTALLED_DEF, wcslen(HWIDINSTALLED_DEF)) == 0)
-         Parse_HWID_installed_swith(pr);
+        if(_wcsnicmp(pr,SAVE_INSTALLED_ID_DEF,wcslen(SAVE_INSTALLED_ID_DEF))==0)
+            Parse_save_installed_id_swith(pr);else
+        if(wcsstr(pr,L"-?"))CLIParam.ShowHelp=TRUE;else
+        if(_wcsnicmp(pr,HWIDINSTALLED_DEF,wcslen(HWIDINSTALLED_DEF))==0)
+            Parse_HWID_installed_swith(pr);
         else
             log_err("Unknown argument '%ws'\n",pr);
-       if (statemode==STATEMODE_EXIT) break; //по текущей команде выяснили что параметры не верны.
+       if(statemode==STATEMODE_EXIT)break;
     }
     LocalFree(argv);
-    if (statemode == STATEMODE_EXIT) return;
+    if(statemode==STATEMODE_EXIT)return;
     // Expert mode
     panelitems[13].checked=expertmode;
 
@@ -283,7 +286,8 @@ void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
     UNREFERENCED_PARAMETER(action);
     UNREFERENCED_PARAMETER(lParam);
 
-    if(StrStrIW(szFile,L".7z")||StrStrIW(szFile,L".inf"))SetEvent(event);
+    if(StrStrIW(szFile,L".7z")||StrStrIW(szFile,L".inf")){}
+    //SetEvent(event);
 }
 
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
@@ -296,7 +300,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     HANDLE thr;
     HMODULE backtrace;
 
-    ShowWindow(GetConsoleWindow(),SW_HIDE);
+    //ShowWindow(GetConsoleWindow(),SW_HIDE);
     time_startup=time_total=GetTickCount();
     backtrace=LoadLibraryA("backtrace.dll");
     ghInst=hInst;
@@ -333,27 +337,27 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 
     if(log_verbose&LOG_VERBOSE_ARGS)
     {
-        log_err("Settings\n");
-        log_err("  drp_dir='%ws'\n",drp_dir);
-        log_err("  index_dir='%ws'\n",index_dir);
-        log_err("  output_dir='%ws'\n",output_dir);
-        log_err("  data_dir='%ws'\n",data_dir);
-        log_err("  log_dir='%ws'\n",log_dir);
+        log_con("Settings\n");
+        log_con("  drp_dir='%ws'\n",drp_dir);
+        log_con("  index_dir='%ws'\n",index_dir);
+        log_con("  output_dir='%ws'\n",output_dir);
+        log_con("  data_dir='%ws'\n",data_dir);
+        log_con("  log_dir='%ws'\n",log_dir);
 #ifndef CONSOLE_MODE
-        log_err("  lang=%ws\n",curlang);
-        log_err("  theme=%ws\n",curtheme);
-        log_err("  expertmode=%d\n",expertmode);
-        log_err("  filters=%d\n",filters);
-        log_err("  autoinstall=%d\n",flags&FLAG_AUTOINSTALL?1:0);
-        log_err("  autoclose=%d\n",flags&FLAG_AUTOCLOSE?1:0);
-        log_err("  failsafe=%d\n",flags&FLAG_FAILSAFE?1:0);
-        log_err("  norestorepnt=%d\n",flags&FLAG_NORESTOREPOINT?1:0);
-        log_err("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
+        log_con("  lang=%ws\n",curlang);
+        log_con("  theme=%ws\n",curtheme);
+        log_con("  expertmode=%d\n",expertmode);
+        log_con("  filters=%d\n",filters);
+        log_con("  autoinstall=%d\n",flags&FLAG_AUTOINSTALL?1:0);
+        log_con("  autoclose=%d\n",flags&FLAG_AUTOCLOSE?1:0);
+        log_con("  failsafe=%d\n",flags&FLAG_FAILSAFE?1:0);
+        log_con("  norestorepnt=%d\n",flags&FLAG_NORESTOREPOINT?1:0);
+        log_con("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
 #endif
         log("\n");
-        if(*state_file&&statemode)log_err("Virtual system system config '%ws'\n",state_file);
-        if(virtual_arch_type)log_err("Virtual Windows version: %d-bit\n",virtual_arch_type);
-        if(virtual_os_version)log_err("Virtual Windows version: %d.%d\n",virtual_os_version/10,virtual_os_version%10);
+        if(*state_file&&statemode)log_con("Virtual system system config '%ws'\n",state_file);
+        if(virtual_arch_type)log_con("Virtual Windows version: %d-bit\n",virtual_arch_type);
+        if(virtual_os_version)log_con("Virtual Windows version: %d.%d\n",virtual_os_version/10,virtual_os_version%10);
         log("\n");
     }
 #ifndef CONSOLE_MODE
@@ -426,7 +430,7 @@ unsigned int __stdcall thread_loadindexes(void *arg)
 
     if(manager_g->items_list[SLOT_EMPTY].curpos==1)*drpext_dir=0;
     collection->driverpack_dir=*drpext_dir?drpext_dir:drp_dir;
-    printf("'%ws'\n",collection->driverpack_dir);
+    //printf("'%ws'\n",collection->driverpack_dir);
     collection_load(collection);
     return 0;
 }
@@ -441,7 +445,7 @@ unsigned int __stdcall thread_loadall(void *arg)
         int cancel_update=0;
         //long long t=GetTickCount();
 
-        printf("*** START *** %d,%d\n",bundle_display,bundle_shadow);
+        log_con("*** START *** %d,%d\n",bundle_display,bundle_shadow);
         bundle_prep(&bundle[bundle_shadow]);
         bundle_load(&bundle[bundle_shadow]);
 
@@ -454,6 +458,11 @@ unsigned int __stdcall thread_loadall(void *arg)
                 manager_g->matcher=&bundle[bundle_shadow].matcher;
                 manager_populate(manager_g);
                 manager_filter(manager_g,filters);
+                /*if(flags&FLAG_AUTOINSTALL)
+                {
+                    manager_selectall(manager_g);
+                    manager_install(INSTALLDRIVERS);
+                }*/
             }
             else
                 SendMessage(hMain,WM_BUNDLEREADY,(int)&bundle[bundle_shadow],(int)&bundle[bundle_display]);
@@ -462,10 +471,10 @@ unsigned int __stdcall thread_loadall(void *arg)
         bundle_lowprioirity(&bundle[bundle_shadow]);
 
         if(cancel_update)
-            printf("*** CANCEL ***\n\n");
+            log_con("*** CANCEL ***\n\n");
         else
         {
-            printf("*** FINISH ***\n\n");
+            log_con("*** FINISH ***\n\n");
             bundle_display^=1;
             bundle_shadow^=1;
         }
@@ -519,35 +528,35 @@ void bundle_lowprioirity(bundle_t *bundle)
 {
     time_startup=GetTickCount()-time_startup;
 
-    log_err("lowprioirity.[");
+    log_con("lowprioirity.[");
     if(!(flags&FLAG_NOSLOWSYSINFO)&&statemode!=STATEMODE_LOAD)
     {
         state_getsysinfo_slow(&bundle->state);
         redrawmainwnd();
-        log_err("6");
+        log_con("6");
     }
 
     collection_printstates(&bundle->collection);
     state_print(&bundle->state);
     matcher_print(&bundle->matcher);
     manager_print(manager_g);
-    log_err("7");
+    log_con("7");
 
     collection_save(&bundle->collection);
     {
         WCHAR filename[BUFLEN];
         gen_timestamp();
-        wsprintf(filename,L"%s\\%s_state.snp",log_dir,timestamp);
+        wsprintf(filename,L"%s\\%sstate.snp",log_dir,timestamp);
         state_save(&bundle->state,filename);
     }
-    log_err("8");
+    log_con("8");
 
     if(flags&COLLECTION_PRINT_INDEX)
     {
         collection_print(&bundle->collection);
         flags&=~COLLECTION_PRINT_INDEX;
     }
-    log_err("9]\n");
+    log_con("9]\n");
 }
 //}
 
@@ -1393,7 +1402,7 @@ void extractto()
         SHGetPathFromIDList(list,dir);
 
         argv=CommandLineToArgvW(GetCommandLineW(),&argc);
-        printf("'%ws',%d\n",argv[0],argc);
+        //printf("'%ws',%d\n",argv[0],argc);
         wsprintf(buf,L"%s\\drv.exe",dir);
         if(!CopyFile(argv[0],buf,0))
             log_err("ERROR in extractto(): failed CopyFile(%ws,%ws)\n",argv[0],buf);
@@ -1483,7 +1492,8 @@ void escapeAmpUrl(WCHAR *buf,WCHAR *source)
 
 void checktimer(WCHAR *str,long long t,int uMsg)
 {
-    if(GetTickCount()-t>40)log_err("GUI lag in %ws[%X]: %ld\n",str,uMsg,GetTickCount()-t);
+    if(GetTickCount()-t>40&&log_verbose&LOG_VERBOSE_LAGCOUNTER)
+        log_con("GUI lag in %ws[%X]: %ld\n",str,uMsg,GetTickCount()-t);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -1529,7 +1539,9 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             manager_filter(manager_g,filters);
             manager_setpos(manager_g);
 
-            GetWindowRect(hwnd,&rect);
+            GetWindowRect(GetDesktopWindow(),&rect);
+            rect.left=(rect.right-D(MAINWND_WX))/2;
+            rect.top=(rect.bottom-D(MAINWND_WY))/2;
             MoveWindow(hwnd,rect.left,rect.top,D(MAINWND_WX),D(MAINWND_WY),1);
             break;
 
@@ -1570,9 +1582,9 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 bundle_t *bb=(bundle_t *)wParam;
                 manager_t *manager_prev=manager_g;
 
-                log_err("{Sync");
+                log_con("{Sync");
                 EnterCriticalSection(&sync);
-                log_err("...\n");
+                log_con("...\n");
                 manager_active++;
                 manager_active&=1;
                 manager_g=&manager_v[manager_active];
@@ -1586,9 +1598,9 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 manager_restorepos(manager_g,manager_prev);
                 viruscheck(L"",0,0);
                 manager_setpos(manager_g);
-                log_err("}Sync\n");
+                log_con("}Sync\n");
                 LeaveCriticalSection(&sync);
-                //log_err("Mode in WM_BUNDLEREADY: %d\n",installmode);
+                //log_con("Mode in WM_BUNDLEREADY: %d\n",installmode);
                 if(flags&FLAG_AUTOINSTALL)
                 {
                     int cnt=0;
@@ -1603,7 +1615,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                         }
 
                         if(!cnt)flags&=~FLAG_AUTOINSTALL;
-                        log_err("Autoinstall rescan: %d found\n",cnt);
+                        log_con("Autoinstall rescan: %d found\n",cnt);
                     }
 
                     if(installmode==MODE_NONE||(installmode==MODE_SCANNING&&cnt))
@@ -1649,7 +1661,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
         case WM_DEVICECHANGE:
             if(installmode==MODE_INSTALLING)break;
-            printf("WM_DEVICECHANGE(%x,%x)\n",wParam,lParam);
+            log_con("WM_DEVICECHANGE(%x,%x)\n",wParam,lParam);
             SetEvent(event);
             break;
 
@@ -1722,7 +1734,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 else
                     PostMessage(hwnd,WM_COMMAND,panelitems[i].action_id+(BN_CLICKED<<16),0);
 
-                //InvalidateRect(hwnd,NULL,TRUE);
+                InvalidateRect(hwnd,NULL,TRUE);
             }
             break;
 
@@ -1761,7 +1773,6 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
                         devicematch_t *devicematch_f=manager_g->items_list[floating_itembar].devicematch;
                         driver_t *cur_driver=&manager_g->matcher->state->drivers_list[devicematch_f->device->driver_index];
-                        printf("%d,%d,%d\n",devicematch_f,devicematch_f->device->driver_index,cur_driver);
                         wsprintf(buf,L"%s%s%s",
                                 (wp==ID_LOCATEINF)?L"/select,":L"",
                                manager_g->matcher->state->text+manager_g->matcher->state->windir,
@@ -1780,7 +1791,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(wp>=ID_HWID_CLIP&&wp<=ID_HWID_WEB+100)
             {
                 int id=wp%100;
-                printf("%ws\n",getHWIDby(floating_itembar,id));
+                //printf("%ws\n",getHWIDby(floating_itembar,id));
 
                 if(wp>=ID_HWID_WEB)
                 {
@@ -1789,7 +1800,6 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     wsprintf(buf,L"https://www.google.com/#q=%s",getHWIDby(floating_itembar,id));
                     wsprintf(buf,L"http://catalog.update.microsoft.com/v7/site/search.aspx?q=%s",getHWIDby(floating_itembar,id));
                     escapeAmpUrl(buf2,buf);
-                    printf("'%ws'\n",buf2);
                     RunSilent(L"iexplore.exe",buf2,SW_SHOW,0);
 
                 }

@@ -553,7 +553,7 @@ void collection_printstates(collection_t *col)
     {
         drp=&col->driverpack_list[i];
         s=drp->text;
-        log("  %6d  %ws\\(%ws)\n",drp->HWID_list_handle.items,s+drp->drppath,drp->text+drp->drpfilename);
+        log("  %6d  %ws\\%ws\n",drp->HWID_list_handle.items,s+drp->drppath,drp->text+drp->drpfilename);
         sum+=drp->HWID_list_handle.items;
     }
     log("  Sum: %d\n\n",sum);
@@ -661,7 +661,6 @@ void driverpack_init(driverpack_t *drp,WCHAR const *driverpack_path,WCHAR const 
 
     sprintf(buf,"%ws",driverpack_filename);
     drp->drpfilename=heap_memcpy(&drp->text_handle,driverpack_filename,wcslen(driverpack_filename)*2+2);
-    log("init '%ws'\n",drp->text+drp->drpfilename);
 }
 
 void driverpack_free(driverpack_t *drp)
@@ -920,21 +919,21 @@ void driverpack_genhashes(driverpack_t *drp)
     {
         sprintf(filename,"%s%s",drp->text+drp->inffile[i].infpath,drp->text+drp->inffile[i].inffilename);
         strtolower(filename,strlen(filename));
-        //log_err("%s\n",filename);
+        //log_con("%s\n",filename);
         for(j=CatalogFile;j<=CatalogFile_ntamd64;j++)
         {
             if(drp->inffile[i].fields[j])
             {
                 sprintf(filename,"%s%s",drp->text+drp->inffile[i].infpath,drp->text+drp->inffile[i].fields[j]);
                 strtolower(filename,strlen(filename));
-                //log_err("%d: (%s)\n",j,filename);
+                //log_con("%d: (%s)\n",j,filename);
                 r=hash_find_str(&drp->cat_list,filename);
                 if(r)
                 {
-                    //log_err("^^%d: %s\n",r,drp->text+r);
+                    //log_con("^^%d: %s\n",r,drp->text+r);
                     drp->inffile[i].cats[j]=r;
                 }
-                //else log_err("Not found\n");
+                //else log_con("Not found\n");
 
             }
         }
@@ -1022,12 +1021,12 @@ void driverpack_parsecat(driverpack_t *drp,WCHAR const *pathinf,WCHAR const *inf
         if(*p=='O'&&!memcmp(p,L"OSAttr",11))
         {
             //sprintf(bufb,"%ws",p+19);
-            //if(*bufa&&strcmp(bufa,bufb))log_err("^^");
+            //if(*bufa&&strcmp(bufa,bufb))log_con("^^");
             if(!*bufa||bufal<wcslen((WCHAR *)(p+19)))
             {
                 sprintf(bufa,"%ws",p+19);
                 bufal=strlen(bufa);
-                //log_err("Found '%s'\n",bufa);
+                //log_con("Found '%s'\n",bufa);
                 //break;
             }
         }
@@ -1037,7 +1036,7 @@ void driverpack_parsecat(driverpack_t *drp,WCHAR const *pathinf,WCHAR const *inf
     {
         strtolower(filename,strlen(filename));
         hash_add(&drp->cat_list,filename,strlen(filename),heap_memcpyz_dup(&drp->text_handle,bufa,strlen(bufa)),HASH_MODE_INTACT);
-        //log_err("(%s)\n##%s\n",filename,bufa);
+        //log_con("(%s)\n##%s\n",filename,bufa);
     }
 }
 
@@ -1057,7 +1056,7 @@ int driverpack_genindex(driverpack_t *drp)
     WCHAR pathinf[1024];
     WCHAR *inffile;
 
-    log_err("Indexing %ws\\%ws\n",drp->text+drp->drppath,drp->text+drp->drpfilename);
+    log_con("Indexing %ws\\%ws\n",drp->text+drp->drppath,drp->text+drp->drpfilename);
     wsprintf(name,L"%ws\\%ws",drp->text+drp->drppath,drp->text+drp->drpfilename);
     //log("Scanning '%s'\n",name);
     allocImp.Alloc=SzAlloc;
@@ -1093,7 +1092,6 @@ int driverpack_genindex(driverpack_t *drp)
             size_t len;
             if (f->IsDir)continue;
 
-            //log_err("%d,",i);
             len=SzArEx_GetFileNameUtf16(&db,i,NULL);
             if(len>tempSize)
             {
@@ -1108,7 +1106,6 @@ int driverpack_genindex(driverpack_t *drp)
                 }
             }
             SzArEx_GetFileNameUtf16(&db,i,temp);
-            //log_err("%d/%d,(%ws)\n",i,db.db.NumFiles,temp);
 
             if(_wcsicmp((WCHAR *)temp+wcslen((WCHAR *)temp)-4,L".inf")==0)
             {

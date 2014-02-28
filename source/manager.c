@@ -215,7 +215,6 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
             *r=i;
             x-=D(ITEM_CHECKBOX_OFS_X)+D(DRVITEM_OFSX);
             y-=D(ITEM_CHECKBOX_OFS_Y)+pos;
-            //printf("%d,%d\n",x,y);
             if(x>0&&x<D(ITEM_CHECKBOX_SIZE)&&y>0&&y<D(ITEM_CHECKBOX_SIZE))*zone=1;
             if(x>D(DRVITEM_WX)-50)*zone=2;
             return;
@@ -229,7 +228,6 @@ void manager_clear(manager_t *manager)
     itembar_t *itembar;
     int i;
 
-    log_err("Clear\n");
     itembar=&manager->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
     {
@@ -364,7 +362,7 @@ void manager_selectall(manager_t *manager)
     for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
     {
         itembar->checked=0;
-        if(itembar->isactive&&group!=itembar->index)
+        if(itembar->isactive&&group!=itembar->index&&itembar->hwidmatch)
         {
             if(itembar->install_status==0)itembar->checked=1;
             group=itembar->index;
@@ -403,7 +401,6 @@ void itembar_setpos(itembar_t *itembar,int *pos,int *cnt)
             *pos+=*cnt?D(ITEM_DIST_Y1):D(ITEM_DIST_Y0);
 
         (*cnt)--;
-        //printf("%d,%d\n",itembar->index,*pos);
     }
     //*pos=0;
     itembar->oldpos=itembar->curpos;
@@ -980,6 +977,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
     int show_changes=manager_old->items_handle.items>20;
 
     if(statemode==STATEMODE_LOAD)show_changes=0;
+    if((log_verbose&LOG_VERBOSE_DEVSYNC)==0)show_changes=0;
     //show_changes=1;
 
     t_old=manager_old->matcher->state->text;
@@ -990,7 +988,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
         return;
     }
 
-    log_err("{Updated %d->%d\n",manager_old->items_handle.items,manager_new->items_handle.items);
+    log_con("{Updated %d->%d\n",manager_old->items_handle.items,manager_new->items_handle.items);
     log_console=0;
     itembar_new=&manager_new->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager_new->items_handle.items;i++,itembar_new++)
@@ -999,7 +997,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
 
         if(itembar_act&&itembar_cmp(itembar_new,&manager_old->items_list[itembar_act],t_new,t_old))
         {
-            log_err("Act %d -> %d\n",itembar_act,i);
+            log_con("Act %d -> %d\n",itembar_act,i);
             itembar_act=i;
         }
 
@@ -1031,14 +1029,14 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
         if(show_changes)
         if(j==manager_old->items_handle.items)
         {
-            log_err("\nAdded   $%04d|%ws|%ws|",i,t_new+itembar_new->devicematch->device->Driver,
+            log_con("\nAdded   $%04d|%ws|%ws|",i,t_new+itembar_new->devicematch->device->Driver,
                     t_new+itembar_new->devicematch->device->Devicedesc);
 
             if(itembar_new->hwidmatch)
             {
                 int limits[7];
                 memset(limits,0,sizeof(limits));
-                log_err("%d|\n",itembar_new->hwidmatch->HWID_index);
+                log_con("%d|\n",itembar_new->hwidmatch->HWID_index);
                 hwidmatch_print(itembar_new->hwidmatch,limits);
             }
             else
@@ -1052,13 +1050,13 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
     {
         if(itembar_old->isactive!=9)
         {
-            log_err("\nDeleted $%04d|%ws|%ws|",j,t_old+itembar_old->devicematch->device->Driver,
+            log_con("\nDeleted $%04d|%ws|%ws|",j,t_old+itembar_old->devicematch->device->Driver,
                     t_old+itembar_old->devicematch->device->Devicedesc);
             if(itembar_old->hwidmatch)
             {
                 int limits[7];
                 memset(limits,0,sizeof(limits));
-                log_err("%d|\n",itembar_old->hwidmatch->HWID_index);
+                log_con("%d|\n",itembar_old->hwidmatch->HWID_index);
                 hwidmatch_print(itembar_old->hwidmatch,limits);
             }
             else
@@ -1067,7 +1065,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
         }
     }
     log_console=0;
-    log_err("}Updated\n");
+    log_con("}Updated\n");
 }
 //}
 
