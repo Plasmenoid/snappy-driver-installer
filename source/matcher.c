@@ -112,9 +112,66 @@ const markers_t markers[NUM_MARKERS]=
     {"ntx86",  -1,-1, 0},
     {"ntx64",  -1,-1, 1},
 };
+
+char marker[BUFLEN];
+
+WCHAR *Filter_1[]={L"Acer",L"acer",L"emachines",L"packard",L"bell",L"gateway",L"aspire",0};
+WCHAR *Filter_2[]={L"Apple",L"apple",0};
+WCHAR *Filter_3[]={L"Asus",L"asus",0};
+WCHAR *Filter_4[]={L"Clevo",L"clevo",L"eurocom",L"sager",L"iru",L"viewsonic",L"viewbook",0};
+WCHAR *Filter_5[]={L"Dell",L"dell",L"alienware",L"arima",L"jetway",L"gericom",0};
+WCHAR *Filter_6[]={L"Fujitsu",L"fujitsu",L"sieme",0};
+WCHAR *Filter_7[]={L"Gigabyte",L"gigabyte",L"ecs",L"elitegroup",L"roverbook",L"rover",0};
+WCHAR *Filter_8[]={L"HP",L"hp",L"hewle",L"compaq",0};
+WCHAR *Filter_9[]={L"Intel",L"intel",0};
+WCHAR *Filter_10[]={L"Lenovo",L"lenovo",L"compal",L"ibm",L"wistron",0};
+WCHAR *Filter_11[]={L"LG",L"lg",0};
+WCHAR *Filter_12[]={L"MTC",L"mitac",L"mtc",L"depo",L"getac",0};
+WCHAR *Filter_13[]={L"MSI",L"msi",L"micro-star",0};
+WCHAR *Filter_14[]={L"Panasonic",L"panasonic",L"matsushita",0};
+WCHAR *Filter_15[]={L"Quanta",L"quanta",L"prolink",L"nec",L"k-systems",L"benq",L"vizio",0};
+WCHAR *Filter_16[]={L"Pegatron",L"pegatron",L"medion",0};
+WCHAR *Filter_17[]={L"Samsung",L"samsung",0};
+WCHAR *Filter_18[]={L"Shuttle",L"shuttle",0};
+WCHAR *Filter_19[]={L"Sony",L"sony",L"vaio",0};
+WCHAR *Filter_20[]={L"Toshiba",L"toshiba",0};
+WCHAR *Filter_21[]={L"Twinhead",L"twinhead",L"durabook",0};
+
+WCHAR **filter_list[]=
+{
+    Filter_1, Filter_2, Filter_3, Filter_4, Filter_5, Filter_6, Filter_7,
+    Filter_8, Filter_9, Filter_10,Filter_11,Filter_12,Filter_13,Filter_14,
+    Filter_15,Filter_16,Filter_17,Filter_18,Filter_19,Filter_20,Filter_21
+};
 //}
 
 //{ Calc
+void genmarker(state_t *state)
+{
+    int i,j;
+    WCHAR *str;
+
+    *marker=0;
+    if(state->manuf)
+        str=(WCHAR *)(state->text+state->manuf);
+    else
+        return;
+
+    //log_con("Manuf '%ws'\n",str);
+    for(i=0;i<21;i++)
+    {
+        //log_con("%d: '%ws'\n",i+1,filter_list[i][0]);
+        for(j=1;filter_list[i][j];j++)
+        {
+            if(StrStrI(str,filter_list[i][j]))
+            {
+                sprintf(marker,"%ws_nb",filter_list[i][0]);
+                log_con("Matched marker: '%s'(%ws)\n",marker,filter_list[i][j]);
+            }
+        }
+    }
+}
+
 int calc_identifierscore(int dev_pos,int dev_ishw,int inf_pos)
 {
     if(dev_ishw&&inf_pos==0)    // device hardware ID and a hardware ID in an INF
@@ -262,8 +319,12 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
         getdrp_drvsectionAtPos(hwidmatch->drp,buf,pos,manufacturer_index);
         if(calc_decorscore(calc_secttype(buf),state)>curscore)return 0;
     }
-    if(!isLaptop&&strstr(getdrp_infpath(hwidmatch),"_nb\\")!=0)
-        return 0;
+    if(strstr(getdrp_infpath(hwidmatch),"_nb\\"))
+    {
+        if(!isLaptop)return 0;
+        if(!*marker)return 0;
+        if(!StrStrIA(getdrp_infpath(hwidmatch),marker))return 0;
+    }
     //log("Sc:%d\n\n",curscore);
     return isvalidcat(hwidmatch,state)?2:1;
 }
@@ -559,6 +620,8 @@ void matcher_populate(matcher_t *matcher)
     cur_device=state->devices_list;
     heap_reset(&matcher->devicematch_handle,0);
     heap_reset(&matcher->hwidmatch_handle,0);
+
+    genmarker(state);
     for(i=0;i<state->devices_handle.items;i++,cur_device++)
     {
         cur_driver=0;

@@ -520,6 +520,10 @@ void bundle_load(bundle_t *bundle)
     CloseHandle_log(thandle[0],L"bundle_load",L"0");
     CloseHandle_log(thandle[1],L"bundle_load",L"1");
 
+    if(!(flags&FLAG_NOSLOWSYSINFO)&&statemode!=STATEMODE_LOAD)
+    {
+        state_getsysinfo_slow(&bundle->state);
+    }
     matcher_populate(&bundle->matcher);
     matcher_sort(&bundle->matcher);
 }
@@ -529,9 +533,10 @@ void bundle_lowprioirity(bundle_t *bundle)
     time_startup=GetTickCount()-time_startup;
 
     log_con("lowprioirity.[");
+    redrawmainwnd();
     if(!(flags&FLAG_NOSLOWSYSINFO)&&statemode!=STATEMODE_LOAD)
     {
-        state_getsysinfo_slow(&bundle->state);
+        //state_getsysinfo_slow(&bundle->state);
         redrawmainwnd();
         log_con("6");
     }
