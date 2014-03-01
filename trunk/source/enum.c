@@ -424,6 +424,7 @@ int  state_load(state_t *state,const WCHAR *filename)
     p=heap_load(&state->text_handle,p);
 
     state_fakeOSversion(state);
+    isnotebook_a(state);
 
     free(mem);
     if(mem_unpack)free(mem_unpack);
