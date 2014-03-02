@@ -597,6 +597,8 @@ void state_getsysinfo_fast(state_t *state)
     isnotebook_a(state);
 }
 
+int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product);
+
 void state_getsysinfo_slow(state_t *state)
 {
     WCHAR buf[BUFLEN];
@@ -605,37 +607,48 @@ void state_getsysinfo_slow(state_t *state)
     FILE *f;
     int  sz;
 
+    WCHAR model[BUFLEN];
+    WCHAR manuf[BUFLEN];
+    WCHAR product[BUFLEN];
+
     time_sysinfo=GetTickCount();
-    wsprintf(filename,L"%s\\output.txt",state->text+state->temp);
-    wsprintf(buf,L"/c wmic baseboard GET /value >\"%s\\output.txt\"",state->text+state->temp);
-    time_test=GetTickCount()-time_test;
-    log_con("1");
-    RunSilent(L"cmd",buf,SW_HIDE,1);
-    log_con("2");
-    f=_wfopen(filename,L"rb");
-    if(!f)return;
-    fseek(f,0,SEEK_END);
-    sz=ftell(f);
-    if(!sz)return;
-    fseek(f,0,SEEK_SET);
-    fread(buf,1,sz,f);
-    fclose(f);
-    buf[sz/2]=0;
+    if(1)
+    {
+        getbaseboard(manuf,model,product);
+        state->manuf=heap_memcpy(&state->text_handle,manuf,wcslen(manuf)*2+2);
+        state->product=heap_memcpy(&state->text_handle,product,wcslen(product)*2+2);
+        state->model=heap_memcpy(&state->text_handle,model,wcslen(model)*2+2);
+    }
+    else
+    {
+        wsprintf(filename,L"%s\\output.txt",state->text+state->temp);
+        wsprintf(buf,L"/c wmic baseboard GET /value >\"%s\\output.txt\"",state->text+state->temp);
+        time_test=GetTickCount()-time_test;
+        log_con("1");
+        RunSilent(L"cmd",buf,SW_HIDE,1);
+        log_con("2");
+        f=_wfopen(filename,L"rb");
+        if(!f)return;
+        fseek(f,0,SEEK_END);
+        sz=ftell(f);
+        if(!sz)return;
+        fseek(f,0,SEEK_SET);
+        fread(buf,1,sz,f);
+        fclose(f);
+        buf[sz/2]=0;
 
-    log_con("3");
-    pw=wcsstr(buf,L"Manufacturer=");
-    if(!pw)return;
-    pw+=13;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
-    state->manuf=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
-    *pe=pchar;pw=wcsstr(buf,L"Product=");pw+=8;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
-    state->product=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
-    *pe=pchar;pw=wcsstr(buf,L"Model=");pw+=6;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
-    state->model=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
+        pw=wcsstr(buf,L"Manufacturer=");
+        if(!pw)return;
+        pw+=13;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
+        state->manuf=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
+        *pe=pchar;pw=wcsstr(buf,L"Product=");pw+=8;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
+        state->product=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
+        *pe=pchar;pw=wcsstr(buf,L"Model=");pw+=6;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
+        state->model=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
+        _wremove(filename);
+    }
 
-    log_con("4");
-    _wremove(filename);
     time_sysinfo=GetTickCount()-time_sysinfo;
-    log_con("5");
 }
 
 void state_scandevices(state_t *state)
@@ -643,7 +656,7 @@ void state_scandevices(state_t *state)
     HDEVINFO hDevInfo;
     HKEY   hkey;
     SP_DEVINFO_DATA *DeviceInfoData;
-    WCHAR buf[4096];
+    WCHAR buf[BUFLEN];
     DWORD buffersize;
     driver_t *cur_driver;
     collection_t collection;
