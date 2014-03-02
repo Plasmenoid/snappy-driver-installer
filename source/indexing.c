@@ -579,7 +579,7 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
         } else
         {
             int len=lstrlen(FindFileData.cFileName);
-            if(lstrcmp(FindFileData.cFileName+len-3,L".7z")==0)
+            if(_wcsicmp(FindFileData.cFileName+len-3,L".7z")==0)
             {
                 //drp=(driverpack_t *)heap_allocitem_ptr(&col->driverpack_handle);
                 int index=heap_allocitem_i(&col->driverpack_handle);
