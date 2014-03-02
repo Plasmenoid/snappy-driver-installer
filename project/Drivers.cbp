@@ -84,6 +84,7 @@
 			<Add option="-static-libstdc++" />
 			<Add option="-static" />
 			<Add option="-m32" />
+			<Add library="baseboard" />
 			<Add library="7z" />
 			<Add library="kernel32" />
 			<Add library="user32" />
@@ -103,6 +104,8 @@
 			<Add library="shlwapi" />
 			<Add library="newdev" />
 			<Add library="comctl32" />
+			<Add library="wbemuuid" />
+			<Add directory="../external" />
 		</Linker>
 		<ExtraCommands>
 			<Add before="..\resources\delres.bat" />
