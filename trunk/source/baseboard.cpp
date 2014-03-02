@@ -5,6 +5,7 @@
 //for some reason CLSID_WbemLocator isn't declared in libwbemuuid.a (although it probably should be).
 const GUID CLSID_WbemLocator={0x4590F811,0x1D3A,0x11D0,{ 0x89,0x1F,0x00,0xAA,0x00,0x4B,0x2E,0x24}};
 
+int init=0;
 extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product)
 {
     IWbemLocator *pLoc=0;
@@ -20,13 +21,16 @@ extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product)
         return 0;
     }
 
-    hres=CoInitializeSecurity(NULL,-1,NULL,NULL,RPC_C_AUTHN_LEVEL_DEFAULT,
-                              RPC_C_IMP_LEVEL_IMPERSONATE,NULL,EOAC_NONE,NULL);
-    if(FAILED(hres))
+    if(!init)
     {
-        printf("FAILED to initialize security. Error code = 0x%X\n",hres);
-        CoUninitialize();
-        return 0;
+        hres=CoInitializeSecurity(NULL,-1,NULL,NULL,RPC_C_AUTHN_LEVEL_DEFAULT,
+                                RPC_C_IMP_LEVEL_IMPERSONATE,NULL,EOAC_NONE,NULL);
+        if(FAILED(hres))
+        {
+            printf("FAILED to initialize security. Error code = 0x%X\n",hres);
+            CoUninitialize();
+            return 0;
+        }
     }
 
     hres=CoCreateInstance(CLSID_WbemLocator,0,CLSCTX_INPROC_SERVER,IID_IWbemLocator,(LPVOID *)&pLoc);
@@ -93,6 +97,7 @@ extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product)
             if(vtProp3.bstrVal)wcscpy(product,vtProp3.bstrVal);
         }
     }
+    init=1;
 
     pSvc->Release();
     pLoc->Release();

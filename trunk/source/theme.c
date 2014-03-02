@@ -400,7 +400,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
     langauto[0]=0;
     wcscpy(langauto2,L"Auto");
 
-    wsprintf(buf,L"%s\\%s\\*.txt",data_dir,path);
+    wsprintf(buf,L"%s\\%s\\*.TXT",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);
     if(hFind!=INVALID_HANDLE_VALUE)
     do
