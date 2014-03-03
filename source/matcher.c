@@ -217,6 +217,7 @@ int calc_signature(int catalogfile,state_t *state,int isnt)
 
 unsigned calc_score(int catalogfile,int feature,int rank,state_t *state,int isnt)
 {
+    if(flags&FLAG_NOFEATURESCORE)feature=0;
     if(state->platform.dwMajorVersion>=6)
         return (calc_signature(catalogfile,state,isnt)<<16)+(feature<<16)+rank;
     else
@@ -225,7 +226,9 @@ unsigned calc_score(int catalogfile,int feature,int rank,state_t *state,int isnt
 
 unsigned calc_score_h(driver_t *driver,state_t *state)
 {
-    return calc_score(driver->catalogfile,driver->feature,driver->identifierscore,
+    int feature=driver->feature;
+    if(flags&FLAG_NOFEATURESCORE)feature=0;
+    return calc_score(driver->catalogfile,feature,driver->identifierscore,
         state,StrStrI((WCHAR *)(state->text+driver->InfSectionExt),L".nt")?1:0);
 }
 

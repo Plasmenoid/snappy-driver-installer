@@ -177,6 +177,7 @@ typedef struct _data_HWID_t // 8
 #define FLAG_NOLOGFILE               0x0800
 #define FLAG_NOSNAPSHOT              0x1000
 #define FLAG_NOSTAMP                 0x2000
+#define FLAG_NOFEATURESCORE          0x4000
 
 typedef struct _collection_t
 {
