@@ -458,7 +458,7 @@ int collection_scanfolder_count(collection_t *col,const WCHAR *path)
 {
     HANDLE hFind = INVALID_HANDLE_VALUE;
     WIN32_FIND_DATA FindFileData;
-    WCHAR buf[1024];
+    WCHAR buf[BUFLEN];
     int cnt=0;
 
     wsprintf(buf,L"%ws\\*.*",path);
@@ -474,7 +474,7 @@ int collection_scanfolder_count(collection_t *col,const WCHAR *path)
         } else
         {
             int len=lstrlen(FindFileData.cFileName);
-            if(lstrcmp(FindFileData.cFileName+len-3,L".7z")==0)
+            if(_wcsicmp(FindFileData.cFileName+len-3,L".7z")==0)
             {
                 cnt++;
             }
