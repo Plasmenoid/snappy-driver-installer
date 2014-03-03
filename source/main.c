@@ -1575,7 +1575,13 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             SendMessage(hTheme,CB_RESETCONTENT,0,0);
             theme_enum(hTheme,L"themes");
             f=SendMessage(hTheme,CB_FINDSTRINGEXACT,-1,(int)curtheme);
-            if(f==CB_ERR)f=0;
+            if(f==CB_ERR)
+            {
+                theme_set(f);
+                j=SendMessage(hTheme,CB_GETCOUNT,0,0);
+                for(i=0;i<j;i++)
+                    if(StrStrI(themelist[i],(WCHAR *)D(THEME_NAME)))f=i;
+            }
             theme_set(f);
             setfont();
             SendMessage(hTheme,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));

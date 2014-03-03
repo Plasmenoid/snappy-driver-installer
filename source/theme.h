@@ -31,6 +31,7 @@ typedef struct _img_t
 extern const int boxindex[BOX_NUM];
 extern img_t box[BOX_NUM];
 extern img_t icon[ICON_NUM];
+extern WCHAR themelist[64][250];
 
 // Theme/lang
 typedef struct _entry_t
