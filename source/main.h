@@ -164,6 +164,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 // Manager
 extern manager_t *manager_g;
 extern int volatile installmode;
+extern int driverpackpath;
 extern CRITICAL_SECTION sync;
 
 // Window

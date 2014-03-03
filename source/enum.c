@@ -862,6 +862,8 @@ void state_scandevices(state_t *state)
                     driverpack_indexinf(&unpacked_drp,buf,(WCHAR *)(state->text+cur_driver->InfPath),buft,len);
                     free(buft);
 
+                    char sect[BUFLEN];
+                    sprintf(sect,"%ws",state->text+cur_driver->InfSection);
                     sprintf(bufa,"%ws%ws",state->text+cur_driver->InfSection,state->text+cur_driver->InfSectionExt);
                     sprintf(bufa,"%ws",state->text+cur_driver->MatchingDeviceId);
                     for(HWID_index=0;HWID_index<unpacked_drp.HWID_list_handle.items;HWID_index++)
@@ -870,9 +872,12 @@ void state_scandevices(state_t *state)
                         hwidmatch_t hwidmatch;
 
                         hwidmatch_initbriefly(&hwidmatch,&unpacked_drp,HWID_index);
-                        cur_driver->feature=getdrp_drvfeature(&hwidmatch);
-                        cur_driver->catalogfile=calc_catalogfile(&hwidmatch);
-                        if(inf_pos<0||inf_pos>getdrp_drvinfpos(&hwidmatch))inf_pos=getdrp_drvinfpos(&hwidmatch);
+                        if(!strcmpi(getdrp_drvinstall(&hwidmatch),sect))
+                        {
+                            cur_driver->feature=getdrp_drvfeature(&hwidmatch);
+                            cur_driver->catalogfile=calc_catalogfile(&hwidmatch);
+                            if(inf_pos<0||inf_pos>getdrp_drvinfpos(&hwidmatch))inf_pos=getdrp_drvinfpos(&hwidmatch);
+                        }
                     }
                     //log("Added '%ws',%d\n",filename,inf_pos);
                     infdata=malloc(sizeof(infdata_t));
