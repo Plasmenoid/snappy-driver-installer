@@ -165,6 +165,7 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
+        if(!wcscmp(pr,L"-nofeaturescore"))flags|=FLAG_NOFEATURESCORE;else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
@@ -252,6 +253,7 @@ void settings_save()
     if(license)fwprintf(f,L"-license ");
     if(expertmode)fwprintf(f,L"-expertmode ");
     if(flags&FLAG_NORESTOREPOINT)fwprintf(f,L"-norestorepnt ");
+    if(flags&FLAG_NOFEATURESCORE)fwprintf(f,L"-nofeaturescore ");
     fclose(f);
 }
 
