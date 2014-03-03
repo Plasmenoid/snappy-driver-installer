@@ -73,6 +73,7 @@ int manager_active=0;
 int bundle_display=1;
 int bundle_shadow=0;
 int volatile installmode=MODE_NONE;
+int driverpackpath=0;
 CRITICAL_SECTION sync;
 
 // Window
@@ -1659,6 +1660,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             {
                 wndclicker(2);
                 MessageBox(0,L"Windows data recorded into the log.",L"Message",0);
+            }
+            if(wParam==VK_F8)
+            {
+                driverpackpath^=1;
+                redrawfield();
             }
             break;
 

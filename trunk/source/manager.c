@@ -863,6 +863,13 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
                         wcscpy(bufw,STR(itembar->install_status));
                 }
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+
+                if(driverpackpath)
+                {
+                    wsprintf(bufw,L"%ws\\%ws",getdrp_packpath(itembar->hwidmatch),
+                            getdrp_packname(itembar->hwidmatch));
+                    TextOut(hdc,x+D(DRVITEM_WX)-240,pos,bufw,wcslen(bufw));
+                }
             }
             else
             {
