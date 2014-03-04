@@ -166,7 +166,7 @@ typedef struct _data_HWID_t // 8
 #define COLLECTION_FORCE_REINDEXING  0x0001
 #define COLLECTION_USE_LZMA          0x0002
 #define COLLECTION_PRINT_INDEX       0x0004
-//#define COLLECTION_PRINT_LINEAR_INDEX   0x0008
+#define FLAG_PRESERVECFG             0x8000
 #define FLAG_NOGUI                   0x0010
 #define FLAG_NOSLOWSYSINFO           0x0020
 #define FLAG_DISABLEINSTALL          0x0040
