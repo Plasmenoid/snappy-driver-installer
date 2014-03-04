@@ -189,6 +189,28 @@ void manager_print(manager_t *manager)
 
     log("}manager_print[%d]\n\n",act);
 }
+
+void manager_sort(manager_t *manager)
+{
+    itembar_t *itembar1,*itembar2,t;
+    int i,j;
+
+    if(installmode)return;
+
+    itembar1=&manager->items_list[RES_SLOTS];
+    for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar1++)if(itembar1->hwidmatch)
+    {
+        itembar2=&manager->items_list[i+1];
+        for(j=i+1;j<manager->items_handle.items;j++,itembar2++)if(itembar2->hwidmatch)
+        if(wcscmp(getdrp_packname(itembar1->hwidmatch),getdrp_packname(itembar2->hwidmatch))>0)
+        {
+            memcpy(&t,itembar1,sizeof(itembar_t));
+            memcpy(itembar1,itembar2,sizeof(itembar_t));
+            memcpy(itembar2,&t,sizeof(itembar_t));
+        }
+    }
+    manager_setpos(manager);
+}
 //}
 
 //{ User interaction

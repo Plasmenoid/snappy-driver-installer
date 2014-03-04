@@ -167,6 +167,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
         if(!wcscmp(pr,L"-nofeaturescore"))flags|=FLAG_NOFEATURESCORE;else
+        if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
@@ -235,6 +236,7 @@ void settings_save()
 {
     FILE *f;
 
+    if(flags&FLAG_PRESERVECFG)return;
     if(!canWrite(L"settings.cfg"))
     {
         log_err("ERROR in settings_save(): Write-protected,'settings.cfg'\n");
@@ -1656,7 +1658,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_KEYUP:
             if(wParam==VK_F5)
                 PostMessage(hwnd,WM_DEVICECHANGE,7,0);
-            if(wParam==VK_F6)
+            if(wParam==VK_F6&&ctrl_down)
             {
                 manager_testitembars(manager_g);
                 manager_setpos(manager_g);
@@ -1670,6 +1672,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(wParam==VK_F8)
             {
                 driverpackpath^=1;
+                if(ctrl_down)
+                {
+                    driverpackpath=1;
+                    manager_sort(manager_g);
+                }
                 redrawfield();
             }
             break;

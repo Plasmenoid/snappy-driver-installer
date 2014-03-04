@@ -102,6 +102,7 @@ void manager_free(manager_t *manager);
 void manager_populate(manager_t *manager);
 void manager_filter(manager_t *manager,int options);
 void manager_print(manager_t *manager);
+void manager_sort(manager_t *manager);
 
 // User interaction
 void manager_hitscan(manager_t *manager,int x,int y, int *i,int *zone);
