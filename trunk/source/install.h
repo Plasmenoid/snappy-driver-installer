@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define NUM_CLICKDATA 3
+#define NUM_CLICKDATA 4
 #define AUTOCLICKER_CONFIRM
 
 typedef struct _wnddata_t
