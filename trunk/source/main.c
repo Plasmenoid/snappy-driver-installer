@@ -98,6 +98,7 @@ int field_lasti,field_lastz;
 int mainx_c,mainy_c;
 int mainx_w,mainy_w;
 int mousex=-1,mousey=-1,mousedown=0,mouseclick=0;
+int cntd=0;
 
 int ctrl_down=0;
 int space_down=0;
@@ -105,7 +106,6 @@ int floating_type=0;
 int floating_itembar=-1;
 int floating_x=1,floating_y=1;
 int horiz_sh=0;
-WCHAR *floating_str=0;
 
 int exitflag=0;
 int ret_global;
@@ -198,7 +198,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else
         if(!wcscmp(pr,L"-index_hr"))     flags|=COLLECTION_PRINT_INDEX;else
         if(!wcscmp(pr,L"-lzma"))         flags|=COLLECTION_USE_LZMA;else
-        if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI;else
+        if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI|FLAG_AUTOCLOSE;else
         if(!wcscmp(pr,L"-noslowsysinfo"))flags|=FLAG_NOSLOWSYSINFO;else
         if(!wcscmp(pr,L"-autoinstall"))  flags|=FLAG_AUTOINSTALL;else
         if(!wcscmp(pr,L"-autoclose"))    flags|=FLAG_AUTOCLOSE;else
@@ -370,6 +370,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     mkdir_r(index_dir);
     mkdir_r(output_dir);
 #endif
+    vault_init();
     bundle_init(&bundle[0]);
     bundle_init(&bundle[1]);
     manager_init(&manager_v[0],&bundle[bundle_display].matcher);
@@ -382,7 +383,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     mon_drp=monitor_start(drp_dir,FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,drp_callback);
     virusmonitor_start();
     viruscheck(L"",0,0);
-    if(!(flags&FLAG_NOGUI))gui(nCmd);
+    if(!(flags&FLAG_NOGUI)||flags&FLAG_AUTOINSTALL)gui(nCmd);
     exitflag=1;
     SetEvent(event);
     if(mon_drp)monitor_stop(mon_drp);
@@ -458,7 +459,7 @@ unsigned int __stdcall thread_loadall(void *arg)
 
         if(!cancel_update)
         {
-            if(flags&FLAG_NOGUI||hMain==0)
+            if((flags&FLAG_NOGUI||hMain==0)&&(flags&FLAG_AUTOINSTALL)==0)
             {
                 manager_g->matcher=&bundle[bundle_shadow].matcher;
                 manager_populate(manager_g);
@@ -612,6 +613,7 @@ void redrawmainwnd()
         log_err("ERROR in redrawfield(): hField is 0\n");
         return;
     }
+    //log_con("Redraw main %d\n",cntd++);
     InvalidateRect(hMain,NULL,TRUE);
     UpdateWindow(hMain);
 }
@@ -978,23 +980,24 @@ void drawrevision(HDC hdcMem,int y)
     TextOut(hdcMem,D(PANEL_OFSX),y-20,buf,wcslen(buf));
 }
 
-void drawpopup(int itembar,WCHAR *str,int type,int x,int y,HWND hwnd)
+void drawpopup(int itembar,int type,int x,int y,HWND hwnd)
 {
     POINT p={x,y};
     HMONITOR hMonitor;
     MONITORINFO mi;
+    int needupdate;
 
-    if(type==FLOATING_DRIVER&&floating_itembar<0)type=FLOATING_NONE;
-    if(type==FLOATING_TOOLTIP&&!*str)type=FLOATING_NONE;
+    if((type==FLOATING_CMPDRIVER||type==FLOATING_DRIVERLST)&&floating_itembar<0)type=FLOATING_NONE;
+    if(type==FLOATING_TOOLTIP&&(floating_itembar<=1||!*STR(floating_itembar)))type=FLOATING_NONE;
 
     ClientToScreen(hwnd,&p);
-    floating_str=str;
+    needupdate=floating_itembar!=itembar||floating_type!=type;
     floating_itembar=itembar;
     floating_type=type;
 
     if(type!=FLOATING_NONE)
     {
-        if(type==FLOATING_DRIVER)
+        if(type==FLOATING_CMPDRIVER||type==FLOATING_DRIVERLST)
         {
             hMonitor=MonitorFromPoint(p,MONITOR_DEFAULTTONEAREST);
             mi.cbSize=sizeof(MONITORINFO);
@@ -1009,7 +1012,7 @@ void drawpopup(int itembar,WCHAR *str,int type,int x,int y,HWND hwnd)
         if(type==FLOATING_ABOUT)p.y=p.y-floating_y-30;
 
         MoveWindow(hPopup,p.x+10,p.y+20,floating_x,floating_y,1);
-        InvalidateRect(hPopup,0,0);
+        if(needupdate)InvalidateRect(hPopup,0,0);
 
         TRACKMOUSEEVENT tme;
         tme.cbSize=sizeof(tme);
@@ -1252,7 +1255,7 @@ void gui(int nCmd)
             return;
         }
 
-        ShowWindow(hMain,nCmd);
+        ShowWindow(hMain,flags&FLAG_NOGUI?SW_HIDE:nCmd);
 
         while(!done)
         {
@@ -1281,7 +1284,7 @@ void gui(int nCmd)
                 {
                     if(msg.wParam==VK_CONTROL||msg.wParam==VK_SPACE)
                     {
-                        drawpopup(-1,0,FLOATING_NONE,0,0,hField);
+                        drawpopup(-1,FLOATING_NONE,0,0,hField);
                     }
                     if(msg.wParam==VK_CONTROL)ctrl_down=0;
                     if(msg.wParam==VK_SPACE)  space_down=0;
@@ -1583,8 +1586,9 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 j=SendMessage(hTheme,CB_GETCOUNT,0,0);
                 for(i=0;i<j;i++)
                     if(StrStrI(themelist[i],(WCHAR *)D(THEME_NAME)))f=i;
-            }
-            theme_set(f);
+            }else
+                theme_set(f);
+
             setfont();
             SendMessage(hTheme,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
             SendMessage(hLang,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
@@ -1734,9 +1738,9 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             i=panel_hitscan(x,y);
 
             if(i<0&&y>rect.bottom-20&&x<D(PANEL_WX))
-                drawpopup(-1,L"",FLOATING_ABOUT,x,y,hwnd);
+                drawpopup(-1,FLOATING_ABOUT,x,y,hwnd);
             else
-                drawpopup(-1,i>=0?STR(panelitems[i].str_id+1):L"",i>0&&i<4?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
+                drawpopup(panelitems[i].str_id+1,i>0&&i<4?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
 
             if(panel_lasti!=i)redrawmainwnd();
             panel_lasti=i;
@@ -2140,11 +2144,16 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             }
             if(ctrl_down||space_down||expertmode)
             {
+                int type=FLOATING_NONE;
+
+                if(space_down)type=FLOATING_DRIVERLST;else
+                if(ctrl_down||expertmode)type=FLOATING_CMPDRIVER;
+
                 manager_hitscan(manager_g,x,y,&floating_itembar,&i);
                 if(i==0&&(floating_itembar>=RES_SLOTS||floating_itembar<0))
-                    drawpopup(floating_itembar,0,FLOATING_DRIVER,x,y,hField);
+                    drawpopup(floating_itembar,type,x,y,hField);
                 else
-                    drawpopup(-1,0,FLOATING_NONE,0,0,hField);
+                    drawpopup(-1,FLOATING_NONE,0,0,hField);
             }
             {
                 int a,b;
@@ -2182,7 +2191,7 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
             rect.right=D(POPUP_WX);
             rect.bottom=floating_y;
             SelectObject(hdcMem,hFont);
-            DrawText(hdcMem,floating_str,-1,&rect,DT_WORDBREAK|DT_CALCRECT);
+            DrawText(hdcMem,STR(floating_itembar),-1,&rect,DT_WORDBREAK|DT_CALCRECT);
             AdjustWindowRectEx(&rect,WS_POPUPWINDOW|WS_VISIBLE,0,0);
             wp->cx=rect.right+D(POPUP_OFSX)*2;
             wp->cy=rect.bottom+D(POPUP_OFSY)*2;
@@ -2201,6 +2210,7 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
             GetClientRect(hwnd,&rect);
             canvas_begin(&canvasPopup,hwnd,rect.right,rect.bottom);
 
+            //log_con("Redraw Popup %d\n",cntd++);
             box_draw(canvasPopup.hdcMem,0,0,rect.right,rect.bottom,BOX_POPUP);
             switch(floating_type)
             {
@@ -2216,13 +2226,17 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
                     rect.bottom-=D(POPUP_OFSY);
                     SelectObject(canvasPopup.hdcMem,hFont);
                     SetTextColor(canvasPopup.hdcMem,D(POPUP_TEXT_COLOR));
-                    DrawText(canvasPopup.hdcMem,floating_str,-1,&rect,DT_WORDBREAK);
+                    DrawText(canvasPopup.hdcMem,STR(floating_itembar),-1,&rect,DT_WORDBREAK);
                     break;
 
-                case FLOATING_DRIVER:
+                case FLOATING_CMPDRIVER:
                     SelectObject(canvasPopup.hdcMem,hFont);
-                    if(space_down)popup_driverlist(manager_g,canvasPopup.hdcMem,rect,floating_itembar);else
-                    if(ctrl_down||expertmode)popup_drivercmp(manager_g,canvasPopup.hdcMem,rect,floating_itembar);
+                    popup_drivercmp(manager_g,canvasPopup.hdcMem,rect,floating_itembar);
+                    break;
+
+                case FLOATING_DRIVERLST:
+                    SelectObject(canvasPopup.hdcMem,hFont);
+                    popup_driverlist(manager_g,canvasPopup.hdcMem,rect,floating_itembar);
                     break;
 
                 case FLOATING_ABOUT:

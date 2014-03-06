@@ -313,7 +313,22 @@ goaround:
             itembar->install_status=instflag&INSTALLDRIVERS?STR_INST_EXTRACT:STR_EXTR_EXTRACTING;
             redrawfield();
             LeaveCriticalSection(&sync);
-            r=Extract7z(cmd);
+            do
+            {
+                r=Extract7z(cmd);
+                if(r==2)
+                {
+                    if(PathFileExists(getdrp_packpath(hwidmatch)))break;
+                    log_con("Waiting for driverpacks to become available.");
+                    do
+                    {
+                        log_con(".");
+                        Sleep(1000);
+                    }while(!PathFileExists(getdrp_packpath(hwidmatch)));
+                    log_con("OK\n");
+
+                }
+            }while(r);
             EnterCriticalSection(&sync);
             itembar=&manager_g->items_list[itembar_act];
             //itembar->percent=manager_g->items_list[SLOT_EMPTY].percent;
