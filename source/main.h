@@ -75,14 +75,15 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 
 // Mode
 #define STATEMODE_LOAD      2
-#define STATEMODE_EXIT        3
+#define STATEMODE_EXIT      3
 
 // Popup window
-#define FLOATING_NONE    0
-#define FLOATING_TOOLTIP 1
-#define FLOATING_SYSINFO 2
-#define FLOATING_DRIVER  3
-#define FLOATING_ABOUT   4
+#define FLOATING_NONE       0
+#define FLOATING_TOOLTIP    1
+#define FLOATING_SYSINFO    2
+#define FLOATING_CMPDRIVER  3
+#define FLOATING_DRIVERLST  4
+#define FLOATING_ABOUT      5
 
 // Extract info
 #define INSTALLDRIVERS      1
@@ -265,7 +266,7 @@ void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int i);
 void drawcheckbox(HDC hdc,int x,int y,int wx,int wy,int checked,int active);
 void drawrect(HDC hdc,int x1,int y1,int x2,int y2,int color1,int color2,int w,int r);
 void drawrevision(HDC hdcMem,int y);
-void drawpopup(int itembar,WCHAR *str,int type,int x,int y,HWND hwnd);
+void drawpopup(int itembar,int type,int x,int y,HWND hwnd);
 
 // Canvas
 void canvas_init(canvas_t *canvas);

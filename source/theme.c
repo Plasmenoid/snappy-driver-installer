@@ -27,6 +27,7 @@ WCHAR *themedata=0;
 WCHAR *langdata=0;
 WCHAR langlist[64][250];
 WCHAR themelist[64][250];
+hashtable_t theme_strs,lang_strs;
 //}
 
 //{ Image
@@ -104,6 +105,27 @@ void vault_stopmonitors()
     if(mon_theme)monitor_stop(mon_theme);
 }
 
+void vault_init()
+{
+    char buf[BUFLEN];
+    int i;
+
+    hash_init(&theme_strs,ID_INF_LIST,THEME_NM*4,0);
+    hash_init(&lang_strs,ID_INF_LIST,STR_NM*4,0);
+
+    for(i=0;i<THEME_NM;i++)
+    {
+        sprintf(buf,"%S",theme[i].name);
+        hash_add(&theme_strs,buf,strlen(buf),(int)i+1,HASH_MODE_INTACT);
+    }
+
+    for(i=0;i<STR_NM;i++)
+    {
+        sprintf(buf,"%S",language[i].name);
+        hash_add(&lang_strs,buf,strlen(buf),(int)i+1,HASH_MODE_INTACT);
+    }
+}
+
 void vault_free()
 {
     int i;
@@ -119,6 +141,9 @@ void vault_free()
 
     if(themedata)free(themedata);
     if(langdata)free(langdata);
+
+    hash_free(&theme_strs);
+    hash_free(&lang_strs);
 }
 
 void *vault_loadfile(const WCHAR *filename,int *sz)
@@ -191,11 +216,12 @@ void *vault_loadfile(const WCHAR *filename,int *sz)
     }
 }
 
-int vault_findvar(entry_t *a,int num,WCHAR *str)
+int vault_findvar(hashtable_t *t,WCHAR *str)
 {
     int i;
     WCHAR *p;
     WCHAR c;
+    char buf[BUFLEN];
 
     while(*str&&(*str==L' '||*str==L'\t'))str++;
     p=str;
@@ -203,14 +229,11 @@ int vault_findvar(entry_t *a,int num,WCHAR *str)
     c=*p;
     *p=0;
 
-    for(i=0;i<num;i++)if(!wcscmp(str,a[i].name))
-    {
-        *p=c;
-        return i;
-    }
-
+    sprintf(buf,"%ws",str);
+    i=hash_find_str(t,buf);
+    i--;
     *p=c;
-    return -1;
+    return i;
 }
 
 int vault_readvalue(const WCHAR *str)
@@ -234,7 +257,7 @@ int vault_findstr(WCHAR *str)
     return (int)b;
 }
 
-void vault_parse(WCHAR *data,entry_t *entry,int num,WCHAR **origdata)
+void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
 {
     WCHAR *lhs,*rhs,*le;
     WCHAR *tmp;
@@ -261,7 +284,7 @@ void vault_parse(WCHAR *data,entry_t *entry,int num,WCHAR **origdata)
 
         // Parse LHS
         int r;
-        r=vault_findvar(entry,num,lhs);
+        r=vault_findvar(tbl,lhs);
         if(r<0)
         {
             //printf("Error: unknown var '%ws'\n",lhs);
@@ -269,7 +292,7 @@ void vault_parse(WCHAR *data,entry_t *entry,int num,WCHAR **origdata)
         {
             int v,r1,r2;
             r1=vault_findstr(rhs);
-            r2=vault_findvar(entry,num,rhs);
+            r2=vault_findvar(tbl,rhs);
 
             if(r1)               // String
             {
@@ -315,7 +338,7 @@ void vault_parse(WCHAR *data,entry_t *entry,int num,WCHAR **origdata)
     *origdata=data;
 }
 
-void vault_loadfromfile(WCHAR *filename,entry_t *entry,int num,WCHAR **origdata)
+void vault_loadfromfile(WCHAR *filename,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
 {
     WCHAR *data;
     int sz;
@@ -329,10 +352,10 @@ void vault_loadfromfile(WCHAR *filename,entry_t *entry,int num,WCHAR **origdata)
         return;
     }
     data[sz]=0;
-    vault_parse(data,entry,num,origdata);
+    vault_parse(data,entry,tbl,origdata);
 }
 
-void vault_loadfromres(int id,entry_t *entry,int num,WCHAR **origdata)
+void vault_loadfromres(int id,entry_t *entry,hashtable_t *tbl,int num,WCHAR **origdata)
 {
     WCHAR *data;
     char *data1;
@@ -347,7 +370,7 @@ void vault_loadfromres(int id,entry_t *entry,int num,WCHAR **origdata)
         data[i]=data1[j];
     }
     data[sz]=0;
-    vault_parse(data,entry,num,origdata);
+    vault_parse(data,entry,tbl,origdata);
     for(i=0;i<num;i++)
         if(entry[i].init<1)log_err("ERROR in vault_loadfromres: not initialized '%ws'\n",entry[i].name);
 }
@@ -356,14 +379,14 @@ void vault_loadfromres(int id,entry_t *entry,int num,WCHAR **origdata)
 //{ Lang/theme
 void lang_load(WCHAR *filename)
 {
-    vault_loadfromres(IDR_LANG,language,STR_NM,&langdata);
-    vault_loadfromfile(filename,language,STR_NM,&langdata);
+    vault_loadfromres(IDR_LANG, language,&lang_strs,STR_NM,&langdata);
+    vault_loadfromfile(filename,language,&lang_strs,       &langdata);
 }
 
 void theme_load(WCHAR *filename)
 {
-    vault_loadfromres(IDR_THEME,theme,THEME_NM,&themedata);
-    vault_loadfromfile(filename,theme,THEME_NM,&themedata);
+    vault_loadfromres(IDR_THEME,theme,&theme_strs,THEME_NM,&themedata);
+    vault_loadfromfile(filename,theme,&theme_strs,         &themedata);
 }
 
 void lang_set(int i)
@@ -407,7 +430,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
         wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
-        vault_loadfromfile(buf,language,STR_NM,&langdata);
+        vault_loadfromfile(buf,language,&lang_strs,&langdata);
         if(language[STR_LANG_CODE].val==(locale&0xFF))
         {
             wsprintf(langauto2,L"Auto (%s)",STR(STR_LANG_NAME));
@@ -448,7 +471,8 @@ void theme_enum(HWND hwnd,WCHAR *path)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
         wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
-        vault_loadfromfile(buf,theme,THEME_NM,&themedata);
+        D(THEME_NAME)=L"";
+        vault_loadfromfile(buf,theme,&theme_strs,&themedata);
         SendMessage(hwnd,CB_ADDSTRING,0,(int)D(THEME_NAME));
         wcscpy(themelist[i],buf);
         i++;

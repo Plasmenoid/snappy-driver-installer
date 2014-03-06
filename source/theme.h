@@ -68,14 +68,15 @@ void icon_free(img_t *img);
 // Vault
 void vault_startmonitors();
 void vault_stopmonitors();
+void vault_init();
 void vault_free();
 void *vault_loadfile(const WCHAR *filename,int *sz);
-int  vault_findvar(entry_t *a,int num,WCHAR *str);
+int  vault_findvar(hashtable_t *t,WCHAR *str);
 int  vault_readvalue(const WCHAR *str);
 int  vault_findstr(WCHAR *str);
-void vault_parse(WCHAR *data,entry_t *entry,int num,WCHAR **origdata);
-void vault_loadfromfile(WCHAR *filename,entry_t *entry,int num,WCHAR **origdata);
-void vault_loadfromres(int id,entry_t *entry,int num,WCHAR **origdata);
+void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata);
+void vault_loadfromfile(WCHAR *filename,entry_t *entry,hashtable_t *tbl,WCHAR **origdata);
+void vault_loadfromres(int id,entry_t *entry,hashtable_t *tbl,int num,WCHAR **origdata);
 
 // Lang/theme
 void lang_enum(HWND hwnd,WCHAR *path,int locale);

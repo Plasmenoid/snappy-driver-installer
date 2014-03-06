@@ -129,6 +129,7 @@ WCHAR *str_version(version_t *ver);
 // Driver list
 void manager_setpos(manager_t *manager);
 int  manager_animate(manager_t *manager);
+void drawbutton(HDC hdc,int x,int pos,int index,WCHAR *str1,WCHAR *str2);
 int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone);
 int  isbehind(manager_t *manager,int pos,int ofs,int j);
 void manager_draw(manager_t *manager,HDC hdc,int ofsy);

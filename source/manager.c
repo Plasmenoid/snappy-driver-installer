@@ -686,6 +686,16 @@ int groupsize(manager_t *manager,int index)
     return num;
 }
 
+
+void drawbutton(HDC hdc,int x,int pos,int index,WCHAR *str1,WCHAR *str2)
+{
+    pos+=D(ITEM_TEXT_OFS_Y);
+    SetTextColor(hdc,D(boxindex[box_status(index)]+14));
+    TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,str1,wcslen(str1));
+    SetTextColor(hdc,D(boxindex[box_status(index)]+15));
+    TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),str2,wcslen(str2));
+}
+
 int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
 {
     HICON hIcon;
@@ -779,13 +789,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
             break;
 
         case SLOT_NODRIVERS:
-            pos+=D(ITEM_TEXT_OFS_Y);
-            wsprintf(bufw,L"%s",STR(STR_EMPTYDRP));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+14));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
-            wsprintf(bufw,L"%s",manager->matcher->col->driverpack_dir);
-            SetTextColor(hdc,D(boxindex[box_status(index)]+15));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+            drawbutton(hdc,x,pos,index,STR(STR_EMPTYDRP),manager->matcher->col->driverpack_dir);
             break;
 
         case SLOT_NOUPDATES:
@@ -796,53 +800,23 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
             break;
 
         case SLOT_SNAPSHOT:
-            pos+=D(ITEM_TEXT_OFS_Y);
-            wsprintf(bufw,L"%s",state_file);
-            SetTextColor(hdc,D(boxindex[box_status(index)]+14));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
-            wsprintf(bufw,L"%s",STR(STR_CLOSE_SNAPSHOT));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+15));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+            drawbutton(hdc,x,pos,index,state_file,STR(STR_CLOSE_SNAPSHOT));
             break;
 
         case SLOT_DPRDIR:
-            pos+=D(ITEM_TEXT_OFS_Y);
-            wsprintf(bufw,L"%s",drpext_dir);
-            SetTextColor(hdc,D(boxindex[box_status(index)]+14));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
-            wsprintf(bufw,L"%s",STR(STR_CLOSE_DRPEXT));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+15));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+            drawbutton(hdc,x,pos,index,drpext_dir,STR(STR_CLOSE_DRPEXT));
             break;
 
         case SLOT_VIRUS_AUTORUN:
-            pos+=D(ITEM_TEXT_OFS_Y);
-            wsprintf(bufw,L"%s",STR(STR_VIRUS));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+14));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
-            wsprintf(bufw,L"%s",STR(STR_VIRUS_AUTORUN));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+15));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+            drawbutton(hdc,x,pos,index,STR(STR_VIRUS),STR(STR_VIRUS_AUTORUN));
             break;
 
         case SLOT_VIRUS_RECYCLER:
-            pos+=D(ITEM_TEXT_OFS_Y);
-            wsprintf(bufw,L"%s",STR(STR_VIRUS));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+14));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
-            wsprintf(bufw,L"%s",STR(STR_VIRUS_RECYCLER));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+15));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+            drawbutton(hdc,x,pos,index,STR(STR_VIRUS),STR(STR_VIRUS_RECYCLER));
             break;
 
         case SLOT_VIRUS_HIDDEN:
-            pos+=D(ITEM_TEXT_OFS_Y);
-            wsprintf(bufw,L"%s",STR(STR_VIRUS));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+14));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
-            wsprintf(bufw,L"%s",STR(STR_VIRUS_HIDDEN));
-            SetTextColor(hdc,D(boxindex[box_status(index)]+15));
-            TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+            drawbutton(hdc,x,pos,index,STR(STR_VIRUS),STR(STR_VIRUS_HIDDEN));
             break;
 
         default:
