@@ -60,6 +60,17 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
         565,118,  // stop
         129,23    // stop
 #endif
+    },
+    {
+        697,212,
+        697,212,
+#ifdef AUTOCLICKER_CONFIRM
+        458,118,  // continue
+        94,23     // continue
+#else
+        558,118,  // stop
+        129,23    // stop
+#endif
     }
 };
 volatile int clicker_flag;
@@ -281,7 +292,11 @@ goaround:
         wsprintf(cmd,L"%s\\%S",extractdir,getdrp_infpath(hwidmatch));
 
         // Extract
-        if(PathFileExists(cmd))
+        wsprintf(inf,L"%s\\%S%S",
+                unpacked?getdrp_packpath(hwidmatch):extractdir,
+                getdrp_infpath(hwidmatch),
+                getdrp_infname(hwidmatch));
+        if(PathFileExists(inf))
         {
             log_con("Already unpacked\n");
             _7z_total(100);
