@@ -9,7 +9,7 @@ Task-oriented
 /install <hwid> <inffile>  -- Install driver with hwid from <inffile>
 
 /HWIDInstalled:<hwid>=<Filename> -- Check if driver <hwid> installed in
-                sesion <Filename> (see save-installed-id options).
+                sesion <Filename> (see "save-installed-id" options).
                 <hwid> is VID_xxxx&PID_XXXX.
                 <hwid> can be in short (VID_xxxx&PID_XXXX) or
                 long form (PCI\VEN_XXXX&DEV_XXXX&SUBSYS_XXXXXXXX&REV_XX,
@@ -19,6 +19,8 @@ Task-oriented
 /save-installed-id[:<Filename>] -- Save installed driver id (hwid) (VID_xxxx&PID_XXXX)
                 in file <Filename> used with options 'HWIDInstalled'.
                 If <Filename> absent used %temp%\SDI2\InstalledID.txt
+                See also "HWIDInstalled" option.
+
 /verbose:<flags>  Set log detail level.
 /ls:<file>        Load snapshot.
 /lzma             Compress driverpacks.
@@ -41,7 +43,8 @@ Settings.cfg
 /expertmode       Enable the expert mode.
 /license          Suppress the license dialog.
 /norestorepnt     Suppress creating of restore point.
-
+/cfg:<FileName>   Custom .cfg file, if set "settings.cfg" not processed.
+                  Other swithes processed 
 ---------
 Emulation
 ---------
