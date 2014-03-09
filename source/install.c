@@ -327,10 +327,14 @@ goaround:
             log_con("Extracting via '%ws'\n",cmd);
             itembar->install_status=instflag&INSTALLDRIVERS?STR_INST_EXTRACT:STR_EXTR_EXTRACTING;
             redrawfield();
-            LeaveCriticalSection(&sync);
+            int tries=0;
             do
             {
+                if(!itembar->checked||installmode!=MODE_INSTALLING||tries>60)break;
+                LeaveCriticalSection(&sync);
                 r=Extract7z(cmd);
+                EnterCriticalSection(&sync);
+                itembar=&manager_g->items_list[itembar_act];
                 if(r==2)
                 {
                     if(PathFileExists(getdrp_packpath(hwidmatch)))break;
@@ -339,13 +343,12 @@ goaround:
                     {
                         log_con(".");
                         Sleep(1000);
+                        tries++;
                     }while(!PathFileExists(getdrp_packpath(hwidmatch)));
                     log_con("OK\n");
 
                 }
             }while(r);
-            EnterCriticalSection(&sync);
-            itembar=&manager_g->items_list[itembar_act];
             //itembar->percent=manager_g->items_list[SLOT_EMPTY].percent;
             hwidmatch=itembar->hwidmatch;
             log_con("Ret %d\n",r);

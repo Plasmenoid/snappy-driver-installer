@@ -24,6 +24,7 @@ void ExpandPath(WCHAR * Apath)
   memset( infoBuf, 0, sizeof(infoBuf) );
   ExpandEnvironmentStringsW(Apath, infoBuf, INFO_BUFFER_SIZE );
   wcscpy(Apath,infoBuf);
+  #undef INFO_BUFFER_SIZE
 }
 
 static BOOL CALLBACK ShowHelpProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam)
@@ -62,12 +63,10 @@ static BOOL CALLBACK ShowHelpProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPAR
         switch(LOWORD(wParam))
         {
         case IDOK:
-//            license=1;
             EndDialog(hwnd,IDOK);
             return TRUE;
 
         case IDCANCEL:
-//            license=0;
             EndDialog(hwnd,IDCANCEL);
             return TRUE;
 
@@ -142,9 +141,11 @@ void RUN_CLI(CommandLineParam_t ACLIParam)
       WCHAR *RStr;
       f=_wfopen(CLIParam.SaveInstalledFileName,L"rt");
       if(!f) log_err("Failed to open '%ws'\n",CLIParam.SaveInstalledFileName);
-
+      else
+      {
       while(fgetws(buf,sizeof(buf),f))
-	  { log_con("'%ws'\n", buf);
+        {
+          //log_con("'%ws'\n", buf);
 	    RStr = wcsstr(buf, CLIParam.HWIDSTR);
 	    if (RStr != NULL)
         {
@@ -153,6 +154,7 @@ void RUN_CLI(CommandLineParam_t ACLIParam)
         }
 	  };
       fclose(f);
+      };
       flags |= FLAG_AUTOCLOSE|FLAG_NOGUI;
       statemode = STATEMODE_EXIT;
     };
@@ -187,4 +189,70 @@ void Parse_HWID_installed_swith(const WCHAR *ParamStr)
     wcscpy(CLIParam.HWIDSTR, buf);
     CLIParam.HWIDInstalled = TRUE;
   }
+}
+
+WCHAR *ltrim(WCHAR *s)
+{
+    while(iswspace(*s)) s++;
+    return s;
+}
+
+
+void LoadCFGFile(const WCHAR *FileName, WCHAR *DestStr)
+{
+  WCHAR Buff[BUFLEN];
+  WCHAR BuffRes[BUFLEN];
+  memset( Buff, 0, sizeof(Buff) );
+  wcscpy(Buff, FileName);
+  ExpandPath(Buff);
+  FILE *f;
+  f=_wfopen(Buff,L"rt");
+  if(!f)
+  {
+   log_err("Failed to open '%ws'\n",Buff);
+   DestStr[0]= '\0';
+   return;
+  }
+  memset( Buff, 0, sizeof(Buff) );
+  memset( BuffRes, 0, sizeof(BuffRes) );
+  while(fgetws(Buff,sizeof(Buff),f))
+  {
+  //  log_con("'%ws'\n", Buff);
+    if (Buff[0] == '#') continue; //комментарий, не интересно.
+    if (Buff[0] == ';') continue; //комментарий, не интересно.
+
+    wcscpy(Buff, ltrim(Buff));
+
+    if (Buff[0] == '/') Buff[0]='-';
+    //исключаемые ключи начало
+    if( wcsstr(Buff,L"-?")) continue;
+
+
+    //исключаемые ключи конец
+    if(Buff[wcslen(Buff)-1] == '\n')
+       Buff[wcslen(Buff)-1] = '\0';
+    if(wcslen(Buff) == 0) continue; //пустая строка
+
+    wcscat(wcscat(BuffRes,Buff), L" ");
+  };
+  fclose(f);
+  wcscpy(DestStr,BuffRes);
+}
+BOOL isCfgSwithExist(const WCHAR *cmdParams, WCHAR *cfgPath)
+{
+    WCHAR **argv,*pr;
+    int argc;
+    int i;
+
+    argv=CommandLineToArgvW(cmdParams,&argc);
+    for(i=1;i<argc;i++)
+    {
+        pr=argv[i];
+        if (pr[0] == '/') pr[0]='-';
+        if(_wcsnicmp(pr,GFG_DEF,wcslen(GFG_DEF))==0) {
+          wcscpy(cfgPath,pr+wcslen(GFG_DEF));
+          return TRUE;
+        }
+    }
+    return FALSE;
 }

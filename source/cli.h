@@ -20,10 +20,14 @@ void init_CLIParam();
 //параметры командной строки
 #define SAVE_INSTALLED_ID_DEF   L"-save-installed-id"
 #define HWIDINSTALLED_DEF       L"-HWIDInstalled:"
+#define GFG_DEF                 L"-cfg:"
 
 void SaveHWID(WCHAR *hwid);
 void ExpandPath(WCHAR * Apath);
 void Parse_save_installed_id_swith(const WCHAR *ParamStr);
 void RUN_CLI(CommandLineParam_t ACLIParam);
 void Parse_HWID_installed_swith(const WCHAR *ParamStr);
+
+void LoadCFGFile(const WCHAR *FileName, WCHAR *DestStr);
+BOOL isCfgSwithExist(const WCHAR *cmdParams, WCHAR *cfgPath);
 #endif // CLI_H_INCLUDED
