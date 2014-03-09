@@ -157,7 +157,9 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-index_dir:"))   wcscpy(index_dir,pr+11);else
         if( wcsstr(pr,L"-output_dir:"))  wcscpy(output_dir,pr+12);else
         if( wcsstr(pr,L"-data_dir:"))    wcscpy(data_dir,pr+10);else
-        if( wcsstr(pr,L"-log_dir:"))     wcscpy(logO_dir,pr+9);else
+        if( wcsstr(pr,L"-log_dir:"))     {wcscpy(logO_dir,pr+9);
+        ExpandEnvironmentStrings(logO_dir,log_dir,BUFLEN);
+        }else
         if( wcsstr(pr,L"-finish_cmd:"))  wcscpy(finish,pr+12);else
         if( wcsstr(pr,L"-finishrb_cmd:"))wcscpy(finish_rb,pr+14);else
         if( wcsstr(pr,L"-lang:"))        wcscpy(curlang,pr+6);else
@@ -216,7 +218,8 @@ void settings_parse(const WCHAR *str,int ind)
             Parse_save_installed_id_swith(pr);else
         if(wcsstr(pr,L"-?"))CLIParam.ShowHelp=TRUE;else
         if(_wcsnicmp(pr,HWIDINSTALLED_DEF,wcslen(HWIDINSTALLED_DEF))==0)
-            Parse_HWID_installed_swith(pr);
+            Parse_HWID_installed_swith(pr); else
+        if(_wcsnicmp(pr,GFG_DEF,wcslen(GFG_DEF))==0)  continue;
         else
             log_err("Unknown argument '%ws'\n",pr);
        if(statemode==STATEMODE_EXIT)break;
@@ -310,11 +313,20 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     backtrace=LoadLibraryA("backtrace.dll");
     ghInst=hInst;
     init_CLIParam();
+    if (isCfgSwithExist(GetCommandLineW(),CLIParam.SaveInstalledFileName))
+    {
+      WCHAR buff[BUFLEN];
+      LoadCFGFile(CLIParam.SaveInstalledFileName, buff);
+      settings_parse(buff,0);
+      //CLIParam.SaveInstalledFileName[0] = '\0';
+
+    }
+    else
     if(!settings_load(L"settings.cfg"))
         settings_load(L"tools\\SDI\\settings.cfg");
 
     settings_parse(GetCommandLineW(),1);
-    ExpandEnvironmentStrings(logO_dir,log_dir,BUFLEN);
+
 #ifdef CONSOLE_MODE
     flags|=FLAG_NOGUI;
     license=1;
