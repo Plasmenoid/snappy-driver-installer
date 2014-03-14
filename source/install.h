@@ -43,6 +43,7 @@ int _7z_setcomplited(long long i);
 unsigned int __stdcall thread_install(void *arg);
 
 void calcwnddata(wnddata_t *w,HWND hwnd);
+int cmpclickdata(int *a,int *b);
 BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam);
 void wndclicker(int mode);
 unsigned int __stdcall thread_clicker(void *arg);

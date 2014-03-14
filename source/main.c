@@ -207,6 +207,9 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-nologfile"))    flags|=FLAG_NOLOGFILE;else
         if(!wcscmp(pr,L"-nosnapshot"))   flags|=FLAG_NOSNAPSHOT;else
         if(!wcscmp(pr,L"-nostamp"))      flags|=FLAG_NOSTAMP;else
+        if(!wcscmp(pr,L"-extractonly"))  flags|=FLAG_EXTRACTONLY;else
+        if(!wcscmp(pr,L"-keepunpackedindex"))flags|=FLAG_KEEPUNPACKINDEX;else
+        if(!wcscmp(pr,L"-keeptempfiles"))flags|=FLAG_KEEPTEMPFILES;else
         if(!wcscmp(pr,L"-disableinstall"))flags|=FLAG_DISABLEINSTALL;else
         if(!wcscmp(pr,L"-failsafe"))     flags|=FLAG_FAILSAFE;else
         if( wcsstr(pr,L"-verbose:"))     log_verbose=_wtoi(pr+9);else
@@ -330,6 +333,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 #ifdef CONSOLE_MODE
     flags|=FLAG_NOGUI;
     license=1;
+    ExpandEnvironmentStrings(logO_dir,log_dir,BUFLEN);
     wcscpy(drp_dir,log_dir);
     wcscpy(index_dir,log_dir);
     wcscpy(output_dir,log_dir);
@@ -350,7 +354,9 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         return ret_global;
     }
     //signal(SIGSEGV,SignalHandler);
+#ifndef CONSOLE_MODE
     ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:SW_HIDE);
+#endif
 
     if(log_verbose&LOG_VERBOSE_ARGS)
     {

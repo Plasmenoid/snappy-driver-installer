@@ -51,13 +51,13 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
 #endif
     },
     {
-        704,212,
-        704,212,
+        -1,212,
+        -1,212,
 #ifdef AUTOCLICKER_CONFIRM
-        465,118,  // continue
+        -1,118,   // continue
         94,23     // continue
 #else
-        565,118,  // stop
+        -1,118,   // stop
         129,23    // stop
 #endif
     },
@@ -337,16 +337,16 @@ goaround:
                 itembar=&manager_g->items_list[itembar_act];
                 if(r==2)
                 {
-                    if(PathFileExists(getdrp_packpath(hwidmatch)))break;
+                    //if(PathFileExists(getdrp_packpath(hwidmatch)))break;
                     log_con("Waiting for driverpacks to become available.");
                     do
                     {
                         log_con(".");
                         Sleep(1000);
                         tries++;
+                        if(!itembar->checked||installmode!=MODE_INSTALLING||tries>60)break;
                     }while(!PathFileExists(getdrp_packpath(hwidmatch)));
                     log_con("OK\n");
-
                 }
             }while(r);
             //itembar->percent=manager_g->items_list[SLOT_EMPTY].percent;
@@ -436,7 +436,7 @@ goaround:
         manager_g->items_list[SLOT_EXTRACTING].isactive=0;
         manager_setpos(manager_g);
     }
-    if(instflag&INSTALLDRIVERS)
+    if(instflag&INSTALLDRIVERS&&(flags&FLAG_KEEPTEMPFILES)==0)
     {
         wsprintf(buf,L" /c rd /s /q \"%s\"",extractdir);
         RunSilent(L"cmd",buf,SW_HIDE,1);
@@ -490,6 +490,16 @@ void calcwnddata(wnddata_t *w,HWND hwnd)
     w->btn_wy=pwb.rcClient.bottom-pwb.rcClient.top;
 }
 
+int cmpclickdata(int *a,int *b)
+{
+    int i;
+
+    for(i=0;i<8;i++,a++,b++)
+    if(*a!=*b&&*b!=-1)return 0;
+
+    return 1;
+}
+
 BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
 {
     WCHAR buf[BUFLEN];
@@ -513,16 +523,16 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
 
     if((lParam&1)==1)
     {
+        calcwnddata(&w,hwnd);
         if(lParam&2)
         {
             log("* MainWindow (%d,%d) (%d,%d)\n",w.wnd_wx,w.wnd_wy,w.cln_wx,w.cln_wy);
             log("* Child (%d,%d,%d,%d)\n",w.btn_x,w.btn_y,w.btn_wx,w.btn_wy);
             log("\n");
         }
-        calcwnddata(&w,hwnd);
 
         if((lParam&2)==0)for(i=0;i<NUM_CLICKDATA;i++)
-            if(!memcmp(&w,&clicktbl[i],sizeof(wnddata_t)))
+            if(cmpclickdata((int *)&w,(int *)&clicktbl[i]))
         {
             SwitchToThisWindow(hwnd,0);
             GetWindowInfo(GetParent(hwnd),&pwi);
@@ -533,7 +543,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
                 GetWindowInfo(hwnd,&pwi);
                 calcwnddata(&w,hwnd);
 
-                if(!memcmp(&w,&clicktbl[i],sizeof(wnddata_t)))
+                if(cmpclickdata((int *)&w,(int *)&clicktbl[i]))
                 {
                     GetWindowInfo(GetParent(hwnd),&pwi);
                     SetCursorPos(pwi.rcClient.left+w.btn_x+w.btn_wx/2,pwi.rcClient.top+w.btn_y+w.btn_wy/2);
