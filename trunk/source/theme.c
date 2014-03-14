@@ -458,7 +458,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
 
 void theme_enum(HWND hwnd,WCHAR *path)
 {
-    WCHAR buf[4096];
+    WCHAR buf[BUFLEN];
     HANDLE hFind;
     WIN32_FIND_DATA FindFileData;
     int i=0;

@@ -6,18 +6,7 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc_64" />
 		<Build>
-			<Target title="Debug">
-				<Option output="../../resources/install64" prefix_auto="1" extension_auto="1" />
-				<Option object_output="../../obj/DebugU" />
-				<Option type="1" />
-				<Option compiler="gcc_64" />
-				<Option use_console_runner="0" />
-				<Option parameters="asd qwe" />
-				<Compiler>
-					<Add option="-g" />
-				</Compiler>
-			</Target>
-			<Target title="Release">
+			<Target title="Win32 ReleaseU">
 				<Option output="../../resources/install64" prefix_auto="1" extension_auto="1" />
 				<Option object_output="../../obj/ReleaseU" />
 				<Option type="1" />
@@ -30,6 +19,17 @@
 				<Linker>
 					<Add option="-s" />
 				</Linker>
+			</Target>
+			<Target title="Win32 DebugU">
+				<Option output="../../resources/install64" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../../obj/DebugU" />
+				<Option type="1" />
+				<Option compiler="gcc_64" />
+				<Option use_console_runner="0" />
+				<Option parameters="asd qwe" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
 			</Target>
 		</Build>
 		<Compiler>

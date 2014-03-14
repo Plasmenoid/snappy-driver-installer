@@ -122,22 +122,28 @@ void manager_filter(manager_t *manager,int options)
                 cnt[NUM_STATUS]++;
             }
 
+
             for(k=0;k<NUM_STATUS;k++)
                 if((!o1||!cnt[NUM_STATUS])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
             {
-                if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&devicematch->device->problem==0
-                   &&itembar->hwidmatch->altsectscore<2)continue;
+                /*if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&devicematch->device->problem==0
+                   &&itembar->hwidmatch->altsectscore<2)continue;*/
 
+
+                // hide if
                 //[X] Newer
                 //[ ] Worse
-                //old, no problem
+                //worse, no problem
                 if((options&FILTER_SHOW_NEWER)!=0
                    &&(options&FILTER_SHOW_WORSE_RANK)==0
                    &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0)continue;
+
                 cnt[k]++;
                 cnt[NUM_STATUS]++;
                 itembar->isactive=1;
             }
+
+            if(o1&&itembar->hwidmatch->status&STATUS_CURRENT)cnt[NUM_STATUS]++;
         }
         if(!devicematch->num_matches)
         {
@@ -185,6 +191,9 @@ void manager_print(manager_t *manager)
             else
                 log("'%ws'\n",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
             act++;
+        }else
+        {
+//            log("$%04d|^^ %d,%d\n",k,itembar->devicematch->num_matches,(itembar->hwidmatch)?itembar->hwidmatch->status:-1);
         }
 
     log("}manager_print[%d]\n\n",act);
@@ -285,6 +294,7 @@ void manager_testitembars(manager_t *manager)
         itembar->checked=0;
         if(j==0||j==6||j==9||j==18||j==21)index++;
         itembar->index=index;
+        itembar->hwidmatch->altsectscore=2;
         switch(j++)
         {
             case  0:itembar->install_status=STR_INST_EXTRACT;itembar->percent=300;itembar->checked=1;break;
@@ -570,6 +580,8 @@ int box_status(int index)
                 return BOX_DRVITEM_MS;
             else
             {
+                if(itembar->hwidmatch->altsectscore<2)return BOX_DRVITEM_WO;
+
                 if(status&STATUS_BETTER&&status&STATUS_NEW)        return BOX_DRVITEM_BN;
                 if(status&STATUS_SAME  &&status&STATUS_NEW)        return BOX_DRVITEM_SN;
                 if(status&STATUS_WORSE &&status&STATUS_NEW)        return BOX_DRVITEM_WN;

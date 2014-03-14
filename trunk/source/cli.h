@@ -28,6 +28,7 @@ void Parse_save_installed_id_swith(const WCHAR *ParamStr);
 void RUN_CLI(CommandLineParam_t ACLIParam);
 void Parse_HWID_installed_swith(const WCHAR *ParamStr);
 
+WCHAR *ltrim(WCHAR *s);
 void LoadCFGFile(const WCHAR *FileName, WCHAR *DestStr);
 BOOL isCfgSwithExist(const WCHAR *cmdParams, WCHAR *cfgPath);
 #endif // CLI_H_INCLUDED

@@ -163,21 +163,25 @@ typedef struct _data_HWID_t // 8
     ofst HWID;
 }data_HWID_t;
 
-#define COLLECTION_FORCE_REINDEXING  0x0001
-#define COLLECTION_USE_LZMA          0x0002
-#define COLLECTION_PRINT_INDEX       0x0004
-#define FLAG_PRESERVECFG             0x8000
-#define FLAG_NOGUI                   0x0010
-#define FLAG_NOSLOWSYSINFO           0x0020
-#define FLAG_DISABLEINSTALL          0x0040
-#define FLAG_AUTOINSTALL             0x0080
-#define FLAG_FAILSAFE                0x0100
-#define FLAG_AUTOCLOSE               0x0200
-#define FLAG_NORESTOREPOINT          0x0400
-#define FLAG_NOLOGFILE               0x0800
-#define FLAG_NOSNAPSHOT              0x1000
-#define FLAG_NOSTAMP                 0x2000
-#define FLAG_NOFEATURESCORE          0x4000
+#define COLLECTION_FORCE_REINDEXING  0x00000001
+#define COLLECTION_USE_LZMA          0x00000002
+#define COLLECTION_PRINT_INDEX       0x00000004
+#define FLAG_NOGUI                   0x00000010
+#define FLAG_NOSLOWSYSINFO           0x00000020
+#define FLAG_DISABLEINSTALL          0x00000040
+#define FLAG_AUTOINSTALL             0x00000080
+#define FLAG_FAILSAFE                0x00000100
+#define FLAG_AUTOCLOSE               0x00000200
+#define FLAG_NORESTOREPOINT          0x00000400
+#define FLAG_NOLOGFILE               0x00000800
+#define FLAG_NOSNAPSHOT              0x00001000
+#define FLAG_NOSTAMP                 0x00002000
+#define FLAG_NOFEATURESCORE          0x00004000
+#define FLAG_PRESERVECFG             0x00008000
+
+#define FLAG_EXTRACTONLY             0x00010000
+#define FLAG_KEEPUNPACKINDEX         0x00020000
+#define FLAG_KEEPTEMPFILES           0x00040000
 
 typedef struct _collection_t
 {

@@ -346,18 +346,21 @@ int isMissing(device_t *device,driver_t *driver,state_t *state)
 
 int calc_status(hwidmatch_t *hwidmatch,state_t *state)
 {
-    int r=0;
+    int r=0,res;
     int score;
     driver_t *cur_driver=hwidmatch->devicematch->driver;
 
     if(isMissing(hwidmatch->devicematch->device,cur_driver,state))return STATUS_MISSING;
 
-    if(hwidmatch->devicematch->driver&&getdrp_drvversion(hwidmatch))
+    if(hwidmatch->devicematch->driver)
     {
-        int res=cmpdate(&hwidmatch->devicematch->driver->version,getdrp_drvversion(hwidmatch));
-        if(res<0)r+=STATUS_NEW;else
-        if(res>0)r+=STATUS_OLD;else
-            r+=STATUS_CURRENT;
+        if(getdrp_drvversion(hwidmatch))
+        {
+            res=cmpdate(&hwidmatch->devicematch->driver->version,getdrp_drvversion(hwidmatch));
+            if(res<0)r+=STATUS_NEW;else
+            if(res>0)r+=STATUS_OLD;else
+                r+=STATUS_CURRENT;
+        }
 
         score=calc_score_h(cur_driver,state);
         res=cmpunsigned(score,hwidmatch->score);
@@ -365,6 +368,8 @@ int calc_status(hwidmatch_t *hwidmatch,state_t *state)
         if(res<0)r+=STATUS_WORSE;else
             r+=STATUS_SAME;
     }
+    else
+        r+=STATUS_BETTER;
 
     if(!hwidmatch->altsectscore)r+=STATUS_INVALID;
     return r;
