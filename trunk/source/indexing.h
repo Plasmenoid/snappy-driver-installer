@@ -182,6 +182,7 @@ typedef struct _data_HWID_t // 8
 #define FLAG_EXTRACTONLY             0x00010000
 #define FLAG_KEEPUNPACKINDEX         0x00020000
 #define FLAG_KEEPTEMPFILES           0x00040000
+#define FLAG_SHOWDRPNAMES            0x00080000
 
 typedef struct _collection_t
 {

@@ -471,7 +471,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
         wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
-        D(THEME_NAME)=L"";
+        D(THEME_NAME)=(int)L"";
         vault_loadfromfile(buf,theme,&theme_strs,&themedata);
         SendMessage(hwnd,CB_ADDSTRING,0,(int)D(THEME_NAME));
         wcscpy(themelist[i],buf);

@@ -60,17 +60,6 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
         -1,118,   // stop
         129,23    // stop
 #endif
-    },
-    {
-        697,212,
-        697,212,
-#ifdef AUTOCLICKER_CONFIRM
-        458,118,  // continue
-        94,23     // continue
-#else
-        558,118,  // stop
-        129,23    // stop
-#endif
     }
 };
 volatile int clicker_flag;
@@ -298,7 +287,7 @@ goaround:
                 getdrp_infname(hwidmatch));
         if(PathFileExists(inf))
         {
-            log_con("Already unpacked\n");
+            log_con("Already unpacked(%ws)\n",inf);
             _7z_total(100);
             _7z_setcomplited(100);
             redrawfield();
@@ -459,7 +448,7 @@ goaround:
     itembar_act=0;
     log_con("Mode:%d\n",installmode);
     LeaveCriticalSection(&sync);
-    PostMessage(hMain,WM_DEVICECHANGE,7,0);
+    PostMessage(hMain,WM_DEVICECHANGE,7,1);
     redrawfield();
 
     return 0;
