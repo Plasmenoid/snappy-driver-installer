@@ -126,9 +126,8 @@ void manager_filter(manager_t *manager,int options)
             for(k=0;k<NUM_STATUS;k++)
                 if((!o1||!cnt[NUM_STATUS])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
             {
-                /*if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&devicematch->device->problem==0
-                   &&itembar->hwidmatch->altsectscore<2)continue;*/
-
+                if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&devicematch->device->problem==0
+                   &&itembar->hwidmatch->altsectscore<2)continue;
 
                 // hide if
                 //[X] Newer
@@ -269,7 +268,7 @@ void manager_clear(manager_t *manager)
     manager->items_list[SLOT_RESTORE_POINT].install_status=STR_RESTOREPOINT;
     manager_filter(manager,filters);
     manager_setpos(manager);
-    PostMessage(hMain,WM_DEVICECHANGE,7,0);
+    PostMessage(hMain,WM_DEVICECHANGE,7,2);
 }
 
 void manager_testitembars(manager_t *manager)
@@ -872,11 +871,17 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
                 }
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
 
-                if(driverpackpath)
+                if(flags&FLAG_SHOWDRPNAMES)
                 {
-                    wsprintf(bufw,L"%ws\\%ws",getdrp_packpath(itembar->hwidmatch),
+                    int len=wcslen(manager->matcher->col->driverpack_dir);
+                    int lnn=len-wcslen(getdrp_packpath(itembar->hwidmatch));
+
+                    SetTextColor(hdc,0);// FIXME: color
+                    wsprintf(bufw,L"%ws%ws%ws",
+                            getdrp_packpath(itembar->hwidmatch)+len+(lnn?1:0),
+                            lnn?L"\\":L"",
                             getdrp_packname(itembar->hwidmatch));
-                    TextOut(hdc,x+D(DRVITEM_WX)-240,pos,bufw,wcslen(bufw));
+                    TextOut(hdc,x+D(DRVITEM_WX)-240,pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
                 }
             }
             else
@@ -984,6 +989,13 @@ int itembar_cmp(itembar_t *a,itembar_t *b,CHAR *ta,CHAR *tb)
     return 0;
 }
 
+//Keep when:
+//* installing drivers
+//* device update
+//Discard when:
+//* loading a snapshot
+//* returning to real machine
+//* driverpack update
 void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
 {
     itembar_t *itembar_new,*itembar_old;
@@ -991,7 +1003,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
     int i,j;
     int show_changes=manager_old->items_handle.items>20;
 
-    if(statemode==STATEMODE_LOAD)show_changes=0;
+    //if(statemode==STATEMODE_LOAD)show_changes=0;
     if((log_verbose&LOG_VERBOSE_DEVSYNC)==0)show_changes=0;
     //show_changes=1;
 
@@ -1000,6 +1012,11 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
 
     if(manager_old->items_list[SLOT_EMPTY].curpos==1)
     {
+        return;
+    }
+    if((instflag&RESTOREPOS)==0)
+    {
+        instflag^=RESTOREPOS;
         return;
     }
 

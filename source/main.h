@@ -85,10 +85,6 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define FLOATING_DRIVERLST  4
 #define FLOATING_ABOUT      5
 
-// Extract info
-#define INSTALLDRIVERS      1
-#define OPENFOLDER          2
-
 // Left panel types
 #define TYPE_GROUP          1
 #define TYPE_TEXT           2

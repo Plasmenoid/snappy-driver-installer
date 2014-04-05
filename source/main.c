@@ -73,7 +73,6 @@ int manager_active=0;
 int bundle_display=1;
 int bundle_shadow=0;
 int volatile installmode=MODE_NONE;
-int driverpackpath=0;
 CRITICAL_SECTION sync;
 
 // Window
@@ -99,6 +98,7 @@ int mainx_c,mainy_c;
 int mainx_w,mainy_w;
 int mousex=-1,mousey=-1,mousedown=0,mouseclick=0;
 int cntd=0;
+int hideconsole=SW_HIDE;
 
 int ctrl_down=0;
 int space_down=0;
@@ -169,6 +169,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
         if(!wcscmp(pr,L"-nofeaturescore"))flags|=FLAG_NOFEATURESCORE;else
+        if(!wcscmp(pr,L"-showdrpnames")) flags|=FLAG_SHOWDRPNAMES;else
         if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
         if(!wcscmp(pr,L"-7z"))
         {
@@ -207,7 +208,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-nologfile"))    flags|=FLAG_NOLOGFILE;else
         if(!wcscmp(pr,L"-nosnapshot"))   flags|=FLAG_NOSNAPSHOT;else
         if(!wcscmp(pr,L"-nostamp"))      flags|=FLAG_NOSTAMP;else
-        if(!wcscmp(pr,L"-extractonly"))  flags|=FLAG_EXTRACTONLY;else
+        if( wcsstr(pr,L"-extractdir:"))  {flags|=FLAG_EXTRACTONLY;wcscpy(extractdir,pr+12);}else
         if(!wcscmp(pr,L"-keepunpackedindex"))flags|=FLAG_KEEPUNPACKINDEX;else
         if(!wcscmp(pr,L"-keeptempfiles"))flags|=FLAG_KEEPTEMPFILES;else
         if(!wcscmp(pr,L"-disableinstall"))flags|=FLAG_DISABLEINSTALL;else
@@ -263,6 +264,7 @@ void settings_save()
     if(expertmode)fwprintf(f,L"-expertmode ");
     if(flags&FLAG_NORESTOREPOINT)fwprintf(f,L"-norestorepnt ");
     if(flags&FLAG_NOFEATURESCORE)fwprintf(f,L"-nofeaturescore ");
+    if(flags&FLAG_SHOWDRPNAMES)fwprintf(f,L"-showdrpnames ");
     fclose(f);
 }
 
@@ -310,8 +312,12 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     monitor_t mon_drp;
     HANDLE thr;
     HMODULE backtrace;
+    DWORD dwProcessId;
 
-    //ShowWindow(GetConsoleWindow(),SW_HIDE);
+    GetWindowThreadProcessId(GetConsoleWindow(),&dwProcessId);
+    if(GetCurrentProcessId()!=dwProcessId)hideconsole=SW_SHOWNOACTIVATE;
+    ShowWindow(GetConsoleWindow(),hideconsole);
+
     time_startup=time_total=GetTickCount();
     backtrace=LoadLibraryA("backtrace.dll");
     ghInst=hInst;
@@ -333,11 +339,11 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 #ifdef CONSOLE_MODE
     flags|=FLAG_NOGUI;
     license=1;
-    ExpandEnvironmentStrings(logO_dir,log_dir,BUFLEN);
     wcscpy(drp_dir,log_dir);
     wcscpy(index_dir,log_dir);
     wcscpy(output_dir,log_dir);
 #endif
+    ExpandEnvironmentStrings(logO_dir,log_dir,BUFLEN);
     if(statemode==STATEMODE_EXIT)
     {
         if(backtrace)FreeLibrary(backtrace);
@@ -355,7 +361,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     }
     //signal(SIGSEGV,SignalHandler);
 #ifndef CONSOLE_MODE
-    ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:SW_HIDE);
+    ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:hideconsole);
 #endif
 
     if(log_verbose&LOG_VERBOSE_ARGS)
@@ -366,7 +372,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         log_con("  output_dir='%ws'\n",output_dir);
         log_con("  data_dir='%ws'\n",data_dir);
         log_con("  log_dir='%ws'\n",log_dir);
-#ifndef CONSOLE_MODE
+        log_con("  extractdir='%ws'\n",extractdir);
         log_con("  lang=%ws\n",curlang);
         log_con("  theme=%ws\n",curtheme);
         log_con("  expertmode=%d\n",expertmode);
@@ -376,18 +382,15 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         log_con("  failsafe=%d\n",flags&FLAG_FAILSAFE?1:0);
         log_con("  norestorepnt=%d\n",flags&FLAG_NORESTOREPOINT?1:0);
         log_con("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
-#endif
         log("\n");
         if(*state_file&&statemode)log_con("Virtual system system config '%ws'\n",state_file);
         if(virtual_arch_type)log_con("Virtual Windows version: %d-bit\n",virtual_arch_type);
         if(virtual_os_version)log_con("Virtual Windows version: %d.%d\n",virtual_os_version/10,virtual_os_version%10);
         log("\n");
     }
-#ifndef CONSOLE_MODE
     mkdir_r(drp_dir);
     mkdir_r(index_dir);
     mkdir_r(output_dir);
-#endif
     vault_init();
     bundle_init(&bundle[0]);
     bundle_init(&bundle[1]);
@@ -1407,7 +1410,7 @@ void snapshot()
     if(GetOpenFileName(&ofn))
     {
         statemode=STATEMODE_LOAD;
-        PostMessage(hMain,WM_DEVICECHANGE,7,0);
+        PostMessage(hMain,WM_DEVICECHANGE,7,2);
     }
 }
 
@@ -1463,7 +1466,7 @@ void drvdir()
         int len=wcslen(drpext_dir);
         drpext_dir[len]=0;
 //        printf("'%ws',%d\n",drpext_dir,len);
-        PostMessage(hMain,WM_DEVICECHANGE,7,0);
+        PostMessage(hMain,WM_DEVICECHANGE,7,2);
     }
 }
 
@@ -1659,6 +1662,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     if(installmode==MODE_NONE||(installmode==MODE_SCANNING&&cnt))
                     {
                         manager_selectall(manager_g);
+                        if((flags&FLAG_EXTRACTONLY)==0)
                         wsprintf(extractdir,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
                         manager_install(INSTALLDRIVERS);
                     }
@@ -1679,7 +1683,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
         case WM_KEYUP:
             if(wParam==VK_F5)
-                PostMessage(hwnd,WM_DEVICECHANGE,7,0);
+                PostMessage(hwnd,WM_DEVICECHANGE,7,2);
             if(wParam==VK_F6&&ctrl_down)
             {
                 manager_testitembars(manager_g);
@@ -1693,10 +1697,10 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             }
             if(wParam==VK_F8)
             {
-                driverpackpath^=1;
+                flags^=FLAG_SHOWDRPNAMES;
                 if(ctrl_down)
                 {
-                    driverpackpath=1;
+                    flags|=FLAG_SHOWDRPNAMES;
                     manager_sort(manager_g);
                 }
                 redrawfield();
@@ -1710,6 +1714,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_DEVICECHANGE:
             if(installmode==MODE_INSTALLING)break;
             log_con("WM_DEVICECHANGE(%x,%x)\n",wParam,lParam);
+            if(lParam<2)
+                instflag|=RESTOREPOS;
+            else
+                instflag&=~RESTOREPOS;
+
             SetEvent(event);
             break;
 
@@ -1777,7 +1786,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 if(panelitems[i].action_id==ID_EXPERT_MODE)
                 {
                     expertmode=panelitems[i].checked;
-                    ShowWindow(GetConsoleWindow(),expertmode&&ctrl_down?SW_SHOWNOACTIVATE:SW_HIDE);
+                    ShowWindow(GetConsoleWindow(),expertmode&&ctrl_down?SW_SHOWNOACTIVATE:hideconsole);
                 }
                 else
                     PostMessage(hwnd,WM_COMMAND,panelitems[i].action_id+(BN_CLICKED<<16),0);
@@ -1889,6 +1898,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 case ID_INSTALL:
                     if(installmode==MODE_NONE)
                     {
+                        if((flags&FLAG_EXTRACTONLY)==0)
                         wsprintf(extractdir,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
                         manager_install(INSTALLDRIVERS);
                     }
@@ -2100,12 +2110,12 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             if(floating_itembar==SLOT_SNAPSHOT)
             {
                 statemode=0;
-                PostMessage(hMain,WM_DEVICECHANGE,7,0);
+                PostMessage(hMain,WM_DEVICECHANGE,7,2);
             }
             if(floating_itembar==SLOT_DPRDIR)
             {
                 *drpext_dir=0;
-                PostMessage(hMain,WM_DEVICECHANGE,7,0);
+                PostMessage(hMain,WM_DEVICECHANGE,7,2);
             }
             if(floating_itembar==SLOT_EXTRACTING)
             {
@@ -2119,6 +2129,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
                 manager_toggle(manager_g,floating_itembar);
                 if(wParam&MK_SHIFT&&installmode==MODE_NONE)
                 {
+                    if((flags&FLAG_EXTRACTONLY)==0)
                     wsprintf(extractdir,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
                     manager_install(INSTALLDRIVERS);
                 }

@@ -337,6 +337,7 @@ int isMissing(device_t *device,driver_t *driver,state_t *state)
     if(driver)
     {
         if(!_wcsicmp((WCHAR*)(state->text+driver->MatchingDeviceId),L"PCI\\CC_0300"))return 1;
+        if(device->problem)return 1;
     }else
     {
         if(device->problem)return 1;

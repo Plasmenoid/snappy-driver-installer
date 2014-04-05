@@ -21,6 +21,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 //{ Global variables
 int drp_count;
+int loaded_unpacked=0;
 const tbl_t table_version[NUM_VER_NAMES]=
 {
     {"classguid",                  9},
@@ -438,7 +439,7 @@ void collection_save(collection_t *col)
         if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
         {
             wsprintf(buf3,L"%s\\%s",col->index_bin_dir,FindFileData.cFileName);
-            for(i=1;i<col->driverpack_handle.items;i++)
+            for(i=flags&FLAG_KEEPUNPACKINDEX?0:1;i<col->driverpack_handle.items;i++)
             {
                 driverpack_getindexfilename(&col->driverpack_list[i],col->index_bin_dir,L"bin",buf2);
                 if(!wcscmp(buf2,buf3))break;
@@ -507,6 +508,7 @@ void collection_load(collection_t *col)
     thr=(HANDLE)_beginthreadex(0,0,&thread_indexinf,col,0,0);
 //}thread
 
+    if(flags&FLAG_KEEPUNPACKINDEX)loaded_unpacked=driverpack_loadindex(unpacked_drp);
     drp_count=collection_scanfolder_count(col,col->driverpack_dir);
     collection_scanfolder(col,col->driverpack_dir);
     manager_g->items_list[SLOT_INDEXING].isactive=0;
@@ -600,7 +602,7 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
                     driverpack_genindex(drp);
                 }
             }else
-            if(_wcsicmp(FindFileData.cFileName+len-4,L".inf")==0)
+            if(_wcsicmp(FindFileData.cFileName+len-4,L".inf")==0&&loaded_unpacked==0)
             {
                 FILE *f;
                 char *buft;
@@ -616,7 +618,7 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
                 driverpack_indexinf(&col->driverpack_list[0],buf,FindFileData.cFileName,buft,len);
                 free(buft);
             }else
-            if(_wcsicmp(FindFileData.cFileName+len-4,L".cat")==0)
+            if(_wcsicmp(FindFileData.cFileName+len-4,L".cat")==0&&loaded_unpacked==0)
             {
                 FILE *f;
                 char *buft;
@@ -750,6 +752,7 @@ int driverpack_loadindex(driverpack_t *drp)
     sz-=3+sizeof(int);
 
     if(memcmp(buf,"SDW",3)||version!=VER_INDEX)return 0;
+    if(*drpext_dir)return 0;
 
     p=mem=(char *)malloc(sz);
     fread(mem,sz,1,f);
@@ -813,7 +816,7 @@ void driverpack_print(driverpack_t *drp)
     int i;
 
     hwidmatch.drp=drp;
-    driverpack_getindexfilename(drp,drp->col->index_linear_dir,L"ttt",filename);
+    driverpack_getindexfilename(drp,drp->col->index_linear_dir,L"txt",filename);
     f=_wfopen(filename,L"wt");
 
     fprintf(f,"%ws\\%ws (%d inf files)\n",drp->text+drp->drppath,drp->text+drp->drpfilename,n);
