@@ -228,6 +228,7 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
     int i;
     int pos;
     int ofsy=getscrollpos();
+    int cutoff=calc_cutoff(manager)+D(ITEM_DIST_Y0);
 
     *r=-2;
     *zone=0;
@@ -239,6 +240,7 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
     if(itembar->isactive)
     {
         pos=itembar->curpos>>16;
+        if(i>=SLOT_RESTORE_POINT&&y<cutoff)continue;
         if(i>=SLOT_RESTORE_POINT)pos-=ofsy;
         if(y>pos&&y<pos+D(DRVITEM_WY))
         {
@@ -707,11 +709,11 @@ void drawbutton(HDC hdc,int x,int pos,int index,WCHAR *str1,WCHAR *str2)
     TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),str2,wcslen(str2));
 }
 
-int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
+int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int cutoff)
 {
     HICON hIcon;
     WCHAR bufw[BUFLEN];
-    HRGN hrgn=0;
+    HRGN hrgn=0,hrgn2;
     int x=D(DRVITEM_OFSX);
 
     itembar_t *itembar=&manager->items_list[index];
@@ -724,10 +726,13 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
 
     SelectObject(hdc,hFont);
 
-    hrgn=CreateRectRgn(x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY));
+    if(index<SLOT_EXTRACTING)cutoff=0;
+    hrgn2=CreateRectRgn(x,cutoff,D(DRVITEM_OFSX)+D(DRVITEM_WX),mainy_c);
+    hrgn=CreateRectRgn(x,(pos<cutoff)?cutoff:pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY));
     int cl=((zone>=0)?1:0);
     if(index==SLOT_EXTRACTING&&itembar->install_status&&installmode==MODE_NONE)
         cl=((GetTickCount()-manager->animstart)/200)%2;
+    SelectClipRgn(hdc,hrgn2);
     box_draw(hdc,x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY),
              box_status(index)+cl);
     SelectClipRgn(hdc,hrgn);
@@ -914,6 +919,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone)
 
     SelectClipRgn(hdc,0);
     DeleteObject(hrgn);
+    DeleteObject(hrgn2);
     return 1;
 }
 
@@ -931,6 +937,16 @@ int isbehind(manager_t *manager,int pos,int ofsy,int j)
     return 0;
 }
 
+int calc_cutoff(manager_t *manager)
+{
+    int i,cutoff=0;
+
+    for(i=0;i<SLOT_RESTORE_POINT;i++)
+        if(manager->items_list[i].isactive)cutoff=(manager->items_list[i].curpos>>16);
+
+    return cutoff;
+}
+
 void manager_draw(manager_t *manager,HDC hdc,int ofsy)
 {
     itembar_t *itembar;
@@ -938,12 +954,18 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
     int maxpos=0;
     int nm=0;
     int cur_i,zone;
+    int cutoff=0;
     POINT p;
+    RECT rect;
 
     GetCursorPos(&p);
     ScreenToClient(hField,&p);
     manager_hitscan(manager,p.x,p.y,&cur_i,&zone);
 
+    GetClientRect(hField,&rect);
+    box_draw(hdc,0,0,rect.right,rect.bottom,BOX_DRVLIST);
+
+    cutoff=calc_cutoff(manager);
     updatecur();
     updateoverall(manager);
     for(i=manager->items_handle.items-1;i>=0;i--)
@@ -952,7 +974,7 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
         if(itembar->isactive)continue;
 
         if(isbehind(manager,(itembar->curpos>>16),ofsy,i))continue;
-        nm+=manager_drawitem(manager,hdc,i,ofsy,-1);
+        nm+=manager_drawitem(manager,hdc,i,ofsy,-1,cutoff);
     }
     for(i=manager->items_handle.items-1;i>=0;i--)
     {
@@ -960,7 +982,7 @@ void manager_draw(manager_t *manager,HDC hdc,int ofsy)
         if(itembar->isactive==0)continue;
 
         if(itembar->curpos>maxpos)maxpos=itembar->curpos;
-        nm+=manager_drawitem(manager,hdc,i,ofsy,cur_i==i?zone:-1);
+        nm+=manager_drawitem(manager,hdc,i,ofsy,cur_i==i?zone:-1,cutoff);
 
     }
     //printf("nm:%3d, ofs:%d\n",nm,ofsy);

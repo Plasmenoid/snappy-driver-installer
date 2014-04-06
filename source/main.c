@@ -1567,7 +1567,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
             // Misc
             vault_startmonitors();
-
+            DragAcceptFiles(hwnd,1);
 
             manager_populate(manager_g);
             manager_filter(manager_g,filters);
@@ -1680,6 +1680,42 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     if(installmode==MODE_SCANNING)installmode=MODE_NONE;
             }
             break;
+
+        case WM_DROPFILES:
+		{
+            WCHAR lpszFile[MAX_PATH]={0};
+            UINT uFile=0;
+            HDROP hDrop=(HDROP)wParam;
+
+            uFile=DragQueryFile(hDrop,0xFFFFFFFF,NULL,0);
+            if(uFile!=1)
+            {
+                //MessageBox(0,L"Dropping multiple files is not supported.",NULL,MB_ICONERROR);
+                DragFinish(hDrop);
+                break;
+            }
+
+            lpszFile[0] = '\0';
+            if(DragQueryFile(hDrop,0,lpszFile,MAX_PATH))
+            {
+                uFile=GetFileAttributes(lpszFile);
+                if(uFile!=INVALID_FILE_ATTRIBUTES&&uFile&FILE_ATTRIBUTE_DIRECTORY)
+                {
+                    wcscpy(drpext_dir,lpszFile);
+                    PostMessage(hMain,WM_DEVICECHANGE,7,2);
+                }
+                else if(StrStrI(lpszFile,L".snp"))
+                {
+                    wcscpy(state_file,lpszFile);
+                    statemode=STATEMODE_LOAD;
+                    PostMessage(hMain,WM_DEVICECHANGE,7,2);
+                }
+                //else
+                //    MessageBox(NULL,lpszFile,NULL,MB_ICONINFORMATION);
+            }
+            DragFinish(hDrop);
+            break;
+		}
 
         case WM_KEYUP:
             if(wParam==VK_F5)
@@ -1819,8 +1855,15 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     break;
 
                 case ID_SHOWALT:
-                    manager_expand(manager_g,floating_itembar);
-                    manager_setpos(manager_g);
+                    if(floating_itembar==SLOT_RESTORE_POINT)
+                    {
+                        RunSilent(L"cmd",L"/c %windir%\\Sysnative\\rstrui.exe",SW_HIDE,0);
+                    }
+                    else
+                    {
+                        manager_expand(manager_g,floating_itembar);
+                        manager_setpos(manager_g);
+                    }
                     break;
 
                 case ID_OPENINF:
@@ -1989,17 +2032,28 @@ void contextmenu(int x,int y)
         hSub1=CreatePopupMenu(),
         hSub2=CreatePopupMenu();
 
+    itembar_t *itembar=&manager_g->items_list[floating_itembar];
+    int flags1=itembar->checked?MF_CHECKED:0;
+    int flags2=itembar->isactive&2?MF_CHECKED:0;
+
+    if(floating_itembar==SLOT_RESTORE_POINT)
+    {
+        i=0;
+        InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags1,ID_SCHEDULE, STR(STR_REST_SCHEDULE));
+        InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING,       ID_SHOWALT,  STR(STR_REST_ROLLBACK));
+        SetForegroundWindow(hMain);
+        GetWindowRect(hField,&rect);
+        TrackPopupMenu(hPopupMenu,TPM_LEFTALIGN,rect.left+x,rect.top+y,0,hMain,NULL);
+        return;
+    }
     if(floating_itembar<RES_SLOTS)return;
     //printf("itembar %d\n",floating_itembar);
 
-    itembar_t *itembar=&manager_g->items_list[floating_itembar];
     devicematch_t *devicematch_f=manager_g->items_list[floating_itembar].devicematch;
     driver_t *cur_driver=0;
     WCHAR *p;
     char *t=manager_g->matcher->state->text;
     if(devicematch_f->device->driver_index>=0)cur_driver=&manager_g->matcher->state->drivers_list[devicematch_f->device->driver_index];
-    int flags1=itembar->checked?MF_CHECKED:0;
-    int flags2=itembar->isactive&2?MF_CHECKED:0;
     int flags3=cur_driver?0:MF_GRAYED;
     WCHAR buf[512];
 
@@ -2171,26 +2225,32 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
                 mousey=y;
                 redrawfield();
             }
-            if(ctrl_down||space_down||expertmode)
             {
                 int type=FLOATING_NONE;
+                int itembar_i;
 
                 if(space_down)type=FLOATING_DRIVERLST;else
                 if(ctrl_down||expertmode)type=FLOATING_CMPDRIVER;
 
-                manager_hitscan(manager_g,x,y,&floating_itembar,&i);
-                if(i==0&&(floating_itembar>=RES_SLOTS||floating_itembar<0))
-                    drawpopup(floating_itembar,type,x,y,hField);
+                manager_hitscan(manager_g,x,y,&itembar_i,&i);
+                if(i==0&&itembar_i>=RES_SLOTS&&(ctrl_down||space_down||expertmode))
+                    drawpopup(itembar_i,type,x,y,hField);
+                else if(itembar_i==SLOT_VIRUS_AUTORUN)
+                    drawpopup(STR_VIRUS_AUTORUN_H,FLOATING_TOOLTIP,x,y,hField);
+                else if(itembar_i==SLOT_VIRUS_RECYCLER)
+                    drawpopup(STR_VIRUS_RECYCLER_H,FLOATING_TOOLTIP,x,y,hField);
+                else if(itembar_i==SLOT_VIRUS_HIDDEN)
+                    drawpopup(STR_VIRUS_HIDDEN_H,FLOATING_TOOLTIP,x,y,hField);
+                else if(itembar_i==SLOT_RESTORE_POINT)
+                    drawpopup(STR_RESTOREPOINT_H,FLOATING_TOOLTIP,x,y,hField);
+                else if(i==0&&itembar_i>=RES_SLOTS)
+                    drawpopup(STR_HINT_DRIVER,FLOATING_TOOLTIP,x,y,hField);
                 else
                     drawpopup(-1,FLOATING_NONE,0,0,hField);
-            }
-            {
-                int a,b;
 
-                manager_hitscan(manager_g,x,y,&a,&b);
-                if(a!=field_lasti||b!=field_lastz)redrawfield();
-                field_lasti=a;
-                field_lastz=b;
+                if(itembar_i!=field_lasti||i!=field_lastz)redrawfield();
+                field_lasti=itembar_i;
+                field_lastz=i;
             }
             break;
 
