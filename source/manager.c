@@ -336,6 +336,10 @@ void manager_toggle(manager_t *manager,int index)
     itembar1=&manager->items_list[index];
     if(index>=RES_SLOTS&&!itembar1->hwidmatch)return;
     itembar1->checked^=1;
+    if(!itembar1->checked&&installmode)
+    {
+        itembar1->install_status=STR_INST_STOPPING;
+    }
     group=itembar1->index;
 
     itembar=manager->items_list;
@@ -726,15 +730,14 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
 
     SelectObject(hdc,hFont);
 
-    if(index<SLOT_EXTRACTING)cutoff=0;
+    if(index<SLOT_RESTORE_POINT)cutoff=0;
     hrgn2=CreateRectRgn(x,cutoff,D(DRVITEM_OFSX)+D(DRVITEM_WX),mainy_c);
     hrgn=CreateRectRgn(x,(pos<cutoff)?cutoff:pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY));
     int cl=((zone>=0)?1:0);
     if(index==SLOT_EXTRACTING&&itembar->install_status&&installmode==MODE_NONE)
         cl=((GetTickCount()-manager->animstart)/200)%2;
     SelectClipRgn(hdc,hrgn2);
-    box_draw(hdc,x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY),
-             box_status(index)+cl);
+    box_draw(hdc,x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY),box_status(index)+cl);
     SelectClipRgn(hdc,hrgn);
 
     if(itembar->percent)

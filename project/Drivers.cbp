@@ -124,6 +124,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../source/common.h" />
+		<Unit filename="../source/draw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../source/draw.h" />
 		<Unit filename="../source/enum.c">
 			<Option compilerVar="CC" />
 		</Unit>
