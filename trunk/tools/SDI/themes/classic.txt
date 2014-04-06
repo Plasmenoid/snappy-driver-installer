@@ -35,7 +35,7 @@ FONT_SIZE                = 10
 // Main window
 MAINWND_TRANSPARENCY     = 255
 MAINWND_TEXT_COLOR       = 0x000000
-MAINWND_WX               = 800
+MAINWND_WX               = 880
 MAINWND_WY               = 675
 MAINWND_INSIDE_COLOR     = 0xD0D0D0
 MAINWND_OUTLINE_COLOR    = 0xD0D0D0

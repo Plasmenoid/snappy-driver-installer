@@ -419,11 +419,14 @@ void collection_save(collection_t *col)
 
 #ifndef CONSOLE_MODE
     // Save indexes
+    log_con("Saving indexes...");
+    if(*drpext_dir==0)
     for(i=0;i<col->driverpack_handle.items;i++)
     {
         if(col->driverpack_list[i].type==DRIVERPACK_TYPE_PENDING_SAVE)
             driverpack_saveindex(&col->driverpack_list[i]);
     }
+    log_con("done\n");
 
     // Delete unused indexes
     if(*drpext_dir)return;

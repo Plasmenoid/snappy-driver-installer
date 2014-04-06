@@ -122,7 +122,7 @@ void itembar_setpos(itembar_t *itembar,int *pos,int *cnt);
 int  itembar_cmp(itembar_t *a,itembar_t *b,CHAR *ta,CHAR *tb);
 int  isdrivervalid(hwidmatch_t *hwidmatch);
 void str_status(WCHAR *buf,itembar_t *itembar);
-int box_status(int index);
+int  box_status(int index);
 void str_date(version_t *v,WCHAR *buf);
 WCHAR *str_version(version_t *ver);
 
@@ -130,8 +130,9 @@ WCHAR *str_version(version_t *ver);
 void manager_setpos(manager_t *manager);
 int  manager_animate(manager_t *manager);
 void drawbutton(HDC hdc,int x,int pos,int index,WCHAR *str1,WCHAR *str2);
-int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone);
+int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int cutoff);
 int  isbehind(manager_t *manager,int pos,int ofs,int j);
+int  calc_cutoff(manager_t *manager);
 void manager_draw(manager_t *manager,HDC hdc,int ofsy);
 void manager_restorepos(manager_t *manager,manager_t *manager_prev);
 

@@ -184,8 +184,11 @@ STR_STATUS_NF_STANDARD  = "Стандартний драйвер вже вста
 // Вирус
 STR_VIRUS               = "Носій інформації, де знаходиться програма, можливо заражений вірусом"
 STR_VIRUS_AUTORUN       = "У корені носія мається файл AUTORUN.INF"
+STR_VIRUS_AUTORUN_H     = "" // translate
 STR_VIRUS_RECYCLER      = "У корені носія мається папка RECYCLER"
+STR_VIRUS_RECYCLER_H    = "" // translate
 STR_VIRUS_HIDDEN        = "У корені носія мається приховані папки"
+STR_VIRUS_HIDDEN_H      = "" // translate
 
 // Статус
 STR_CLOSE_SNAPSHOT      = "(Клікніть тут, щоб завершити емуляцію чужої системи)"
@@ -215,6 +218,13 @@ STR_INDEXING            = "Індексація..."
 STR_OF                  = " з "
 
 STR_RESTOREPOINT        = "Створити точку відновлення"
+STR_RESTOREPOINT_H      = "" // translate
+STR_REST_SCHEDULE       = "" // translate
+STR_REST_ROLLBACK       = "" // translate
 STR_REST_CREATING       = "Створення точки відновлення..."
 STR_REST_CREATED        = "Точка відновлення створена"
 STR_REST_FAILED         = "Не вдалося створити точку відновлення"
+
+STR_HINT_STOPINST       = "" // translate
+STR_HINT_STOPEXTR       = "" // translate
+STR_HINT_DRIVER         = "" // translate

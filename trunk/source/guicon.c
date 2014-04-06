@@ -299,6 +299,7 @@ void CALLBACK viruscheck(LPTSTR szFile,DWORD action,LPARAM lParam)
     UNREFERENCED_PARAMETER(lParam);
 
     char buf[BUFLEN];
+    WCHAR bufw[BUFLEN];
     HANDLE hFind = INVALID_HANDLE_VALUE;
     WIN32_FIND_DATA FindFileData;
     int type;
@@ -322,12 +323,15 @@ void CALLBACK viruscheck(LPTSTR szFile,DWORD action,LPARAM lParam)
                 if(!strstr(buf,"[NOT_A_VIRUS]"))
                     manager_g->items_list[SLOT_VIRUS_AUTORUN].isactive=update=1;
             }
+            else
+                log_con("NOTE: cannot open autorun.inf [error: %d]\n",errno);
         }
     }
 
     // RECYCLER
     if(type==DRIVE_REMOVABLE)
-        if(PathFileExists(L"\\RECYCLER"))manager_g->items_list[SLOT_VIRUS_RECYCLER].isactive=update=1;
+        if(PathFileExists(L"\\RECYCLER")&&!PathFileExists(L"\\RECYCLER\\not_a_virus.txt"))
+            manager_g->items_list[SLOT_VIRUS_RECYCLER].isactive=update=1;
 
     // Hidden folders
     hFind=FindFirstFile(L"\\*.*",&FindFileData);
@@ -338,7 +342,12 @@ void CALLBACK viruscheck(LPTSTR szFile,DWORD action,LPARAM lParam)
         {
             if(lstrcmp(FindFileData.cFileName,L"..")==0)continue;
             if(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_HIDDEN)
+            {
+                wsprintf(bufw,L"\\%ws\\not_a_virus.txt",FindFileData.cFileName);
+                if(PathFileExists(bufw))continue;
+                log_con("VIRUS_WARNING: hidden folder '%ws'\n",FindFileData.cFileName);
                 manager_g->items_list[SLOT_VIRUS_HIDDEN].isactive=update=1;
+            }
         }
     }
     FindClose(hFind);
