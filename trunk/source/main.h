@@ -53,6 +53,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #include "manager.h"
 #include "theme.h"
 #include "install.h"
+#include "draw.h"
 #include "cli.h"
 
 #include "7z.h"
@@ -171,6 +172,8 @@ extern HFONT hFont;
 extern HWND hPopup,hMain,hField;
 
 // Window helpers
+extern int floating_type;
+extern int floating_itembar;
 extern int floating_x,floating_y;
 extern int horiz_sh;
 extern int ret_global;
@@ -194,17 +197,6 @@ typedef struct _panelitem_t
     int action_id;
     int checked;
 }panelitem_t;
-
-typedef struct _canvas_t
-{
-    int x,y;
-    HDC hdcMem,localDC;
-    HBITMAP bitmap,oldbitmap;
-    HRGN clipping;
-    PAINTSTRUCT ps;
-    HWND hwnd;
-}canvas_t;
-extern canvas_t canvasField;
 
 typedef struct _bundle_t
 {
@@ -248,27 +240,10 @@ void setscrollpos(int pos);
 
 // Helpers
 void get_resource(int id,void **data,int *size);
-WCHAR *get_winverstr(manager_t *manager);
+const WCHAR *get_winverstr(manager_t *manager);
 void mkdir_r(const WCHAR *path);
 void snapshot();
 void extractto();
-
-// Draw
-void image_load(img_t *img,BYTE *data,int sz);
-void image_loadFile(img_t *img,WCHAR *filename);
-void image_loadRes(img_t *img,int id);
-void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fill);
-void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int i);
-void drawcheckbox(HDC hdc,int x,int y,int wx,int wy,int checked,int active);
-void drawrect(HDC hdc,int x1,int y1,int x2,int y2,int color1,int color2,int w,int r);
-void drawrevision(HDC hdcMem,int y);
-void drawpopup(int itembar,int type,int x,int y,HWND hwnd);
-
-// Canvas
-void canvas_init(canvas_t *canvas);
-void canvas_free(canvas_t *canvas);
-void canvas_begin(canvas_t *canvas,HWND hwnd,int x,int y);
-void canvas_end(canvas_t *canvas);
 
 // Panel
 int  panel_hitscan(int x,int y);
@@ -288,4 +263,5 @@ void drvdir();
 WCHAR *getHWIDby(int id,int num);
 void escapeAmpUrl(WCHAR *buf,WCHAR *source);
 void escapeAmp(WCHAR *buf,WCHAR *source);
+void contextmenu2(int x,int y);
 void contextmenu(int x,int y);

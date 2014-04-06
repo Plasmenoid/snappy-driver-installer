@@ -306,6 +306,30 @@ int calc_markerscore(state_t *state,char *path)
     return score;
 }
 
+int isvalid_usb30hub(hwidmatch_t *hwidmatch,state_t *state,WCHAR *str)
+{
+    //log_con("Intel USB3.0 HUB '%ws'\n",state->text+hwidmatch->devicematch->device->HardwareID);
+    return (int)StrStrI((WCHAR *)(state->text+hwidmatch->devicematch->device->HardwareID),str);
+}
+
+int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state)
+{
+    version_t *v;
+    int major=state->platform.dwMajorVersion,
+        minor=state->platform.dwMinorVersion;
+
+    v=getdrp_drvversion(hwidmatch);
+    switch(v->v1)
+    {
+        case 5:if(major!=5)return 0;break;              // XP
+        case 6:if(major!=6||minor!=0)return 0;break;    // Vista
+        case 7:if(major!=6||minor!=1)return 0;break;    // 7
+        case 8:if(major!=6||minor <2)return 0;break;    // 8 and 8.1
+        default:break;
+    }
+    return 1;
+}
+
 int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
 {
     char buf[BUFLEN];
@@ -328,6 +352,16 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
         if(!*marker)return 0;
         if(!StrStrIA(getdrp_infpath(hwidmatch),marker))return 0;
     }
+
+    if(strstr(getdrp_infpath(hwidmatch),"intel_2nd\\"))
+        if(!isvalid_usb30hub(hwidmatch,state,L"IUSB3\\ROOT_HUB30&VID_8086&PID_1E31"))return 0;
+
+    if(strstr(getdrp_infpath(hwidmatch),"intel_4th\\"))
+        if(!isvalid_usb30hub(hwidmatch,state,L"IUSB3\\ROOT_HUB30&VID_8086&PID_8C31"))return 0;
+
+    if(strstr(getdrp_infpath(hwidmatch),"matchver\\"))
+        if(!isvalid_ver(hwidmatch,state))return 0;
+
     //log("Sc:%d\n\n",curscore);
     return isvalidcat(hwidmatch,state)?2:1;
 }

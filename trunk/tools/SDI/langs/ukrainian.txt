@@ -228,3 +228,10 @@ STR_REST_FAILED         = "Не вдалося створити точку ві�
 STR_HINT_STOPINST       = "" // translate
 STR_HINT_STOPEXTR       = "" // translate
 STR_HINT_DRIVER         = "" // translate
+
+STR_SYS_WINVER          = "" // translate
+STR_SYS_32              = "" // translate
+STR_SYS_64              = "" // translate
+STR_SYS_DEVICEMNG       = "" // translate
+STR_SYS_DISINSTALL      = "" // translate
+STR_SYS_DISRESTPNT      = "" // translate
