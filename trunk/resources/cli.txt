@@ -26,8 +26,8 @@ Task-oriented
 /lzma             Compress driverpacks.
 /nogui            Run without GUI-interface.
 /nologfile        Suppress creating logs
-/nosnapshot       Suppress creating snapshots
-/nostamp          Create logs and snapshot without timestamps
+/nosnapshot       Suppress creating snapshots.
+/nostamp          Create logs and snapshot without timestamps.
 
 ------------
 Settings.cfg
@@ -43,8 +43,10 @@ Settings.cfg
 /expertmode       Enable the expert mode.
 /license          Suppress the license dialog.
 /norestorepnt     Suppress creating of restore point.
+/showdrpnames     Shows driverpack names.
+/preservecfg      Prevents updating of settings.cfg.
 /cfg:<FileName>   Custom .cfg file, if set "settings.cfg" not processed.
-                  Other swithes processed 
+                  Other swithes processed
 ---------
 Emulation
 ---------
@@ -60,6 +62,9 @@ Autoinstall
 /autoclose           Close the application after installation.
 /finish_cmd:<cmd>    Specifies a command executed upon completion of driver installation.
 /finishrb_cmd:<cmd>  Specifies a command executed upon completion of driver installation when reboot is required.
+/extractdir:<dir>    Path to TEMP.
+/keepunpackedindex   Prevents updating of indexes for unpacked drivers.
+/keeptempfiles       Keep temp files.
 
 -----
 Debug
@@ -77,3 +82,19 @@ Command: -HWIDInstalled
  0 -- driver not installed in session saved in <Filename>
  1 -- driver has been installed in session saved in <Filename>
 24 -- Invalid length.  HWID less 17 chars (VID_xxxx&PID_XXXX).
+
+-------
+Verbose
+-------
+
+LOG_VERBOSE_ARGS       | 0x0001 |    1
+LOG_VERBOSE_SYSINFO    | 0x0002 |    2
+LOG_VERBOSE_DEVICES    | 0x0004 |    4
+LOG_VERBOSE_MATCHER    | 0x0008 |    8
+LOG_VERBOSE_MANAGER    | 0x0010 |   16
+LOG_VERBOSE_DRP        | 0x0020 |   32
+LOG_VERBOSE_TIMES      | 0x0040 |   64
+LOG_VERBOSE_LOG_ERR    | 0x0080 |  128
+LOG_VERBOSE_LOG_CON    | 0x0100 |  256
+LOG_VERBOSE_LAGCOUNTER | 0x0200 |  512
+LOG_VERBOSE_DEVSYNC    | 0x0400 | 1024

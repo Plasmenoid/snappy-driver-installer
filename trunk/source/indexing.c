@@ -419,14 +419,49 @@ void collection_save(collection_t *col)
 
 #ifndef CONSOLE_MODE
     // Save indexes
-    log_con("Saving indexes...");
     if(*drpext_dir==0)
-    for(i=0;i<col->driverpack_handle.items;i++)
     {
-        if(col->driverpack_list[i].type==DRIVERPACK_TYPE_PENDING_SAVE)
-            driverpack_saveindex(&col->driverpack_list[i]);
+        int count=0,cur=1;
+
+        for(i=0;i<col->driverpack_handle.items;i++)
+            if(col->driverpack_list[i].type==DRIVERPACK_TYPE_PENDING_SAVE)count++;
+
+        log_con("Saving indexes...\n");
+        for(i=0;i<col->driverpack_handle.items;i++)
+        {
+            if((flags&FLAG_KEEPUNPACKINDEX)==0&&!i)
+            {
+                cur++;
+                continue;
+            }
+            if(col->driverpack_list[i].type==DRIVERPACK_TYPE_PENDING_SAVE)
+            {
+                if(flags&COLLECTION_USE_LZMA)
+                {
+                    WCHAR bufw2[BUFLEN];
+
+                    wsprintf(bufw2,L"%ws\\%ws",
+                        col->driverpack_list[i].text+col->driverpack_list[i].drppath,
+                        col->driverpack_list[i].text+col->driverpack_list[i].drpfilename);
+
+                    log_con("Saving indexes for '%ws'\n",bufw2);
+                    manager_g->items_list[SLOT_INDEXING].isactive=2;
+                    manager_g->items_list[SLOT_INDEXING].val1=cur-1;
+                    manager_g->items_list[SLOT_INDEXING].val2=count-1;
+                    wcscpy(manager_g->items_list[SLOT_INDEXING].txt1,bufw2);
+                    manager_g->items_list[SLOT_INDEXING].percent=(cur)*1000/count;
+                    manager_setpos(manager_g);
+                    redrawfield();
+                    cur++;
+                }
+
+                driverpack_saveindex(&col->driverpack_list[i]);
+            }
+        }
+        manager_g->items_list[SLOT_INDEXING].isactive=0;
+        manager_setpos(manager_g);
+        log_con("done\n");
     }
-    log_con("done\n");
 
     // Delete unused indexes
     if(*drpext_dir)return;

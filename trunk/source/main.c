@@ -124,7 +124,7 @@ WCHAR state_file[BUFLEN]=L"untitled.snp";
 WCHAR finish    [BUFLEN]=L"";
 WCHAR finish_rb [BUFLEN]=L"";
 
-int flags=0;
+int flags=COLLECTION_USE_LZMA;
 int statemode=0;
 int expertmode=0;
 int license=0;
@@ -1186,7 +1186,7 @@ void escapeAmpUrl(WCHAR *buf,WCHAR *source)
 
 void checktimer(WCHAR *str,long long t,int uMsg)
 {
-    if(GetTickCount()-t>40&&log_verbose&LOG_VERBOSE_LAGCOUNTER)
+    if(GetTickCount()-t>20&&log_verbose&LOG_VERBOSE_LAGCOUNTER)
         log_con("GUI lag in %ws[%X]: %ld\n",str,uMsg,GetTickCount()-t);
 }
 
@@ -1523,6 +1523,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     if(floating_itembar==SLOT_RESTORE_POINT)
                     {
                         RunSilent(L"cmd",L"/c %windir%\\Sysnative\\rstrui.exe",SW_HIDE,0);
+                        RunSilent(L"cmd",L"/c %windir%\\system32\\Restore\\rstrui.exe",SW_HIDE,0);
                     }
                     else
                     {
@@ -1550,8 +1551,37 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     }
                     break;
 
+                case ID_DEVICEMNG:
+                    RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
+                    break;
+
+                case ID_EMU_32:
+                    virtual_arch_type=32;
+                    PostMessage(hMain,WM_DEVICECHANGE,7,2);
+                    break;
+
+                case ID_EMU_64:
+                    virtual_arch_type=64;
+                    PostMessage(hMain,WM_DEVICECHANGE,7,2);
+                    break;
+
+                case ID_DIS_INSTALL:
+                    flags^=FLAG_DISABLEINSTALL;
+                    break;
+
+                case ID_DIS_RESTPNT:
+                    flags^=FLAG_NORESTOREPOINT;
+                    manager_g->items_list[SLOT_RESTORE_POINT].isactive=(flags&FLAG_NORESTOREPOINT)==0;
+                    manager_setpos(manager_g);
+                    break;
+
                 default:
                     break;
+            }
+            if(wp>=ID_WIN_2000&&wp<=ID_WIN_81)
+            {
+                virtual_os_version=windows_ver[wp-ID_WIN_2000];
+                PostMessage(hMain,WM_DEVICECHANGE,7,2);
             }
             if(wp>=ID_HWID_CLIP&&wp<=ID_HWID_WEB+100)
             {
@@ -1701,18 +1731,18 @@ void contextmenu2(int x,int y)
     for(i=0;i<NUM_OS-1;i++)
     {
         InsertMenu(hSub1,i,MF_BYPOSITION|MF_STRING|(ver==windows_ver[i]?MF_CHECKED:0),
-                   ID_HWID_WEB+i,windows_name[i]);
+                   ID_WIN_2000+i,windows_name[i]);
     }
 
     i=0;
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(int)hSub1,STR(STR_SYS_WINVER));
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(arch==0?MF_CHECKED:0),       ID_SHOWALT,  STR(STR_SYS_32));
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(arch==1?MF_CHECKED:0),       ID_SHOWALT,  STR(STR_SYS_64));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(arch==0?MF_CHECKED:0),ID_EMU_32,STR(STR_SYS_32));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(arch==1?MF_CHECKED:0),ID_EMU_64,STR(STR_SYS_64));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_SEPARATOR,0,0);
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING,       ID_SHOWALT,  STR(STR_SYS_DEVICEMNG));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING,ID_DEVICEMNG,STR(STR_SYS_DEVICEMNG));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_SEPARATOR,0,0);
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(flags&FLAG_DISABLEINSTALL?MF_CHECKED:0),       ID_SHOWALT,  STR(STR_SYS_DISINSTALL));
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(flags&FLAG_NORESTOREPOINT?MF_CHECKED:0),       ID_SHOWALT,  STR(STR_SYS_DISRESTPNT));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(flags&FLAG_DISABLEINSTALL?MF_CHECKED:0),ID_DIS_INSTALL,STR(STR_SYS_DISINSTALL));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(flags&FLAG_NORESTOREPOINT?MF_CHECKED:0),ID_DIS_RESTPNT,STR(STR_SYS_DISRESTPNT));
     SetForegroundWindow(hMain);
     GetWindowRect(hMain,&rect);
     TrackPopupMenu(hPopupMenu,TPM_LEFTALIGN,rect.left+x,rect.top+y,0,hMain,NULL);

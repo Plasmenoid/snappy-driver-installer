@@ -126,15 +126,15 @@ void manager_filter(manager_t *manager,int options)
             for(k=0;k<NUM_STATUS;k++)
                 if((!o1||!cnt[NUM_STATUS])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
             {
-                if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&devicematch->device->problem==0
-                   &&itembar->hwidmatch->altsectscore<2)continue;
+                if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&(options&FILTER_SHOW_INVALID)==0&&
+                   devicematch->device->problem==0&&itembar->hwidmatch->altsectscore<2)continue;
 
                 // hide if
                 //[X] Newer
                 //[ ] Worse
                 //worse, no problem
                 if((options&FILTER_SHOW_NEWER)!=0
-                   &&(options&FILTER_SHOW_WORSE_RANK)==0
+                   &&(options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&(options&FILTER_SHOW_INVALID)==0
                    &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0)continue;
 
                 cnt[k]++;
@@ -762,7 +762,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
             break;
 
         case SLOT_INDEXING:
-            wsprintf(bufw,L"%s (%d%s%d)",STR(STR_INDEXING),
+            wsprintf(bufw,L"%s (%d%s%d)",STR(itembar->isactive==2?STR_INDEXLZMA:STR_INDEXING),
                         manager->items_list[SLOT_INDEXING].val1,STR(STR_OF),
                         manager->items_list[SLOT_INDEXING].val2);
             TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));

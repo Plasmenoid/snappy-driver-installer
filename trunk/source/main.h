@@ -72,7 +72,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define APPTITLE            L"Snappy Driver Installer v0.1"
 #define VER_MARKER          "SDW"
 #define VER_STATE           0x101
-#define VER_INDEX           0x202
+#define VER_INDEX           0x203
 
 // Mode
 #define STATEMODE_LOAD      2
@@ -143,6 +143,20 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define ID_SHOWALT         24
 #define ID_OPENINF         25
 #define ID_LOCATEINF       26
+
+#define ID_EMU_32          27
+#define ID_EMU_64          28
+#define ID_DEVICEMNG       29
+#define ID_DIS_INSTALL     30
+#define ID_DIS_RESTPNT     31
+
+#define ID_WIN_2000        32
+#define ID_WIN_XP          33
+#define ID_WIN_VISTA       34
+#define ID_WIN_7           35
+#define ID_WIN_8           36
+#define ID_WIN_81          37
+
 #define ID_HWID_CLIP      100
 #define ID_HWID_WEB       200
 
