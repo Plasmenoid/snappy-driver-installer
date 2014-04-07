@@ -368,6 +368,7 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
 
 int isMissing(device_t *device,driver_t *driver,state_t *state)
 {
+    if(device->problem==CM_PROB_DISABLED)return 0;
     if(driver)
     {
         if(!_wcsicmp((WCHAR*)(state->text+driver->MatchingDeviceId),L"PCI\\CC_0300"))return 1;
