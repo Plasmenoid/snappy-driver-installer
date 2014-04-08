@@ -233,6 +233,7 @@ int  collection_scanfolder_count(collection_t *col,const WCHAR *path);
 void driverpack_init(driverpack_t *drp,WCHAR const *driverpack_path,WCHAR const *driverpack_filename,collection_t *col);
 void driverpack_free(driverpack_t *drp);
 void driverpack_saveindex(driverpack_t *drp);
+int  driverpack_checkindex(driverpack_t *drp);
 int  driverpack_loadindex(driverpack_t *drp);
 void driverpack_getindexfilename(driverpack_t *drp,WCHAR *dir,const WCHAR *ext,WCHAR *indfile);
 void driverpack_print(driverpack_t *drp);

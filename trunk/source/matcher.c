@@ -118,24 +118,24 @@ char marker[BUFLEN];
 WCHAR *Filter_1[]={L"Acer",L"acer",L"emachines",L"packard",L"bell",L"gateway",L"aspire",0};
 WCHAR *Filter_2[]={L"Apple",L"apple",0};
 WCHAR *Filter_3[]={L"Asus",L"asus",0};
-WCHAR *Filter_4[]={L"Clevo",L"clevo",L"eurocom",L"sager",L"iru",L"viewsonic",L"viewbook",0};
+WCHAR *Filter_4[]={L"OEM",L"clevo",L"eurocom",L"sager",L"iru",L"viewsonic",L"viewbook",0};
 WCHAR *Filter_5[]={L"Dell",L"dell",L"alienware",L"arima",L"jetway",L"gericom",0};
 WCHAR *Filter_6[]={L"Fujitsu",L"fujitsu",L"sieme",0};
-WCHAR *Filter_7[]={L"Gigabyte",L"gigabyte",L"ecs",L"elitegroup",L"roverbook",L"rover",0};
+WCHAR *Filter_7[]={L"OEM",L"gigabyte",L"ecs",L"elitegroup",L"roverbook",L"rover",0};
 WCHAR *Filter_8[]={L"HP",L"hp",L"hewle",L"compaq",0};
-WCHAR *Filter_9[]={L"Intel",L"intel",0};
-WCHAR *Filter_10[]={L"Lenovo",L"lenovo",L"compal",L"ibm",L"wistron",0};
+WCHAR *Filter_9[]={L"OEM",L"intel",L"wistron",0};
+WCHAR *Filter_10[]={L"Lenovo",L"lenovo",L"compal",L"ibm",0};
 WCHAR *Filter_11[]={L"LG",L"lg",0};
-WCHAR *Filter_12[]={L"MTC",L"mitac",L"mtc",L"depo",L"getac",0};
+WCHAR *Filter_12[]={L"OEM",L"mitac",L"mtc",L"depo",L"getac",0};
 WCHAR *Filter_13[]={L"MSI",L"msi",L"micro-star",0};
 WCHAR *Filter_14[]={L"Panasonic",L"panasonic",L"matsushita",0};
-WCHAR *Filter_15[]={L"Quanta",L"quanta",L"prolink",L"nec",L"k-systems",L"benq",L"vizio",0};
-WCHAR *Filter_16[]={L"Pegatron",L"pegatron",L"medion",0};
+WCHAR *Filter_15[]={L"OEM",L"quanta",L"prolink",L"nec",L"k-systems",L"benq",L"vizio",0};
+WCHAR *Filter_16[]={L"OEM",L"pegatron",L"medion",0};
 WCHAR *Filter_17[]={L"Samsung",L"samsung",0};
-WCHAR *Filter_18[]={L"Shuttle",L"shuttle",0};
+WCHAR *Filter_18[]={L"OEM",L"shuttle",0};
 WCHAR *Filter_19[]={L"Sony",L"sony",L"vaio",0};
 WCHAR *Filter_20[]={L"Toshiba",L"toshiba",0};
-WCHAR *Filter_21[]={L"Twinhead",L"twinhead",L"durabook",0};
+WCHAR *Filter_21[]={L"OEM",L"twinhead",L"durabook",0};
 
 WCHAR **filter_list[]=
 {

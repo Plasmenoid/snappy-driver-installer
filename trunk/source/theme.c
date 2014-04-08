@@ -130,12 +130,6 @@ void vault_free()
 {
     int i;
 
-    for(i=0;i<THEME_NM;i++)
-        if(theme[i].init==2)free((void *)theme[i].val);
-
-    for(i=0;i<STR_NM;i++)
-        if(language[i].init==2)free((void *)language[i].val);
-
     for(i=0;i<BOX_NUM;i++)box_free(&box[i]);
     for(i=0;i<ICON_NUM;i++)icon_free(&icon[i]);
 
@@ -296,12 +290,8 @@ void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
 
             if(r1)               // String
             {
-                int sz=wcslen((WCHAR *)r1)+1;
-
-                if(entry[r].init==2)free((void *)entry[r].val);
                 v=r1;
-                tmp=(WCHAR *)malloc(sz*2);
-                memcpy(tmp,(void *)v,sz*2);
+                tmp=(WCHAR *)v;
                 while(wcsstr(tmp,L"\\n"))
                 {
                     WCHAR *yy=wcsstr(tmp,L"\\n");
@@ -330,7 +320,7 @@ void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
             //if(r2>=0)printf("+RHS:'%ws'\n",L"",rhs);
             //log("%d,%d,%X,{%ws|%ws}\n",r2,v,v,lhs,rhs);
             entry[r].val=v;
-            entry[r].init=r1?2:1;
+            entry[r].init=1;
         }
         lhs=le+1;
     }
