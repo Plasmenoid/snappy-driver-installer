@@ -341,6 +341,8 @@ void CALLBACK viruscheck(LPTSTR szFile,DWORD action,LPARAM lParam)
         if(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)
         {
             if(lstrcmp(FindFileData.cFileName,L"..")==0)continue;
+            if(lstrcmpi(FindFileData.cFileName,L"System Volume Information")==0)continue;
+
             if(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_HIDDEN)
             {
                 wsprintf(bufw,L"\\%ws\\not_a_virus.txt",FindFileData.cFileName);
