@@ -498,6 +498,7 @@ int collection_scanfolder_count(collection_t *col,const WCHAR *path)
     HANDLE hFind = INVALID_HANDLE_VALUE;
     WIN32_FIND_DATA FindFileData;
     WCHAR buf[BUFLEN];
+    driverpack_t drp;
     int cnt=0;
 
     wsprintf(buf,L"%ws\\*.*",path);
@@ -515,7 +516,9 @@ int collection_scanfolder_count(collection_t *col,const WCHAR *path)
             int len=lstrlen(FindFileData.cFileName);
             if(_wcsicmp(FindFileData.cFileName+len-3,L".7z")==0)
             {
-                cnt++;
+                driverpack_init(&drp,path,FindFileData.cFileName,col);
+                if(flags&COLLECTION_FORCE_REINDEXING||!driverpack_checkindex(&drp))cnt++;
+                driverpack_free(&drp);
             }
         }
     }
@@ -605,6 +608,7 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
     WIN32_FIND_DATA FindFileData;
     WCHAR buf[1024];
     driverpack_t *drp;
+    int num=0;
 
     wsprintf(buf,L"%s\\*.*",path);
     hFind=FindFirstFile(buf,&FindFileData);
@@ -629,15 +633,16 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
                 {
                     WCHAR bufw1[4096];
                     WCHAR bufw2[4096];
-                    wsprintf(bufw1,L"Indexing %d/%d",col->driverpack_handle.items-1,drp_count);
+                    wsprintf(bufw1,L"Indexing %d/%d",num,drp_count);
                     wsprintf(bufw2,L"%s\\%s",path,FindFileData.cFileName);
                     manager_g->items_list[SLOT_INDEXING].isactive=1;
-                    manager_g->items_list[SLOT_INDEXING].val1=col->driverpack_handle.items-1;
+                    manager_g->items_list[SLOT_INDEXING].val1=num;
                     manager_g->items_list[SLOT_INDEXING].val2=drp_count;
-                    itembar_settext(manager_g,SLOT_INDEXING,bufw2,(col->driverpack_handle.items-1)*1000/drp_count);
+                    itembar_settext(manager_g,SLOT_INDEXING,bufw2,(num)*1000/drp_count);
                     manager_setpos(manager_g);
                     drp=&col->driverpack_list[index];
                     driverpack_genindex(drp);
+                    num++;
                 }
             }else
             if(_wcsicmp(FindFileData.cFileName+len-4,L".inf")==0&&loaded_unpacked==0)
@@ -766,6 +771,33 @@ void driverpack_saveindex(driverpack_t *drp)
 
     free(mem);
     fclose(f);
+}
+
+int driverpack_checkindex(driverpack_t *drp)
+{
+    WCHAR filename[BUFLEN];
+    CHAR buf[3];
+    FILE *f;
+    int sz;
+    int version;
+
+    driverpack_getindexfilename(drp,drp->col->index_bin_dir,L"bin",filename);
+    f=_wfopen(filename,L"rb");
+    if(!f)return 0;
+
+    fseek(f,0,SEEK_END);
+    sz=ftell(f);
+    fseek(f,0,SEEK_SET);
+
+    fread(buf,3,1,f);
+    fread(&version,sizeof(int),1,f);
+    sz-=3+sizeof(int);
+
+    if(memcmp(buf,"SDW",3)||version!=VER_INDEX)return 0;
+    if(*drpext_dir)return 0;
+
+    fclose(f);
+    return 1;
 }
 
 int driverpack_loadindex(driverpack_t *drp)
