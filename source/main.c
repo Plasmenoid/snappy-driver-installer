@@ -1394,11 +1394,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(wParam==VK_F8)
             {
                 flags^=FLAG_SHOWDRPNAMES;
-                if(ctrl_down)
+                /*if(ctrl_down)
                 {
                     flags|=FLAG_SHOWDRPNAMES;
                     manager_sort(manager_g);
-                }
+                }*/
                 redrawfield();
             }
             break;

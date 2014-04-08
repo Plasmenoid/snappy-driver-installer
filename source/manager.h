@@ -65,6 +65,7 @@ typedef struct _itembar_t
     int isactive;
     int checked;
     int index;
+    int rm;
 
     int oldpos,curpos,tagpos,accel;
 }itembar_t;
@@ -102,7 +103,8 @@ void manager_free(manager_t *manager);
 void manager_populate(manager_t *manager);
 void manager_filter(manager_t *manager,int options);
 void manager_print(manager_t *manager);
-void manager_sort(manager_t *manager);
+//void manager_sort(manager_t *manager);
+void manager_sorta(matcher_t *m,int *v);
 
 // User interaction
 void manager_hitscan(manager_t *manager,int x,int y, int *i,int *zone);
@@ -116,7 +118,7 @@ void manager_selectall(manager_t *manager);
 
 // Helpers
 int groupsize(manager_t *manager,int index);
-void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *match,int groupindex);
+void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *match,int groupindex,int rm);
 void itembar_settext(manager_t *manager,int i,WCHAR *txt1,int percent);
 void itembar_setpos(itembar_t *itembar,int *pos,int *cnt);
 int  itembar_cmp(itembar_t *a,itembar_t *b,CHAR *ta,CHAR *tb);
