@@ -235,8 +235,8 @@ void drawpopup(int itembar,int type,int x,int y,HWND hwnd)
     MONITORINFO mi;
     int needupdate;
 
-    if((type==FLOATING_CMPDRIVER||type==FLOATING_DRIVERLST)&&floating_itembar<0)type=FLOATING_NONE;
-    if(type==FLOATING_TOOLTIP&&(floating_itembar<=1||!*STR(floating_itembar)))type=FLOATING_NONE;
+    if((type==FLOATING_CMPDRIVER||type==FLOATING_DRIVERLST)&&itembar<0)type=FLOATING_NONE;
+    if(type==FLOATING_TOOLTIP&&(itembar<=1||!*STR(itembar)))type=FLOATING_NONE;
 
     ClientToScreen(hwnd,&p);
     needupdate=floating_itembar!=itembar||floating_type!=type;

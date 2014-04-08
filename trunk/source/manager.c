@@ -1643,7 +1643,7 @@ void popup_sysinfo(manager_t *manager,HDC hdcMem)
     td.x=p0;
     td.maxsz+=95;
     td.y+=td.wy;
-    TextOutF(&td,td.col,STR(STR_SYSINF_MISC));td.x=p1;
+    TextOutF(&td,D(POPUP_CMP_BETTER_COLOR),STR(STR_SYSINF_MISC));td.x=p1;
     td.maxsz-=95;
     popup_resize((td.maxsz+95+p0+p1),td.y+D(POPUP_OFSY));
 }
