@@ -29,7 +29,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #define STATUS_OLD          0x080
 
 #define STATUS_NF_MISSING   0x100
-#define STATUS_NF_UNKNOWN    0x200
+#define STATUS_NF_UNKNOWN   0x200
 #define STATUS_NF_STANDARD  0x400
 #define STATUS_DUP          0x800
 

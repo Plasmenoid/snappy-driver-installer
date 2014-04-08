@@ -41,7 +41,7 @@ void manager_init(manager_t *manager,matcher_t *matcher)
     for(i=0;i<RES_SLOTS;i++)
     {
         itembar=(itembar_t *)heap_allocitem_ptr(&manager->items_handle);
-        itembar_init(itembar,0,0,i);
+        itembar_init(itembar,0,0,i,0);
     }
 }
 
@@ -50,28 +50,66 @@ void manager_free(manager_t *manager)
     heap_free(&manager->items_handle);
 }
 
+void manager_sorta(matcher_t *m,int *v)
+{
+    devicematch_t *devicematch_i,*devicematch_j;
+    hwidmatch_t *hwidmatch_i,*hwidmatch_j;
+    int i,j,num;
+
+    num=m->devicematch_handle.items;
+
+    for(i=0;i<num;i++)v[i]=i;
+
+    for(i=0;i<num;i++)
+    {
+        for(j=i+1;j<num;j++)
+        {
+            devicematch_i=&m->devicematch_list[v[i]];
+            devicematch_j=&m->devicematch_list[v[j]];
+            hwidmatch_i=(devicematch_i->num_matches)?&m->hwidmatch_list[devicematch_i->start_matches]:0;
+            hwidmatch_j=(devicematch_j->num_matches)?&m->hwidmatch_list[devicematch_j->start_matches]:0;
+
+            if((hwidmatch_i&&hwidmatch_j&&wcscmp(getdrp_packname(hwidmatch_i),getdrp_packname(hwidmatch_j))>0)
+               ||
+               (!hwidmatch_i&&hwidmatch_j))
+            {
+                int t;
+
+                t=v[i];
+                v[i]=v[j];
+                v[j]=t;
+            }
+        }
+    }
+    //for(i=0;i<num;i++)v[i]=i;
+}
+
 void manager_populate(manager_t *manager)
 {
     matcher_t *matcher=manager->matcher;
     devicematch_t *devicematch;
     hwidmatch_t *hwidmatch;
     int i,j,id=RES_SLOTS;
+    int remap[1024];
 
     manager->items_handle.used=sizeof(itembar_t)*RES_SLOTS;
     manager->items_handle.items=RES_SLOTS;
 
+    manager_sorta(matcher,remap);
+
     devicematch=matcher->devicematch_list;
-    for(i=0;i<matcher->devicematch_handle.items;i++,devicematch++)
+    for(i=0;i<matcher->devicematch_handle.items;i++)
     {
+        devicematch=&matcher->devicematch_list[remap[i]];
         hwidmatch=&matcher->hwidmatch_list[devicematch->start_matches];
         for(j=0;j<devicematch->num_matches;j++,hwidmatch++)
         {
-            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,hwidmatch,i+RES_SLOTS);
+            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,hwidmatch,i+RES_SLOTS,remap[i]);
             id++;
         }
         if(!devicematch->num_matches)
         {
-            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,0,i+RES_SLOTS);
+            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,0,i+RES_SLOTS,remap[i]);
             id++;
         }
     }
@@ -80,17 +118,18 @@ void manager_populate(manager_t *manager)
 void manager_filter(manager_t *manager,int options)
 {
     devicematch_t *devicematch;
-    itembar_t *itembar;
+    itembar_t *itembar,*itembar1;
     int i,j,k;
     int cnt[NUM_STATUS+1];
     int o1=options&FILTER_SHOW_ONE;
 
+    itembar=&manager->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager->items_handle.items;i++)
     {
-        devicematch=manager->items_list[i].devicematch;
+        devicematch=itembar->devicematch;
         memset(cnt,0,sizeof(cnt));
         if(!devicematch)continue;
-        itembar=&manager->items_list[devicematch->start_matches+RES_SLOTS];
+        itembar1=itembar;
         for(j=0;j<devicematch->num_matches;j++,itembar++)
         {
             itembar->isactive=0;
@@ -105,7 +144,6 @@ void manager_filter(manager_t *manager,int options)
 
             if((options&FILTER_SHOW_DUP)&&itembar->hwidmatch->status&STATUS_DUP)
             {
-                itembar_t *itembar1=&manager->items_list[devicematch->start_matches+RES_SLOTS];
                 for(k=0;k<j;k++,itembar1++)
                     if(itembar1->isactive&&
                        itembar1->index==itembar->index&&
@@ -150,6 +188,7 @@ void manager_filter(manager_t *manager,int options)
             if(options&FILTER_SHOW_NF_STANDARD&&devicematch->status&STATUS_NF_STANDARD)itembar->isactive=1;
             if(options&FILTER_SHOW_NF_UNKNOWN&&devicematch->status&STATUS_NF_UNKNOWN)itembar->isactive=1;
             if(options&FILTER_SHOW_NF_MISSING&&devicematch->status&STATUS_NF_MISSING)itembar->isactive=1;
+            itembar++;
         }
     }
     i=0;
@@ -198,7 +237,7 @@ void manager_print(manager_t *manager)
     log("}manager_print[%d]\n\n",act);
 }
 
-void manager_sort(manager_t *manager)
+/*void manager_sort(manager_t *manager)
 {
     itembar_t *itembar1,*itembar2,t;
     int i,j;
@@ -218,7 +257,7 @@ void manager_sort(manager_t *manager)
         }
     }
     manager_setpos(manager);
-}
+}*/
 //}
 
 //{ User interaction
@@ -409,7 +448,7 @@ void manager_selectall(manager_t *manager)
 //}
 
 //{ Helpers
-void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *hwidmatch,int groupindex)
+void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *hwidmatch,int groupindex,int rm)
 {
     memset(item,0,sizeof(itembar_t));
     item->devicematch=devicematch;
@@ -417,6 +456,7 @@ void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *hwidma
     item->curpos=(-D(ITEM_DIST_Y0))<<16;
     item->tagpos=(-D(ITEM_DIST_Y0))<<16;
     item->index=groupindex;
+    item->rm=rm;
 }
 
 void itembar_settext(manager_t *manager,int i,WCHAR *txt1,int percent)
@@ -643,22 +683,29 @@ WCHAR *str_version(version_t *ver)
 void manager_setpos(manager_t *manager)
 {
     devicematch_t *devicematch;
-    itembar_t *itembar;
+    itembar_t *itembar,*lastitembar=0;
     int k;
     int cnt=0;
     int pos=D(DRVITEM_OFSY);
     int group=0;
     int lastmatch=0;
 
+//0:wide
+//1:narrow
+
     itembar=manager->items_list;
     for(k=0;k<manager->items_handle.items;k++,itembar++)
     {
         devicematch=itembar->devicematch;
         cnt=group==itembar->index?1:0;
-        if(devicematch&&!devicematch->num_matches&&!lastmatch)cnt=1;
+
+        //if(lastitembar&&lastitembar->index<SLOT_RESTORE_POINT&&itembar->index<SLOT_RESTORE_POINT)cnt=1;
+        if(devicematch&&!devicematch->num_matches&&!lastmatch&&lastitembar&&lastitembar->index>=SLOT_RESTORE_POINT)cnt=1;
+
         itembar_setpos(itembar,&pos,&cnt);
         if(itembar->isactive)
         {
+            lastitembar=itembar;
             group=itembar->index;
             if(devicematch)lastmatch=devicematch->num_matches;
         }
