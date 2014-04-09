@@ -18,22 +18,10 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "themelist.h"
 #include "langlist.h"
 
-// Image
-typedef struct _img_t
-{
-    BYTE *big;
-    HBITMAP bitmap;
-    HDC dc;
-    int sx,sy;
-    int index;
-    int iscopy;
-}img_t;
-extern const int boxindex[BOX_NUM];
-extern img_t box[BOX_NUM];
-extern img_t icon[ICON_NUM];
-extern WCHAR themelist[64][250];
-
 // Theme/lang
+#define STR(A) (language[A].val?(WCHAR *)language[A].val:L"")
+#define D(A) theme[A].val
+
 typedef struct _entry_t
 {
     WCHAR *name;
@@ -41,9 +29,8 @@ typedef struct _entry_t
     int init;
 }entry_t;
 extern entry_t language[STR_NM];
-#define STR(A) (language[A].val?(WCHAR *)language[A].val:L"")
 extern entry_t theme[THEME_NM];
-#define D(A) theme[A].val
+extern WCHAR themelist[64][250];
 
 // Monitor
 typedef void (CALLBACK *FileChangeCallback)(LPTSTR,DWORD,LPARAM);
@@ -58,12 +45,6 @@ typedef struct _monitor_t
 	int        subdirs;
 	FileChangeCallback callback;
 }*monitor_t;
-
-// Image
-void box_init(img_t *img,int i);
-void box_free(img_t *img);
-void icon_init(img_t *img,int i);
-void icon_free(img_t *img);
 
 // Vault
 void vault_startmonitors();

@@ -526,7 +526,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
             SwitchToThisWindow(hwnd,0);
             GetWindowInfo(GetParent(hwnd),&pwi);
             SetCursorPos(pwi.rcClient.left+w.btn_x+w.btn_wx/2,pwi.rcClient.top+w.btn_y+w.btn_wy/2);
-            Sleep(3000);
+            Sleep(500);
             if(IsWindow(hwnd))
             {
                 GetWindowInfo(hwnd,&pwi);

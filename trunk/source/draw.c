@@ -17,6 +17,69 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "main.h"
 
+//{ Global vars
+img_t box[BOX_NUM];
+img_t icon[ICON_NUM];
+//}
+
+//{ Image
+void box_init(img_t *img,int i)
+{
+    WCHAR *filename;
+    int j;
+
+    if(img->big&&!img->iscopy)free(img->big);
+    memset(img,0,sizeof(img_t));
+
+    img->index=boxindex[i];
+    filename=(WCHAR *)D(img->index+4);
+    if(!*filename)return;
+
+    for(j=0;j<BOX_NUM;j++)
+        if(box[j].index&&j!=i)
+            if(!wcscmp(filename,(WCHAR *)D(box[j].index+4)))
+    {
+        //printf("Match %d,'%ws'\n",j,D(box[j].index+4));
+        img->big=box[j].big;
+        img->bitmap=box[j].bitmap;
+        img->dc=box[j].dc;
+        img->sx=box[j].sx;
+        img->sy=box[j].sy;
+        img->iscopy=1;
+        return;
+    }
+
+    if(wcsstr(filename,L"RES_"))
+        image_loadRes(img,_wtoi(filename+4));
+    else
+        image_loadFile(img,filename);
+}
+
+void box_free(img_t *img)
+{
+    if(img->big&&!img->iscopy)free(img->big);
+}
+
+void icon_init(img_t *img,int i)
+{
+    WCHAR *filename;
+
+    if(img->big&&!img->iscopy)free(img->big);
+    memset(img,0,sizeof(img_t));
+
+    filename=(WCHAR *)D(i);
+    if(wcsstr(filename,L"RES_"))
+        image_loadRes(img,_wtoi(filename+4));
+    else
+        image_loadFile(img,filename);
+}
+
+void icon_free(img_t *img)
+{
+    if(img->big&&!img->iscopy)free(img->big);
+}
+//}
+
 //{ Draw
 void image_load(img_t *img,BYTE *data,int sz)
 {
@@ -25,7 +88,7 @@ void image_load(img_t *img,BYTE *data,int sz)
     int ret;
     int i;
 
-    img->sx=img->sy=0;
+    img->hasalpha=img->sx=img->sy=0;
 
     ret=WebPGetInfo((PBYTE)data,sz,&img->sx,&img->sy);
     if(!ret)
@@ -62,12 +125,14 @@ void image_load(img_t *img,BYTE *data,int sz)
         R=*p2++;
         A=*p2++;
         double dA=A/255.;
+        if(A!=255)img->hasalpha=1;
 
         *p1++=(BYTE)(B*dA);
         *p1++=(BYTE)(G*dA);
         *p1++=(BYTE)(R*dA);
         *p1++=A;
     }
+    //log_con("%dx%d:%d,%d\n",img->sx,img->sy,img->hasalpha,img->index);
 }
 
 void image_loadFile(img_t *img,WCHAR *filename)
@@ -183,12 +248,13 @@ void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fil
             if(anchor&ALIGN_HCENTER)x=(x2-x1-wx)/2;
             if(anchor&ALIGN_VCENTER)y=(y2-y1-wy)/2;
 
+            //if(img->hasalpha)
             if(1)
                 AlphaBlend(dc,x,y,wx,wy,img->dc,0,0,img->sx,img->sy,blend);
-            else if(wx!=img->sx||wy!=img->sy)
-                BitBlt(dc,0,0,wx,wy,img->dc,0,0,SRCCOPY);
+            else if(wx==img->sx&&wy==img->sy)
+                BitBlt(dc,x,y,wx,wy,img->dc,0,0,SRCCOPY);
             else
-                StretchBlt(dc,0,0,wx,wy,img->dc,0,0,img->sx,img->sy,SRCCOPY);
+                StretchBlt(dc,x,y,wx,wy,img->dc,0,0,img->sx,img->sy,SRCCOPY);
 
             if((fill&VTILE)==0)break;
         }

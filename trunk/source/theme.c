@@ -18,9 +18,6 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "main.h"
 
 //{ Global vars
-img_t box[BOX_NUM];
-img_t icon[ICON_NUM];
-
 monitor_t mon_lang,mon_theme;
 
 WCHAR *themedata=0;
@@ -28,64 +25,6 @@ WCHAR *langdata=0;
 WCHAR langlist[64][250];
 WCHAR themelist[64][250];
 hashtable_t theme_strs,lang_strs;
-//}
-
-//{ Image
-void box_init(img_t *img,int i)
-{
-    WCHAR *filename;
-    int j;
-
-    if(img->big&&!img->iscopy)free(img->big);
-    memset(img,0,sizeof(img_t));
-
-    img->index=boxindex[i];
-    filename=(WCHAR *)D(img->index+4);
-    if(!*filename)return;
-
-    for(j=0;j<BOX_NUM;j++)
-        if(box[j].index&&j!=i)
-            if(!wcscmp(filename,(WCHAR *)D(box[j].index+4)))
-    {
-        //printf("Match %d,'%ws'\n",j,D(box[j].index+4));
-        img->big=box[j].big;
-        img->bitmap=box[j].bitmap;
-        img->dc=box[j].dc;
-        img->sx=box[j].sx;
-        img->sy=box[j].sy;
-        img->iscopy=1;
-        return;
-    }
-
-    if(wcsstr(filename,L"RES_"))
-        image_loadRes(img,_wtoi(filename+4));
-    else
-        image_loadFile(img,filename);
-}
-
-void box_free(img_t *img)
-{
-    if(img->big&&!img->iscopy)free(img->big);
-}
-
-void icon_init(img_t *img,int i)
-{
-    WCHAR *filename;
-
-    if(img->big&&!img->iscopy)free(img->big);
-    memset(img,0,sizeof(img_t));
-
-    filename=(WCHAR *)D(i);
-    if(wcsstr(filename,L"RES_"))
-        image_loadRes(img,_wtoi(filename+4));
-    else
-        image_loadFile(img,filename);
-}
-
-void icon_free(img_t *img)
-{
-    if(img->big&&!img->iscopy)free(img->big);
-}
 //}
 
 //{ Vault

@@ -15,6 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define DEF_VAL(a) {TEXT(a),0,0},
+#define DEF_STR(a) {TEXT(a),0,0},
+
 #define BOX_MAINWND          0
 #define BOX_POPUP            1
 #define BOX_PROGR            2
@@ -666,3 +669,4 @@ enum
     THEME_NM,
 };
 
+extern const int boxindex[BOX_NUM];
