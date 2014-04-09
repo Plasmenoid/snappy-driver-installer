@@ -17,9 +17,6 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "main.h"
 
-#define DEF_VAL(a) {TEXT(a),0,0},
-#define DEF_STR(a) {TEXT(a),0,0},
-
 const int boxindex[BOX_NUM]=
 {
     MAINWND_INSIDE_COLOR,

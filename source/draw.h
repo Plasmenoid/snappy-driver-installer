@@ -16,6 +16,17 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 //{ Structs
+typedef struct _img_t
+{
+    BYTE *big;
+    HBITMAP bitmap;
+    HDC dc;
+    int sx,sy;
+    int index;
+    int iscopy;
+    int hasalpha;
+}img_t;
+
 typedef struct _canvas_t
 {
     int x,y;
@@ -27,11 +38,22 @@ typedef struct _canvas_t
 }canvas_t;
 //}
 
-// Draw
+//{ Global vars
+extern img_t box[BOX_NUM];
+extern img_t icon[ICON_NUM];
+//}
+
+// Image
+void box_init(img_t *img,int i);
+void box_free(img_t *img);
+void icon_init(img_t *img,int i);
+void icon_free(img_t *img);
 void image_load(img_t *img,BYTE *data,int sz);
 void image_loadFile(img_t *img,WCHAR *filename);
 void image_loadRes(img_t *img,int id);
 void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fill);
+
+// Draw
 void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int i);
 void drawcheckbox(HDC hdc,int x,int y,int wx,int wy,int checked,int active);
 void drawrect(HDC hdc,int x1,int y1,int x2,int y2,int color1,int color2,int w,int r);

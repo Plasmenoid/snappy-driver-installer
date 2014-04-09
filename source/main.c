@@ -923,8 +923,7 @@ void gui(int nCmd)
 
     if(license)
     {
-//        hMain=CreateWindowEx(/*WS_EX_LAYERED|WS_EX_COMPOSITED(*/0,
-        hMain=CreateWindowEx(0,
+        hMain=CreateWindowEx(WS_EX_LAYERED,
                             classMain,
                             APPTITLE,
                             WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN,
@@ -1213,7 +1212,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             hField=CreateWindowM(classField,NULL,hwnd,0);
 
             // Popup
-            hPopup=CreateWindowEx(/*WS_EX_COMPOSITED|*/WS_EX_LAYERED|WS_EX_NOACTIVATE|WS_EX_TOPMOST|WS_EX_TRANSPARENT,
+            hPopup=CreateWindowEx(WS_EX_LAYERED|WS_EX_NOACTIVATE|WS_EX_TOPMOST,
                 classPopup,L"",WS_POPUP,
                 0,0,0,0,hwnd,(HMENU)0,ghInst,0);
 
