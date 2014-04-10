@@ -263,7 +263,7 @@ void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
         }
         lhs=le+1;
     }
-    if(*origdata)free(*origdata);
+    //if(*origdata)free(*origdata); // BUG: leaking memory
     *origdata=data;
 }
 
