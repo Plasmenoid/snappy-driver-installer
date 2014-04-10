@@ -108,7 +108,7 @@ int floating_x=1,floating_y=1;
 int horiz_sh=0;
 
 int exitflag=0;
-int ret_global;
+int ret_global=0;
 HANDLE event;
 
 // Settings
@@ -161,6 +161,7 @@ void settings_parse(const WCHAR *str,int ind)
     int argc;
     int i;
 
+    log_con("Args:[%ws]\n",str);
     argv=CommandLineToArgvW(str,&argc);
     for(i=ind;i<argc;i++)
     {
@@ -194,6 +195,14 @@ void settings_parse(const WCHAR *str,int ind)
             ret_global=Extract7z(cmd);
             log_con("Ret: %d\n",ret_global);
             return;
+        }
+        else
+        if(!wcscmp(pr,L"-PATH"))
+        {
+            wcscpy(drpext_dir,argv[++i]);
+            flags|=FLAG_AUTOCLOSE|
+                FLAG_AUTOINSTALL|FLAG_NORESTOREPOINT|FLAG_DPINSTMODE|//FLAG_DISABLEINSTALL|
+                FLAG_PRESERVECFG;
         }
         else
         if(!wcscmp(pr,L"-install")&&argc-i==3)
@@ -446,7 +455,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 #endif
 
     if(backtrace)FreeLibrary(backtrace);
-    return msg.wParam;
+    return ret_global;
 }
 //}
 
@@ -1375,6 +1384,53 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             DragFinish(hDrop);
             break;
 		}
+
+        case WM_SIZING:
+            {
+                RECT *r=(RECT *)lParam;
+                int minx=D(DRVLIST_OFSX)+280;
+                int miny=D(PANEL_OFSY)+16*D(PANEL_WY);
+
+                switch(wParam)
+                {
+                    case WMSZ_LEFT:
+                    case WMSZ_TOPLEFT:
+                    case WMSZ_BOTTOMLEFT:
+                        if(r->right-r->left<minx)r->left=r->right-minx;
+                        break;
+
+                    case WMSZ_BOTTOM:
+                    case WMSZ_RIGHT:
+                    case WMSZ_TOP:
+                    case WMSZ_BOTTOMRIGHT:
+                    case WMSZ_TOPRIGHT:
+                        if(r->right-r->left<minx)r->right=r->left+minx;
+                        break;
+
+                    default:
+                        break;
+                }
+                switch(wParam)
+                {
+                    case WMSZ_TOP:
+                    case WMSZ_TOPLEFT:
+                    case WMSZ_TOPRIGHT:
+                        if(r->bottom-r->top<miny)r->top=r->bottom-miny;
+                        break;
+
+                    case WMSZ_BOTTOM:
+                    case WMSZ_BOTTOMLEFT:
+                    case WMSZ_BOTTOMRIGHT:
+                    case WMSZ_LEFT:
+                    case WMSZ_RIGHT:
+                        if(r->bottom-r->top<miny)r->bottom=r->top+miny;
+                        break;
+
+                    default:
+                        break;
+                }
+                break;
+            }
 
         case WM_KEYUP:
             if(wParam==VK_F5)
