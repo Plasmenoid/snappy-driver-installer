@@ -766,6 +766,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
     WCHAR bufw[BUFLEN];
     HRGN hrgn=0,hrgn2;
     int x=D(DRVITEM_OFSX);
+    int r=D(box[box_status(index)].index+3);
 
     itembar_t *itembar=&manager->items_list[index];
     int pos=(itembar->curpos>>16)-D(ITEM_DIST_Y0);
@@ -779,7 +780,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
 
     if(index<SLOT_RESTORE_POINT)cutoff=0;
     hrgn2=CreateRectRgn(x,cutoff,D(DRVITEM_OFSX)+D(DRVITEM_WX),mainy_c);
-    hrgn=CreateRectRgn(x,(pos<cutoff)?cutoff:pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY));
+    hrgn=CreateRoundRectRgn(x,(pos<cutoff)?cutoff:pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY),r,r);
     int cl=((zone>=0)?1:0);
     if(index==SLOT_EXTRACTING&&itembar->install_status&&installmode==MODE_NONE)
         cl=((GetTickCount()-manager->animstart)/200)%2;

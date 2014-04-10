@@ -206,6 +206,7 @@ unsigned int __stdcall thread_install(void *arg)
     HINSTANCE hinstLib=0;
     MYPROC ProcAdd;
     int r=0;
+    int failed=0,installed=0;
 
     EnterCriticalSection(&sync);
 
@@ -364,6 +365,7 @@ goaround:
             EnterCriticalSection(&sync);
             itembar=&manager_g->items_list[itembar_act];
 
+            if(ret==1)installed++;else failed++;
             log_con("Ret %d(%X),%d\n\n",ret,ret,needrb);
             if(installmode==MODE_STOPPING||!itembar->checked)
             {
@@ -447,6 +449,8 @@ goaround:
     }
     itembar_act=0;
     log_con("Mode:%d\n",installmode);
+    ret_global=installed+(failed<<16);
+    if(needreboot)ret_global|=0x40<<24;
     LeaveCriticalSection(&sync);
     PostMessage(hMain,WM_DEVICECHANGE,7,1);
     redrawfield();

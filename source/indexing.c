@@ -553,7 +553,7 @@ void collection_load(collection_t *col)
     drp_count=collection_scanfolder_count(col,col->driverpack_dir);
     collection_scanfolder(col,col->driverpack_dir);
     manager_g->items_list[SLOT_INDEXING].isactive=0;
-    if(col->driverpack_handle.items<=1)
+    if(col->driverpack_handle.items<=1&&(flags&FLAG_DPINSTMODE)==0)
         itembar_settext(manager_g,SLOT_NODRIVERS,L"",0);
     driverpack_genhashes(&col->driverpack_list[0]);
     time_indexes=GetTickCount()-time_indexes;
