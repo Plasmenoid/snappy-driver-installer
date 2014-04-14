@@ -28,9 +28,19 @@ typedef struct _entry_t
     int val;
     int init;
 }entry_t;
+
+typedef struct _vault_t
+{
+    entry_t *entry;
+    int num;
+    WCHAR namelist[64][250];
+    WCHAR *data,*odata;
+    hashtable_t strs;
+}vault_t;
+
 extern entry_t language[STR_NM];
 extern entry_t theme[THEME_NM];
-extern WCHAR themelist[64][250];
+extern vault_t vLang,vTheme;
 
 // Monitor
 typedef void (CALLBACK *FileChangeCallback)(LPTSTR,DWORD,LPARAM);
@@ -51,21 +61,23 @@ void vault_startmonitors();
 void vault_stopmonitors();
 void vault_init();
 void vault_free();
+
 void *vault_loadfile(const WCHAR *filename,int *sz);
 int  vault_findvar(hashtable_t *t,WCHAR *str);
 int  vault_readvalue(const WCHAR *str);
 int  vault_findstr(WCHAR *str);
-void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata);
-void vault_loadfromfile(WCHAR *filename,entry_t *entry,hashtable_t *tbl,WCHAR **origdata);
-void vault_loadfromres(int id,entry_t *entry,hashtable_t *tbl,int num,WCHAR **origdata);
+
+void vault_init1(vault_t *v,entry_t *entry,int num);
+void vault_free1(vault_t *v);
+void vault_parse(vault_t *v,WCHAR *data);
+void vault_loadfromfile(vault_t *v,WCHAR *filename);
+void vault_loadfromres(vault_t *v,int id);
 
 // Lang/theme
 void lang_enum(HWND hwnd,WCHAR *path,int locale);
 void theme_enum(HWND hwnd,WCHAR *path);
 void lang_set(int i);
 void theme_set(int i);
-void lang_load(WCHAR *filename);
-void theme_load(WCHAR *filename);
 void CALLBACK lang_callback(LPTSTR szFile,DWORD action,LPARAM lParam);
 void CALLBACK theme_callback(LPTSTR szFile,DWORD action,LPARAM lParam);
 

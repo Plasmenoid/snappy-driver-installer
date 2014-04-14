@@ -104,7 +104,7 @@ PANEL_BITMAP_FILL        = 0
 // Items on left panel
 PNLITEM_OFSX             = 4
 PNLITEM_OFSY             = 3
-PNLITEM_WY               = 16
+PNLITEM_WY               = 17
 
 // Checkboxes on left panel
 CHKBOX_TEXT_OFSX         = 18

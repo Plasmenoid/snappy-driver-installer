@@ -298,6 +298,9 @@ goaround:
         {
             log_con("Unpacked '%ws'\n",getdrp_packpath(hwidmatch));
             unpacked=1;
+            _7z_total(100);
+            _7z_setcomplited(100);
+            redrawfield();
         }
         else
         {
@@ -325,9 +328,11 @@ goaround:
                 r=Extract7z(cmd);
                 EnterCriticalSection(&sync);
                 itembar=&manager_g->items_list[itembar_act];
+                log_con("%d\n",r);
                 if(r==2)
                 {
-                    //if(PathFileExists(getdrp_packpath(hwidmatch)))break;
+                    log_con("Error, checking for driverpack availability...");
+                    if(PathFileExists(getdrp_packpath(hwidmatch)))break;
                     log_con("Waiting for driverpacks to become available.");
                     do
                     {
@@ -339,10 +344,20 @@ goaround:
                     log_con("OK\n");
                 }
             }while(r);
+            if(!itembar->checked)manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
             //itembar->percent=manager_g->items_list[SLOT_EMPTY].percent;
             hwidmatch=itembar->hwidmatch;
             log_con("Ret %d\n",r);
+            if(r&&itembar->install_status!=STR_INST_STOPPING)
+            {
+                itembar->install_status=STR_EXTR_FAILED;
+                itembar->val1=r;
+                itembar->checked=0;
+            }
         }
+
+        if(instflag&OPENFOLDER&&itembar->checked)
+            itembar->install_status=STR_EXTR_OK;
 
         // Install driver
         if(instflag&INSTALLDRIVERS&&itembar->checked)
@@ -367,30 +382,16 @@ goaround:
 
             if(ret==1)installed++;else failed++;
             log_con("Ret %d(%X),%d\n\n",ret,ret,needrb);
-            if(installmode==MODE_STOPPING||!itembar->checked)
+            if(installmode==MODE_STOPPING)
             {
-                itembar->checked=0;
-                itembar->install_status=0;
-                itembar->percent=0;
-                if(installmode==MODE_STOPPING)
-                {
-                    manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
-                    manager_selectnone(manager_g);
-                }
-                wsprintf(buf,L" /c rd /s /q \"%s\"",extractdir);
-                RunSilent(L"cmd",buf,SW_HIDE,1);
+                itembar->install_status=STR_INST_STOPPING;
+                manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
+                manager_selectnone(manager_g);
             }
             else
             {
-                itembar->checked=0;
-                itembar->percent=0;
                 if(ret==1)
-                {
-                    if(needrb)
-                        itembar->install_status=STR_INST_REBOOT;
-                    else
-                        itembar->install_status=STR_INST_OK;
-                }
+                    itembar->install_status=needrb?STR_INST_REBOOT:STR_INST_OK;
                 else
                 {
                     itembar->install_status=STR_INST_FAILED;
@@ -399,14 +400,10 @@ goaround:
 
                 if(needrb)needreboot=1;
             }
-            redrawfield();
         }
-        else
-        {
-            itembar->checked=0;
-            itembar->install_status=0;
-            redrawfield();
-        }
+        if(instflag&INSTALLDRIVERS)itembar->percent=0;
+        itembar->checked=0;
+        redrawfield();
     }
     if(installmode==MODE_INSTALLING)
     {
@@ -425,6 +422,7 @@ goaround:
         log_con("%ws\n",extractdir);
         ShellExecute(0,L"explore",extractdir,0,0,SW_SHOW);
         manager_g->items_list[SLOT_EXTRACTING].isactive=0;
+        manager_clear(manager_g);
         manager_setpos(manager_g);
     }
     if(instflag&INSTALLDRIVERS&&(flags&FLAG_KEEPTEMPFILES)==0)
@@ -437,8 +435,6 @@ goaround:
     if(installmode==MODE_STOPPING)
     {
         flags&=~FLAG_AUTOINSTALL;
-        manager_g->items_list[SLOT_EXTRACTING].percent=0;
-        manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
         installmode=MODE_NONE;
     }
     if(installmode==MODE_INSTALLING)

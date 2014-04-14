@@ -43,6 +43,12 @@ extern img_t box[BOX_NUM];
 extern img_t icon[ICON_NUM];
 //}
 
+
+int Xb(int x);
+int Yb(int y);
+int Xt(int x,int o);
+int Yt(int y,int o);
+
 // Image
 void box_init(img_t *img,int i);
 void box_free(img_t *img);

@@ -199,6 +199,7 @@ extern WCHAR state_file[BUFLEN];
 extern int filters;
 extern int flags;
 extern int statemode;
+extern int expertmode;
 extern int virtual_os_version;
 extern int virtual_arch_type;
 //}
