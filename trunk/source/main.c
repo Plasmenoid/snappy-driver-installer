@@ -18,52 +18,12 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "main.h"
 
 //{ Global variables
-panelitem_t panelitems[PANELITEMS_NUM]=
+panelitem_t panel1[]=
 {
     {TYPE_GROUP,0,3,0},
     {TYPE_TEXT,STR_SHOW_SYSINFO,0,0},
     {TYPE_TEXT,0,0,0},
     {TYPE_TEXT,0,0,0},
-
-    {TYPE_GROUP,0,3,0},
-    {TYPE_BUTTON,STR_INSTALL,               ID_INSTALL,0},
-    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
-    {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
-
-    {TYPE_GROUP,0,5,0},
-    {TYPE_TEXT,STR_LANG,0,0},
-    {TYPE_TEXT,0,0,0},
-    {TYPE_TEXT,STR_THEME,0,0},
-    {TYPE_TEXT,0,0,0},
-    {TYPE_CHECKBOX,STR_EXPERT,              ID_EXPERT_MODE,0},
-
-    {TYPE_GROUP_BREAK,0,4,0},
-    {TYPE_BUTTON,STR_OPENLOGS,              ID_OPENLOGS,0},
-    {TYPE_BUTTON,STR_SNAPSHOT,              ID_SNAPSHOT,0},
-    {TYPE_BUTTON,STR_EXTRACT,               ID_EXTRACT,0},
-    {TYPE_BUTTON,STR_DRVDIR,                ID_DRVDIR,0},
-
-    {TYPE_GROUP,0,7,0},
-    {TYPE_TEXT,STR_SHOW_FOUND,0,0},
-    {TYPE_CHECKBOX, STR_SHOW_MISSING,       ID_SHOW_MISSING,0},
-    {TYPE_CHECKBOX, STR_SHOW_NEWER,         ID_SHOW_NEWER,0},
-    {TYPE_CHECKBOX, STR_SHOW_CURRENT,       ID_SHOW_CURRENT,0},
-    {TYPE_CHECKBOX, STR_SHOW_OLD,           ID_SHOW_OLD,0},
-    {TYPE_CHECKBOX, STR_SHOW_BETTER,        ID_SHOW_BETTER,0},
-    {TYPE_CHECKBOX, STR_SHOW_WORSE_RANK,    ID_SHOW_WORSE_RANK,0},
-
-    {TYPE_GROUP,0,4,0},
-    {TYPE_TEXT,STR_SHOW_NOTFOUND,0,0},
-    {TYPE_CHECKBOX, STR_SHOW_NF_MISSING,    ID_SHOW_NF_MISSING,0},
-    {TYPE_CHECKBOX, STR_SHOW_NF_UNKNOWN,    ID_SHOW_NF_UNKNOWN,0},
-    {TYPE_CHECKBOX, STR_SHOW_NF_STANDARD,   ID_SHOW_NF_STANDARD,0},
-
-    {TYPE_GROUP,0,3,0},
-    {TYPE_CHECKBOX, STR_SHOW_ONE,           ID_SHOW_ONE,0},
-    {TYPE_CHECKBOX, STR_SHOW_DUP,           ID_SHOW_DUP,0},
-    {TYPE_CHECKBOX, STR_SHOW_INVALID,       ID_SHOW_INVALID,0},
-
-    {0,0,0,0}
 };
 
 panelitem_t panel2[]=
@@ -95,7 +55,7 @@ panelitem_t panel4[]=
 
 panelitem_t panel5[]=
 {
-    {TYPE_GROUP,0,7,0},
+    {TYPE_GROUP_BREAK,0,7,0},
     {TYPE_TEXT,STR_SHOW_FOUND,0,0},
     {TYPE_CHECKBOX, STR_SHOW_MISSING,       ID_SHOW_MISSING,0},
     {TYPE_CHECKBOX, STR_SHOW_NEWER,         ID_SHOW_NEWER,0},
@@ -107,7 +67,7 @@ panelitem_t panel5[]=
 
 panelitem_t panel6[]=
 {
-    {TYPE_GROUP,0,4,0},
+    {TYPE_GROUP_BREAK,0,4,0},
     {TYPE_TEXT,STR_SHOW_NOTFOUND,0,0},
     {TYPE_CHECKBOX, STR_SHOW_NF_MISSING,    ID_SHOW_NF_MISSING,0},
     {TYPE_CHECKBOX, STR_SHOW_NF_UNKNOWN,    ID_SHOW_NF_UNKNOWN,0},
@@ -116,7 +76,7 @@ panelitem_t panel6[]=
 
 panelitem_t panel7[]=
 {
-    {TYPE_GROUP,0,3,0},
+    {TYPE_GROUP_BREAK,0,3,0},
     {TYPE_CHECKBOX, STR_SHOW_ONE,           ID_SHOW_ONE,0},
     {TYPE_CHECKBOX, STR_SHOW_DUP,           ID_SHOW_DUP,0},
     {TYPE_CHECKBOX, STR_SHOW_INVALID,       ID_SHOW_INVALID,0},
@@ -125,25 +85,45 @@ panelitem_t panel7[]=
 
 panelitem_t panel8[]=
 {
-    {TYPE_GROUP,0,3,0},
-    {TYPE_CHECKBOX, STR_SHOW_ONE,           ID_SHOW_ONE,0},
+    {TYPE_GROUP,0,1,0},
+    {TYPE_TEXT,0,0,0},
 };
 
 panelitem_t panel9[]=
 {
-    {TYPE_GROUP,0,3,0},
+    {TYPE_GROUP,0,2,0},
     {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
     {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
 };
 
 panelitem_t panel10[]=
 {
+    {TYPE_GROUP,0,1,0},
+    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
+};
+
+panelitem_t panel11[]=
+{
     {TYPE_GROUP,0,3,0},
+    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
     {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
     {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
 };
 
-panel_t panels[1]={{panelitems,0,0,0,0}};
+panel_t panels[NUM_PANELS]=
+{
+    {panel1,  0},
+    {panel2,  1},
+    {panel3,  2},
+    {panel4,  3},
+    {panel5,  4},
+    {panel6,  5},
+    {panel7,  6},
+    {panel8,  7},
+    {panel9,  8},
+    {panel10, 9},
+    {panel11,10}
+};
 
 // Manager
 manager_t manager_v[2];
@@ -173,6 +153,7 @@ HWND hTheme=0;
 // Window helpers
 int panel_lasti;
 int field_lasti,field_lastz;
+int main1x_c,main1y_c;
 int mainx_c,mainy_c;
 int mainx_w,mainy_w;
 int mousex=-1,mousey=-1,mousedown=0,mouseclick=0;
@@ -235,11 +216,12 @@ int windows_ver[NUM_OS]={50,51,60,61,62,63,0};
 
 void panel_setfilters(panel_t *panel)
 {
-    int i;
+    int i,j;
 
-    for(i=0;i<PANELITEMS_NUM;i++)
-        if(panel->items[i].action_id>=ID_SHOW_MISSING&&panel->items[i].action_id<=ID_SHOW_INVALID)
-            panel->items[i].checked=filters&(1<<panel->items[i].action_id)?1:0;
+    for(j=0;j<7;j++)
+    for(i=0;i<panel[j].items[0].action_id+1;i++)
+        if(panel[j].items[i].action_id>=ID_SHOW_MISSING&&panel[j].items[i].action_id<=ID_SHOW_INVALID)
+            panel[j].items[i].checked=filters&(1<<panel[j].items[i].action_id)?1:0;
 }
 
 //{ Main
@@ -342,10 +324,10 @@ void settings_parse(const WCHAR *str,int ind)
     LocalFree(argv);
     if(statemode==STATEMODE_EXIT)return;
     // Expert mode
-    panelitems[13].checked=expertmode;
+    panels[2].items[5].checked=expertmode;
 
     // Left panel
-    panel_setfilters(&panels[0]);
+    panel_setfilters(panels);
 }
 
 void settings_save()
@@ -883,21 +865,32 @@ void mkdir_r(const WCHAR *path)
 //}
 
 //{ Panel
-int panel_hitscan(int hx,int hy)
+int panel_hitscan(panel_t *panel,int hx,int hy)
 {
-    int r,i;
+    int idofs=11*panel->index+11;
 
-    hx-=Xb(D(PANEL_OFSX))+D(PNLITEM_OFSX);
-    hy-=Yb(D(PANEL_OFSY))+D(PNLITEM_OFSY);
-    if(hx<0)return -1;
-    if(hx>D(PANEL_WX))return -1;
-    if(hy<0)return -1;
-    if(hy>=D(PNLITEM_WY)*(PANELITEMS_NUM-2))return -1;
+    if(!D(PANEL_WY+idofs))return -1;
+    hx-=Xa(D(PANEL_OFSX+idofs))+D(PNLITEM_OFSX);
+    hy-=Ya(D(PANEL_OFSY+idofs))+D(PNLITEM_OFSY);
 
-    r=hy/D(PNLITEM_WY)+1;
-    if(!expertmode)
-        for(i=0;i<=r;i++)if(panelitems[i].type==TYPE_GROUP_BREAK)return -1;
-    return r;
+    if(!expertmode&&panel->items[0].type==TYPE_GROUP_BREAK)return -1;
+    if(hx<0||hy<0||hx>D(PANEL_WX))return -1;
+    if(hy>=D(PNLITEM_WY)*(panel->items[0].action_id))return -1;
+
+    return hy/D(PNLITEM_WY)+1;
+}
+
+int panels_hitscan(int hx,int hy,int *ii)
+{
+    int i,r;
+
+    for(i=0;i<NUM_PANELS;i++)
+    {
+        r=panel_hitscan(&panels[i],hx,hy);
+        *ii=i;
+        if(r>=0)return r;
+    }
+    return -1;
 }
 
 void panel_draw(HDC hdc,panel_t *panel)
@@ -906,23 +899,27 @@ void panel_draw(HDC hdc,panel_t *panel)
     POINT p;
     int cur_i;
     int i;
-    int x=Xb(D(PANEL_OFSX)),y=Yb(D(PANEL_OFSY));
+    int idofs=11*panel->index+11;
+    int x=Xa(D(PANEL_OFSX+idofs)),y=Ya(D(PANEL_OFSY+idofs));
     int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
 
     GetCursorPos(&p);
     ScreenToClient(hMain,&p);
-    cur_i=panel_hitscan(p.x,p.y);
+    cur_i=panel_hitscan(panel,p.x,p.y);
 
-    for(i=0;panel->items[i].type;i++)
+    if(!D(PANEL_WY+idofs))return;
+    for(i=0;i<panel->items[0].action_id+1;i++)
     {
-        if(i==2)
+        if(i==2&&panel->index==0)
         {
             wsprintf(buf,L"%s (%d-bit)",get_winverstr(manager_g),manager_g->matcher->state->architecture?64:32);
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
             TextOut(hdc,x+ofsx,y+ofsy,buf,wcslen(buf));
         }
-        if(i==3)
+        if(i==3&&panel->index==0)
         {
             wsprintf(buf,L"%s",manager_g->matcher->state->text+manager_g->matcher->state->product);
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
             TextOut(hdc,x+ofsx,y+ofsy,buf,wcslen(buf));
         }
         if(panel->items[i].type==TYPE_GROUP_BREAK&&!expertmode)break;
@@ -936,9 +933,9 @@ void panel_draw(HDC hdc,panel_t *panel)
                 break;
 
             case TYPE_BUTTON:
-                box_draw(hdc,x+ofsx,y+ofsy,x+D(PANEL_WX)-ofsx,y+ofsy+D(CHKBOX_SIZE),i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
+                box_draw(hdc,x+ofsx,y+ofsy,x+Xr(D(PANEL_WX+idofs),D(PANEL_OFSX+idofs))-ofsx,y+ofsy+D(CHKBOX_SIZE),i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
                 SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-                if(i==5)
+                if(i==1&&panel->index==1)
                 {
                     int j,cnt=0;
                     itembar_t *itembar;
@@ -957,6 +954,20 @@ void panel_draw(HDC hdc,panel_t *panel)
                 break;
 
             case TYPE_TEXT:
+                if(i==1&&panel->index==7)
+                {
+                    version_t v;
+
+                    v.d=atoi(SVN_REV_D);
+                    v.m=atoi(SVN_REV_M);
+                    v.y=SVN_REV_Y;
+
+                    wsprintf(buf,L"%s (",TEXT(SVN_REV2));
+                    str_date(&v,buf+wcslen(buf));
+                    wcscat(buf,L")");
+                    SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+                    TextOut(hdc,x+ofsx,y+ofsy,buf,wcslen(buf));
+                }
                 SetTextColor(hdc,D(i==cur_i&&i>11?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
                 TextOut(hdc,x+ofsx,y+ofsy,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
                 y+=D(PNLITEM_WY);
@@ -965,7 +976,9 @@ void panel_draw(HDC hdc,panel_t *panel)
             case TYPE_GROUP_BREAK:
             case TYPE_GROUP:
                 if(i)y+=D(PNLITEM_WY);
-                box_draw(hdc,x,y,x+D(PANEL_WX),y+D(PNLITEM_WY)*panel->items[i].action_id+ofsy*2,BOX_PANEL);
+                box_draw(hdc,x,y,
+                         x+Xr(D(PANEL_WX+idofs),D(PANEL_OFSX+idofs)),
+                         y+D(PNLITEM_WY)*panel->items[i].action_id+ofsy*2,BOX_PANEL+panel->index+1);
                 break;
 
             default:
@@ -1568,13 +1581,15 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             SetLayeredWindowAttributes(hMain,0,D(MAINWND_TRANSPARENCY),LWA_ALPHA);
             SetLayeredWindowAttributes(hPopup,0,D(POPUP_TRANSPARENCY),LWA_ALPHA);
 
-            MoveWindow(hField,D(DRVLIST_OFSX),D(DRVLIST_OFSY),x-D(DRVLIST_OFSX)-D(DRVLIST_OFSY),y-D(DRVLIST_OFSY)*2,TRUE);
-            MoveWindow(hLang,Xb(D(PANEL_OFSX))+D(PNLITEM_OFSX),Yb(D(PANEL_OFSY))+9*D(PNLITEM_WY)-2,(D(PANEL_WX))-D(PNLITEM_OFSX)*2,190,0);
-            MoveWindow(hTheme,Xb(D(PANEL_OFSX))+D(PNLITEM_OFSX),Yb(D(PANEL_OFSY))+11*D(PNLITEM_WY)-2,(D(PANEL_WX))-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hField,D(DRVLIST_OFSX),D(DRVLIST_OFSY),x-D(DRVLIST_OFSX),y-D(DRVLIST_OFSY),TRUE);
+            MoveWindow(hLang,Xa(D(PANEL_OFSX))+D(PNLITEM_OFSX),Ya(D(PANEL_OFSY))+9*D(PNLITEM_WY)-2,(D(PANEL_WX))-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hTheme,Xa(D(PANEL_OFSX))+D(PNLITEM_OFSX),Ya(D(PANEL_OFSY))+11*D(PNLITEM_WY)-2,(D(PANEL_WX))-D(PNLITEM_OFSX)*2,190,0);
             manager_setpos(manager_g);
             redrawmainwnd();
 
             GetWindowRect(hwnd,&rect);
+            main1x_c=x;
+            main1y_c=y;
             mainx_w=rect.right-rect.left;
             mainy_w=rect.bottom-rect.top;
             break;
@@ -1592,9 +1607,8 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
             box_draw(canvasMain.hdcMem,0,0,rect.right+1,rect.bottom+1,BOX_MAINWND);
             SelectObject(canvasMain.hdcMem,hFont);
-            drawrevision(canvasMain.hdcMem,rect.bottom);
-            panel_draw(canvasMain.hdcMem,&panels[0]);
-
+            //drawrevision(canvasMain.hdcMem,rect.bottom);
+            for(i=0;i<NUM_PANELS;i++)panel_draw(canvasMain.hdcMem,&panels[i]);
             canvas_end(&canvasMain);
             redrawfield();
             break;
@@ -1604,42 +1618,43 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
         case WM_MOUSEMOVE:
             GetClientRect(hwnd,&rect);
-            i=panel_hitscan(x,y);
+            i=panels_hitscan(x,y,&j);
 
-            if(i<0&&y>rect.bottom-20&&x<D(PANEL_WX))
+            if(i==1&&j==7)
                 drawpopup(-1,FLOATING_ABOUT,x,y,hwnd);
             else
-                drawpopup(panelitems[i].str_id+1,i>0&&i<4?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
+                drawpopup(panels[j].items[i].str_id+1,i>0&&i<4&&j==0?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
 
-            if(panel_lasti!=i)redrawmainwnd();
-            panel_lasti=i;
+            if(panel_lasti!=i+j*255)redrawmainwnd();
+            panel_lasti=i+j*255;
             break;
 
         case WM_LBUTTONUP:
             if(!mouseclick)break;
-            i=panel_hitscan(x,y);
+            i=panels_hitscan(x,y,&j);
             if(i<0)break;
-            if(i<4)
+            if(i<4&&j==0)
                 RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
             else
-            if(panelitems[i].type==TYPE_CHECKBOX||TYPE_BUTTON)
+            log_con("%d,%d\n",j,i);
+            if(panels[j].items[i].type==TYPE_CHECKBOX||TYPE_BUTTON)
             {
-                panelitems[i].checked^=1;
-                if(panelitems[i].action_id==ID_EXPERT_MODE)
+                panels[j].items[i].checked^=1;
+                if(panels[j].items[i].action_id==ID_EXPERT_MODE)
                 {
-                    expertmode=panelitems[i].checked;
+                    expertmode=panels[j].items[i].checked;
                     ShowWindow(GetConsoleWindow(),expertmode&&ctrl_down?SW_SHOWNOACTIVATE:hideconsole);
                 }
                 else
-                    PostMessage(hwnd,WM_COMMAND,panelitems[i].action_id+(BN_CLICKED<<16),0);
+                    PostMessage(hwnd,WM_COMMAND,panels[j].items[i].action_id+(BN_CLICKED<<16),0);
 
                 InvalidateRect(hwnd,NULL,TRUE);
             }
             break;
 
         case WM_RBUTTONDOWN:
-            i=panel_hitscan(x,y);
-            if(i>=0&&i<4)contextmenu2(x,y);
+            i=panels_hitscan(x,y,&j);
+            if(i>=0&&i<4&&j==0)contextmenu2(x,y);
             break;
 
         case WM_MOUSEWHEEL:
@@ -1826,9 +1841,12 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 case ID_SHOW_DUP:
                 case ID_SHOW_INVALID:
                     filters=0;
-                    for(j=0;j<PANELITEMS_NUM;j++)
-                        if(panelitems[j].type==TYPE_CHECKBOX&&panelitems[j].checked&&panelitems[j].action_id!=ID_EXPERT_MODE)
-                            filters+=1<<panelitems[j].action_id;
+                    for(i=0;i<NUM_PANELS;i++)
+                    for(j=0;j<panels[i].items[0].action_id+1;j++)
+                        if(panels[i].items[j].type==TYPE_CHECKBOX&&
+                           panels[i].items[j].checked&&
+                           panels[i].items[j].action_id!=ID_EXPERT_MODE)
+                            filters+=1<<panels[i].items[j].action_id;
 
                     manager_filter(manager_g,filters);
                     manager_setpos(manager_g);

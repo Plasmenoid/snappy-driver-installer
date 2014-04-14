@@ -160,8 +160,6 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define ID_HWID_CLIP      100
 #define ID_HWID_WEB       200
 
-#define PANELITEMS_NUM     37
-
 #define MODE_NONE           0
 #define MODE_INSTALLING     1
 #define MODE_STOPPING       2
@@ -181,6 +179,7 @@ extern CRITICAL_SECTION sync;
 
 // Window
 extern HINSTANCE ghInst;
+extern int main1x_c,main1y_c;
 extern int mainx_c,mainy_c;
 extern HFONT hFont;
 extern HWND hPopup,hMain,hField;
@@ -253,7 +252,9 @@ void snapshot();
 void extractto();
 
 // Panel
-int  panel_hitscan(int x,int y);
+void panel_setfilters(panel_t *panel);
+int  panels_hitscan(int hx,int hy,int *ii);
+int  panel_hitscan(panel_t *panel,int x,int y);
 void panel_draw(HDC hdc,panel_t *panel);
 
 // GUI
