@@ -205,14 +205,6 @@ extern int virtual_arch_type;
 //}
 
 //{ Structs
-typedef struct _panelitem_t
-{
-    int type;
-    int str_id;
-    int action_id;
-    int checked;
-}panelitem_t;
-
 typedef struct _bundle_t
 {
     state_t state;
@@ -262,7 +254,7 @@ void extractto();
 
 // Panel
 int  panel_hitscan(int x,int y);
-void panel_draw(HDC hdc);
+void panel_draw(HDC hdc,panel_t *panel);
 
 // GUI
 void gui(int nCmd);
