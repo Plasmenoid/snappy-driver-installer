@@ -66,6 +66,85 @@ panelitem_t panelitems[PANELITEMS_NUM]=
     {0,0,0,0}
 };
 
+panelitem_t panel2[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_BUTTON,STR_INSTALL,               ID_INSTALL,0},
+    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
+    {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
+};
+
+panelitem_t panel3[]=
+{
+    {TYPE_GROUP,0,5,0},
+    {TYPE_TEXT,STR_LANG,0,0},
+    {TYPE_TEXT,0,0,0},
+    {TYPE_TEXT,STR_THEME,0,0},
+    {TYPE_TEXT,0,0,0},
+    {TYPE_CHECKBOX,STR_EXPERT,              ID_EXPERT_MODE,0},
+};
+
+panelitem_t panel4[]=
+{
+    {TYPE_GROUP_BREAK,0,4,0},
+    {TYPE_BUTTON,STR_OPENLOGS,              ID_OPENLOGS,0},
+    {TYPE_BUTTON,STR_SNAPSHOT,              ID_SNAPSHOT,0},
+    {TYPE_BUTTON,STR_EXTRACT,               ID_EXTRACT,0},
+    {TYPE_BUTTON,STR_DRVDIR,                ID_DRVDIR,0},
+};
+
+panelitem_t panel5[]=
+{
+    {TYPE_GROUP,0,7,0},
+    {TYPE_TEXT,STR_SHOW_FOUND,0,0},
+    {TYPE_CHECKBOX, STR_SHOW_MISSING,       ID_SHOW_MISSING,0},
+    {TYPE_CHECKBOX, STR_SHOW_NEWER,         ID_SHOW_NEWER,0},
+    {TYPE_CHECKBOX, STR_SHOW_CURRENT,       ID_SHOW_CURRENT,0},
+    {TYPE_CHECKBOX, STR_SHOW_OLD,           ID_SHOW_OLD,0},
+    {TYPE_CHECKBOX, STR_SHOW_BETTER,        ID_SHOW_BETTER,0},
+    {TYPE_CHECKBOX, STR_SHOW_WORSE_RANK,    ID_SHOW_WORSE_RANK,0},
+};
+
+panelitem_t panel6[]=
+{
+    {TYPE_GROUP,0,4,0},
+    {TYPE_TEXT,STR_SHOW_NOTFOUND,0,0},
+    {TYPE_CHECKBOX, STR_SHOW_NF_MISSING,    ID_SHOW_NF_MISSING,0},
+    {TYPE_CHECKBOX, STR_SHOW_NF_UNKNOWN,    ID_SHOW_NF_UNKNOWN,0},
+    {TYPE_CHECKBOX, STR_SHOW_NF_STANDARD,   ID_SHOW_NF_STANDARD,0},
+};
+
+panelitem_t panel7[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_CHECKBOX, STR_SHOW_ONE,           ID_SHOW_ONE,0},
+    {TYPE_CHECKBOX, STR_SHOW_DUP,           ID_SHOW_DUP,0},
+    {TYPE_CHECKBOX, STR_SHOW_INVALID,       ID_SHOW_INVALID,0},
+
+};
+
+panelitem_t panel8[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_CHECKBOX, STR_SHOW_ONE,           ID_SHOW_ONE,0},
+};
+
+panelitem_t panel9[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
+    {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
+};
+
+panelitem_t panel10[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
+    {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
+};
+
+panel_t panels[1]={{panelitems,0,0,0,0}};
+
 // Manager
 manager_t manager_v[2];
 manager_t *manager_g=&manager_v[0];
@@ -153,6 +232,15 @@ const WCHAR *windows_name[NUM_OS]=
 };
 int windows_ver[NUM_OS]={50,51,60,61,62,63,0};
 //}
+
+void panel_setfilters(panel_t *panel)
+{
+    int i;
+
+    for(i=0;i<PANELITEMS_NUM;i++)
+        if(panel->items[i].action_id>=ID_SHOW_MISSING&&panel->items[i].action_id<=ID_SHOW_INVALID)
+            panel->items[i].checked=filters&(1<<panel->items[i].action_id)?1:0;
+}
 
 //{ Main
 void settings_parse(const WCHAR *str,int ind)
@@ -257,9 +345,7 @@ void settings_parse(const WCHAR *str,int ind)
     panelitems[13].checked=expertmode;
 
     // Left panel
-    for(i=0;i<PANELITEMS_NUM;i++)
-        if(panelitems[i].action_id>=ID_SHOW_MISSING&&panelitems[i].action_id<=ID_SHOW_INVALID)
-            panelitems[i].checked=filters&(1<<panelitems[i].action_id)?1:0;
+    panel_setfilters(&panels[0]);
 }
 
 void settings_save()
@@ -814,7 +900,7 @@ int panel_hitscan(int hx,int hy)
     return r;
 }
 
-void panel_draw(HDC hdc)
+void panel_draw(HDC hdc,panel_t *panel)
 {
     WCHAR buf[BUFLEN];
     POINT p;
@@ -827,7 +913,7 @@ void panel_draw(HDC hdc)
     ScreenToClient(hMain,&p);
     cur_i=panel_hitscan(p.x,p.y);
 
-    for(i=0;panelitems[i].type;i++)
+    for(i=0;panel->items[i].type;i++)
     {
         if(i==2)
         {
@@ -839,13 +925,13 @@ void panel_draw(HDC hdc)
             wsprintf(buf,L"%s",manager_g->matcher->state->text+manager_g->matcher->state->product);
             TextOut(hdc,x+ofsx,y+ofsy,buf,wcslen(buf));
         }
-        if(panelitems[i].type==TYPE_GROUP_BREAK&&!expertmode)break;
-        switch(panelitems[i].type)
+        if(panel->items[i].type==TYPE_GROUP_BREAK&&!expertmode)break;
+        switch(panel->items[i].type)
         {
             case TYPE_CHECKBOX:
-                drawcheckbox(hdc,x+ofsx-1,y+ofsy,D(CHKBOX_SIZE)-1,D(CHKBOX_SIZE)-1,panelitems[i].checked,i==cur_i);
+                drawcheckbox(hdc,x+ofsx-1,y+ofsy,D(CHKBOX_SIZE)-1,D(CHKBOX_SIZE)-1,panel->items[i].checked,i==cur_i);
                 SetTextColor(hdc,D(i==cur_i?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
-                TextOut(hdc,x+D(CHKBOX_TEXT_OFSX)+ofsx,y+ofsy,STR(panelitems[i].str_id),wcslen(STR(panelitems[i].str_id)));
+                TextOut(hdc,x+D(CHKBOX_TEXT_OFSX)+ofsx,y+ofsy,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
                 y+=D(PNLITEM_WY);
                 break;
 
@@ -861,25 +947,25 @@ void panel_draw(HDC hdc)
                     for(j=RES_SLOTS;j<manager_g->items_handle.items;j++,itembar++)
                     if(itembar->checked)cnt++;
 
-                    wsprintf(buf,L"%s (%d)",STR(panelitems[i].str_id),cnt);
+                    wsprintf(buf,L"%s (%d)",STR(panel->items[i].str_id),cnt);
                     TextOut(hdc,x+ofsx+5,y+ofsy+2,buf,wcslen(buf));
                 }
                 else
-                    TextOut(hdc,x+ofsx+5,y+ofsy+2,STR(panelitems[i].str_id),wcslen(STR(panelitems[i].str_id)));
+                    TextOut(hdc,x+ofsx+5,y+ofsy+2,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
 
                 y+=D(PNLITEM_WY);
                 break;
 
             case TYPE_TEXT:
                 SetTextColor(hdc,D(i==cur_i&&i>11?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
-                TextOut(hdc,x+ofsx,y+ofsy,STR(panelitems[i].str_id),wcslen(STR(panelitems[i].str_id)));
+                TextOut(hdc,x+ofsx,y+ofsy,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
                 y+=D(PNLITEM_WY);
                 break;
 
             case TYPE_GROUP_BREAK:
             case TYPE_GROUP:
                 if(i)y+=D(PNLITEM_WY);
-                box_draw(hdc,x,y,x+D(PANEL_WX),y+D(PNLITEM_WY)*panelitems[i].action_id+ofsy*2,BOX_PANEL);
+                box_draw(hdc,x,y,x+D(PANEL_WX),y+D(PNLITEM_WY)*panel->items[i].action_id+ofsy*2,BOX_PANEL);
                 break;
 
             default:
@@ -1507,7 +1593,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             box_draw(canvasMain.hdcMem,0,0,rect.right+1,rect.bottom+1,BOX_MAINWND);
             SelectObject(canvasMain.hdcMem,hFont);
             drawrevision(canvasMain.hdcMem,rect.bottom);
-            panel_draw(canvasMain.hdcMem);
+            panel_draw(canvasMain.hdcMem,&panels[0]);
 
             canvas_end(&canvasMain);
             redrawfield();

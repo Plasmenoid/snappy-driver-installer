@@ -36,6 +36,21 @@ typedef struct _canvas_t
     PAINTSTRUCT ps;
     HWND hwnd;
 }canvas_t;
+
+typedef struct _panelitem_t
+{
+    int type;
+    int str_id;
+    int action_id;
+    int checked;
+}panelitem_t;
+
+typedef struct _panel_t
+{
+    panelitem_t *items;
+    int x,y,wx,wy;
+}panel_t;
+
 //}
 
 //{ Global vars

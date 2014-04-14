@@ -131,7 +131,6 @@ void manager_filter(manager_t *manager,int options)
         devicematch=itembar->devicematch;
         memset(cnt,0,sizeof(cnt));
         if(!devicematch)continue;
-        itembar1=itembar;
         for(j=0;j<devicematch->num_matches;j++,itembar++)
         {
             itembar->isactive=0;
@@ -146,7 +145,8 @@ void manager_filter(manager_t *manager,int options)
 
             if((options&FILTER_SHOW_DUP)&&itembar->hwidmatch->status&STATUS_DUP)
             {
-                for(k=0;k<j;k++,itembar1++)
+                itembar1=&manager->items_list[i];
+                for(k=0;k<devicematch->num_matches-j;k++,itembar1++)
                     if(itembar1->isactive&&
                        itembar1->index==itembar->index&&
                        getdrp_infcrc(itembar1->hwidmatch)==getdrp_infcrc(itembar->hwidmatch))
