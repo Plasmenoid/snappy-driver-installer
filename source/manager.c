@@ -41,7 +41,7 @@ void manager_init(manager_t *manager,matcher_t *matcher)
     for(i=0;i<RES_SLOTS;i++)
     {
         itembar=(itembar_t *)heap_allocitem_ptr(&manager->items_handle);
-        itembar_init(itembar,0,0,i,0);
+        itembar_init(itembar,0,0,i,0,1);
     }
 }
 
@@ -104,12 +104,14 @@ void manager_populate(manager_t *manager)
         hwidmatch=&matcher->hwidmatch_list[devicematch->start_matches];
         for(j=0;j<devicematch->num_matches;j++,hwidmatch++)
         {
-            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,hwidmatch,i+RES_SLOTS,remap[i]);
+            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,hwidmatch,i+RES_SLOTS,
+                remap[i],j?0:1);
+
             id++;
         }
         if(!devicematch->num_matches)
         {
-            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,0,i+RES_SLOTS,remap[i]);
+            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,0,i+RES_SLOTS,remap[i],1);
             id++;
         }
     }
@@ -268,12 +270,14 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
     int pos;
     int ofsy=getscrollpos();
     int cutoff=calc_cutoff(manager)+D(ITEM_DIST_Y0);
+    int ofs=0;
+    int wx=Xt(D(DRVITEM_WX),Xb(D(DRVITEM_OFSX)));
 
     *r=-2;
     *zone=0;
     y-=-D(ITEM_DIST_Y0);
-    if(x<D(DRVITEM_OFSX)||x>D(DRVITEM_OFSX)+D(DRVITEM_WX))return;
-
+    x-=Xb(D(DRVITEM_OFSX));
+    if(x<0||x>wx)return;
     itembar=manager->items_list;
     for(i=0;i<manager->items_handle.items;i++,itembar++)
     if(itembar->isactive)
@@ -283,11 +287,12 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
         if(i>=SLOT_RESTORE_POINT)pos-=ofsy;
         if(y>pos&&y<pos+D(DRVITEM_WY))
         {
-            *r=i;
-            x-=D(ITEM_CHECKBOX_OFS_X)+D(DRVITEM_OFSX);
+            x-=D(ITEM_CHECKBOX_OFS_X);
             y-=D(ITEM_CHECKBOX_OFS_Y)+pos;
-            if(x>0&&x<D(ITEM_CHECKBOX_SIZE)&&y>0&&y<D(ITEM_CHECKBOX_SIZE))*zone=1;
-            if(x>D(DRVITEM_WX)-50)*zone=2;
+            ofs=(itembar->first)?0:30;
+            if(x-ofs>0)*r=i;
+            if(x-ofs>0&&x-ofs<D(ITEM_CHECKBOX_SIZE)&&y>0&&y<D(ITEM_CHECKBOX_SIZE))*zone=1;
+            if(x>wx-50&&!ofs)*zone=expertmode?2:2;
             return;
         }
     }
@@ -384,8 +389,12 @@ void manager_toggle(manager_t *manager,int index)
     itembar=manager->items_list;
     for(i=0;i<manager->items_handle.items;i++,itembar++)
         if(itembar!=itembar1&&itembar->index==group)
-            itembar->checked=0;
-    redrawmainwnd();
+            itembar->checked&=~1;
+
+    if(itembar1->checked&&itembar1->isactive&2)
+        manager_expand(manager,index);
+    else
+        redrawmainwnd();
 }
 
 void manager_expand(manager_t *manager,int index)
@@ -397,12 +406,12 @@ void manager_expand(manager_t *manager,int index)
     group=itembar1->index;
 
     itembar=manager->items_list;
-    if((itembar1->isactive&2)==0)
+    if((itembar1->isactive&2)==0)// collapsed
     {
         for(i=0;i<manager->items_handle.items;i++,itembar++)
-            if(itembar->index==group)
+            if(itembar->index==group&&itembar->hwidmatch&&(itembar->hwidmatch->status&STATUS_INVALID)==0)
                 {
-                    itembar->isactive|=2;
+                    itembar->isactive|=2; // expand
                 }
     }
     else
@@ -410,10 +419,11 @@ void manager_expand(manager_t *manager,int index)
         for(i=0;i<manager->items_handle.items;i++,itembar++)
             if(itembar->index==group)
             {
-                itembar->isactive&=1;
-                if(itembar->checked)itembar->isactive|=1;
+                itembar->isactive&=1; //collapse
+                if(itembar->checked)itembar->isactive|=4;
             }
     }
+    manager_setpos(manager_g);
 }
 
 void manager_selectnone(manager_t *manager)
@@ -448,7 +458,7 @@ void manager_selectall(manager_t *manager)
 //}
 
 //{ Helpers
-void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *hwidmatch,int groupindex,int rm)
+void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *hwidmatch,int groupindex,int rm,int first)
 {
     memset(item,0,sizeof(itembar_t));
     item->devicematch=devicematch;
@@ -457,6 +467,7 @@ void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *hwidma
     item->tagpos=(-D(ITEM_DIST_Y0))<<16;
     item->index=groupindex;
     item->rm=rm;
+    item->first=first;
 }
 
 void itembar_settext(manager_t *manager,int i,WCHAR *txt1,int percent)
@@ -472,14 +483,9 @@ void itembar_setpos(itembar_t *itembar,int *pos,int *cnt)
 {
     if(itembar->isactive)
     {
-        if(*pos<0)
-            *pos=DRVITEM_OFSX;
-        else
-            *pos+=*cnt?D(ITEM_DIST_Y1):D(ITEM_DIST_Y0);
-
+        *pos+=*cnt?D(ITEM_DIST_Y1):D(ITEM_DIST_Y0);
         (*cnt)--;
     }
-    //*pos=0;
     itembar->oldpos=itembar->curpos;
     itembar->tagpos=*pos<<16;
     itembar->accel=(itembar->tagpos-itembar->curpos)/(1000/2);
@@ -611,12 +617,14 @@ int box_status(int index)
                     return BOX_DRVITEM_D0;
 
                 case STR_INST_OK:
+                case STR_EXTR_OK:
                     return BOX_DRVITEM_D1;
 
                 case STR_INST_REBOOT:
                     return BOX_DRVITEM_D2;
 
                 case STR_INST_FAILED:
+                case STR_EXTR_FAILED:
                     return BOX_DRVITEM_DE;
 
                 default:break;
@@ -687,6 +695,7 @@ void manager_setpos(manager_t *manager)
     int k;
     int cnt=0;
     int pos=D(DRVITEM_OFSY);
+    //int pos=0;
     int group=0;
     int lastmatch=0;
 
@@ -744,7 +753,7 @@ int groupsize(manager_t *manager,int index)
 
     itembar=manager->items_list;
     for(i=0;i<manager->items_handle.items;i++,itembar++)
-        if(itembar->index==index)
+        if(itembar->index==index&&itembar->hwidmatch&&(itembar->hwidmatch->status&STATUS_INVALID)==0)
             num++;
 
     return num;
@@ -765,27 +774,54 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
     HICON hIcon;
     WCHAR bufw[BUFLEN];
     HRGN hrgn=0,hrgn2;
-    int x=D(DRVITEM_OFSX);
+    int x=Xb(D(DRVITEM_OFSX));
+    int wx=Xt(D(DRVITEM_WX),x);
     int r=D(box[box_status(index)].index+3);
+    int intend=0;
 
     itembar_t *itembar=&manager->items_list[index];
     int pos=(itembar->curpos>>16)-D(ITEM_DIST_Y0);
     if(index>=SLOT_RESTORE_POINT)pos-=ofsy;
 
+    if(!itembar->first)
+    {
+        int i=index;
+
+        while(i>=0&&!(manager->items_list[i].first&&manager->items_list[i].isactive))i--;
+        if(manager->items_list[i].index==itembar->index)intend=i;
+        //itembar->index=intend;
+    }
+    if(intend)
+    {
+        x+=30;
+        wx-=30;
+    }
     if(pos<=-D(ITEM_DIST_Y0))return 0;
     if(pos>mainy_c)return 0;
-    if(D(DRVITEM_WX)<0)return 0;
+    if(wx<0)return 0;
 
     SelectObject(hdc,hFont);
 
-    if(index<SLOT_RESTORE_POINT)cutoff=0;
-    hrgn2=CreateRectRgn(x,cutoff,D(DRVITEM_OFSX)+D(DRVITEM_WX),mainy_c);
-    hrgn=CreateRoundRectRgn(x,(pos<cutoff)?cutoff:pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY),r,r);
+    if(index<SLOT_RESTORE_POINT)cutoff=D(DRVITEM_OFSY);
+    hrgn2=CreateRectRgn(0,cutoff,x+wx,mainy_c);
+    hrgn=CreateRoundRectRgn(x,(pos<cutoff)?cutoff:pos,x+wx,pos+D(DRVITEM_WY),r,r);
     int cl=((zone>=0)?1:0);
     if(index==SLOT_EXTRACTING&&itembar->install_status&&installmode==MODE_NONE)
         cl=((GetTickCount()-manager->animstart)/200)%2;
     SelectClipRgn(hdc,hrgn2);
-    box_draw(hdc,x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX),pos+D(DRVITEM_WY),box_status(index)+cl);
+    if(intend)
+    {
+        HPEN oldpen,newpen;
+
+        newpen=CreatePen(PS_SOLID,3,RGB(0,0,0));
+        oldpen=SelectObject(hdc,newpen);
+        MoveToEx(hdc,x-30/2,(manager->items_list[intend].curpos>>16)-D(ITEM_DIST_Y0)+D(DRVITEM_WY)-ofsy,0);
+        LineTo(hdc,x-30/2,pos+D(DRVITEM_WY)/2);
+        LineTo(hdc,x,pos+D(DRVITEM_WY)/2);
+        SelectObject(hdc,oldpen);
+        DeleteObject(newpen);
+    }
+    box_draw(hdc,x,pos,x+wx,pos+D(DRVITEM_WY),box_status(index)+cl);
     SelectClipRgn(hdc,hrgn);
 
     if(itembar->percent)
@@ -794,10 +830,10 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
         int a=BOX_PROGR;
         //if(index==SLOT_EXTRACTING&&installmode==MODE_STOPPING)a=BOX_PROGR_S;
         //if(index>=RES_SLOTS&&(!itembar->checked||installmode==MODE_STOPPING))a=BOX_PROGR_S;
-        box_draw(hdc,x,pos,D(DRVITEM_OFSX)+D(DRVITEM_WX)*itembar->percent/1000.,pos+D(DRVITEM_WY),a);
+        box_draw(hdc,x,pos,x+wx*itembar->percent/1000.,pos+D(DRVITEM_WY),a);
     }
 
-    SetTextColor(hdc,0);
+    SetTextColor(hdc,0); // todo: color
     switch(index)
     {
         case SLOT_RESTORE_POINT:
@@ -906,16 +942,15 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
                 switch(itembar->install_status)
                 {
                     case STR_INST_FAILED:
+                    case STR_EXTR_FAILED:
                         wsprintf(bufw,L"%s %X",STR(itembar->install_status),itembar->val1);
                         break;
 
                     case STR_INST_EXTRACT:
-                        SetTextColor(hdc,0);//todo
                         wsprintf(bufw,STR(STR_INST_EXTRACT),(itembar->percent+100)/10);
                         break;
 
                     case STR_EXTR_EXTRACTING:
-                        SetTextColor(hdc,0);//todo
                         wsprintf(bufw,L"%s %d%%",STR(STR_EXTR_EXTRACTING),itembar->percent/10);
                         break;
 
@@ -932,12 +967,12 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
                     int len=wcslen(manager->matcher->col->driverpack_dir);
                     int lnn=len-wcslen(getdrp_packpath(itembar->hwidmatch));
 
-                    SetTextColor(hdc,0);// FIXME: color
+                    SetTextColor(hdc,0);// todo: color
                     wsprintf(bufw,L"%ws%ws%ws",
                             getdrp_packpath(itembar->hwidmatch)+len+(lnn?1:0),
                             lnn?L"\\":L"",
                             getdrp_packname(itembar->hwidmatch));
-                    TextOut(hdc,x+D(DRVITEM_WX)-240,pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+                    TextOut(hdc,x+wx-240,pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
                 }
             }
             else
@@ -962,8 +997,8 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
             }
 
             // Expand icon
-            if(groupsize(manager,itembar->index)>1)
-                image_draw(hdc,&icon[(itembar->isactive&2?0:2)+(zone==2?1:0)],x+D(DRVITEM_WX)-D(ITEM_ICON_SIZE)*2+10,pos,32,32,0,HSTR|VSTR);
+            if(groupsize(manager,itembar->index)>1&&itembar->first)
+                image_draw(hdc,&icon[(itembar->isactive&2?0:2)+(zone==2?1:0)],x+wx-D(ITEM_ICON_SIZE)*2+10,pos,32,32,0,HSTR|VSTR);
             break;
 
     }
@@ -1184,7 +1219,7 @@ void TextOut_CM(HDC hdcMem,int x,int y,WCHAR *str,int color,int *maxsz,int mode)
     if(!mode)return;
     SetTextColor(hdcMem,color);
     TextOut(hdcMem,x,y,str,wcslen(str));
-    SetTextColor(hdcMem,0);
+    //SetTextColor(hdcMem,0);
 }
 
 void TextOutP(textdata_t *td,WCHAR *format,...)
@@ -1352,7 +1387,7 @@ void popup_driverlist(manager_t *manager,HDC hdcMem,RECT rect,int i)
             SelectObject(hdcMem,GetStockObject(DC_BRUSH));
             SelectObject(hdcMem,GetStockObject(DC_PEN));
 //            SetDCBrushColor(hdcMem,RGB(115,125,255));
-            SetDCBrushColor(hdcMem,RGB(255,255,255));
+            SetDCBrushColor(hdcMem,RGB(255,255,255));//todo: color
             Rectangle(hdcMem,D(POPUP_OFSX)+horiz_sh,td.y,rect.right+horiz_sh-D(POPUP_OFSX),td.y+lne);
         }
         popup_driverline(itembar->hwidmatch,limits,hdcMem,td.y,1,k);

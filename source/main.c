@@ -35,7 +35,7 @@ panelitem_t panelitems[PANELITEMS_NUM]=
     {TYPE_TEXT,0,0,0},
     {TYPE_TEXT,STR_THEME,0,0},
     {TYPE_TEXT,0,0,0},
-    {TYPE_CHECKBOX,STR_EXPERT,         ID_EXPERT_MODE,0},
+    {TYPE_CHECKBOX,STR_EXPERT,              ID_EXPERT_MODE,0},
 
     {TYPE_GROUP_BREAK,0,4,0},
     {TYPE_BUTTON,STR_OPENLOGS,              ID_OPENLOGS,0},
@@ -106,6 +106,7 @@ int floating_type=0;
 int floating_itembar=-1;
 int floating_x=1,floating_y=1;
 int horiz_sh=0;
+int scrollvisible=0;
 
 int exitflag=0;
 int ret_global=0;
@@ -708,6 +709,7 @@ void setscrollrange(int y)
     si.nMin  =0;
     si.nMax  =y;
     si.nPage =rect.bottom;
+    scrollvisible=rect.bottom>y;
     SetScrollInfo(hField,SB_VERT,&si,TRUE);
 }
 
@@ -799,14 +801,14 @@ int panel_hitscan(int hx,int hy)
 {
     int r,i;
 
-    hx-=D(PANEL_OFSX)+D(PNLITEM_OFSX);
-    hy-=D(PANEL_OFSY)+D(PNLITEM_OFSY);
+    hx-=Xb(D(PANEL_OFSX))+D(PNLITEM_OFSX);
+    hy-=Yb(D(PANEL_OFSY))+D(PNLITEM_OFSY);
     if(hx<0)return -1;
     if(hx>D(PANEL_WX))return -1;
     if(hy<0)return -1;
-    if(hy>=D(PANEL_WY)*(PANELITEMS_NUM-2))return -1;
+    if(hy>=D(PNLITEM_WY)*(PANELITEMS_NUM-2))return -1;
 
-    r=hy/D(PANEL_WY)+1;
+    r=hy/D(PNLITEM_WY)+1;
     if(!expertmode)
         for(i=0;i<=r;i++)if(panelitems[i].type==TYPE_GROUP_BREAK)return -1;
     return r;
@@ -818,7 +820,7 @@ void panel_draw(HDC hdc)
     POINT p;
     int cur_i;
     int i;
-    int x=D(PANEL_OFSX),y=D(PANEL_OFSY);
+    int x=Xb(D(PANEL_OFSX)),y=Yb(D(PANEL_OFSY));
     int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
 
     GetCursorPos(&p);
@@ -841,14 +843,14 @@ void panel_draw(HDC hdc)
         switch(panelitems[i].type)
         {
             case TYPE_CHECKBOX:
-                drawcheckbox(hdc,x+ofsx-1,y+ofsy,D(PNLITEM_WY)-1,D(PNLITEM_WY)-1,panelitems[i].checked,i==cur_i);
+                drawcheckbox(hdc,x+ofsx-1,y+ofsy,D(CHKBOX_SIZE)-1,D(CHKBOX_SIZE)-1,panelitems[i].checked,i==cur_i);
                 SetTextColor(hdc,D(i==cur_i?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
                 TextOut(hdc,x+D(CHKBOX_TEXT_OFSX)+ofsx,y+ofsy,STR(panelitems[i].str_id),wcslen(STR(panelitems[i].str_id)));
-                y+=D(PANEL_WY);
+                y+=D(PNLITEM_WY);
                 break;
 
             case TYPE_BUTTON:
-                box_draw(hdc,x+ofsx,y+ofsy,x+D(PANEL_WX)-ofsx,y+ofsy+D(PNLITEM_WY),i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
+                box_draw(hdc,x+ofsx,y+ofsy,x+D(PANEL_WX)-ofsx,y+ofsy+D(CHKBOX_SIZE),i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
                 SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
                 if(i==5)
                 {
@@ -865,19 +867,19 @@ void panel_draw(HDC hdc)
                 else
                     TextOut(hdc,x+ofsx+5,y+ofsy+2,STR(panelitems[i].str_id),wcslen(STR(panelitems[i].str_id)));
 
-                y+=D(PANEL_WY);
+                y+=D(PNLITEM_WY);
                 break;
 
             case TYPE_TEXT:
                 SetTextColor(hdc,D(i==cur_i&&i>11?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
                 TextOut(hdc,x+ofsx,y+ofsy,STR(panelitems[i].str_id),wcslen(STR(panelitems[i].str_id)));
-                y+=D(PANEL_WY);
+                y+=D(PNLITEM_WY);
                 break;
 
             case TYPE_GROUP_BREAK:
             case TYPE_GROUP:
-                if(i)y+=D(PANEL_WY);
-                box_draw(hdc,x,y,x+D(PANEL_WX),y+D(PANEL_WY)*panelitems[i].action_id+ofsy*2,BOX_PANEL);
+                if(i)y+=D(PNLITEM_WY);
+                box_draw(hdc,x,y,x+D(PANEL_WX),y+D(PNLITEM_WY)*panelitems[i].action_id+ofsy*2,BOX_PANEL);
                 break;
 
             default:
@@ -1218,7 +1220,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             canvas_init(&canvasMain);
 
             // Field
-            hField=CreateWindowM(classField,NULL,hwnd,0);
+            hField=CreateWindowMF(classField,NULL,hwnd,0,WS_VSCROLL);
 
             // Popup
             hPopup=CreateWindowEx(WS_EX_LAYERED|WS_EX_NOACTIVATE|WS_EX_TOPMOST|WS_EX_TRANSPARENT,
@@ -1274,7 +1276,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 theme_set(f);
                 j=SendMessage(hTheme,CB_GETCOUNT,0,0);
                 for(i=0;i<j;i++)
-                    if(StrStrI(themelist[i],(WCHAR *)D(THEME_NAME)))f=i;
+                    if(StrStrI(vTheme.namelist[i],(WCHAR *)D(THEME_NAME)))f=i;
             }else
                 theme_set(f);
 
@@ -1389,7 +1391,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             {
                 RECT *r=(RECT *)lParam;
                 int minx=D(DRVLIST_OFSX)+280;
-                int miny=D(PANEL_OFSY)+16*D(PANEL_WY);
+                int miny=Yb(D(PANEL_OFSY))+16*D(PNLITEM_WY);
 
                 switch(wParam)
                 {
@@ -1433,6 +1435,9 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             }
 
         case WM_KEYUP:
+            if(ctrl_down&&wParam==L'A')PostMessage(hMain,WM_COMMAND,ID_SELECT_ALL,0);
+            if(ctrl_down&&wParam==L'N')PostMessage(hMain,WM_COMMAND,ID_SELECT_NONE,0);
+            if(ctrl_down&&wParam==L'I')PostMessage(hMain,WM_COMMAND,ID_INSTALL,0);
             if(wParam==VK_F5)
                 PostMessage(hwnd,WM_DEVICECHANGE,7,2);
             if(wParam==VK_F6&&ctrl_down)
@@ -1478,8 +1483,8 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             SetLayeredWindowAttributes(hPopup,0,D(POPUP_TRANSPARENCY),LWA_ALPHA);
 
             MoveWindow(hField,D(DRVLIST_OFSX),D(DRVLIST_OFSY),x-D(DRVLIST_OFSX)-D(DRVLIST_OFSY),y-D(DRVLIST_OFSY)*2,TRUE);
-            MoveWindow(hLang,D(PANEL_OFSX)+D(PNLITEM_OFSX),D(PANEL_OFSY)+9*D(PANEL_WY)-2,D(PANEL_WX)-D(PNLITEM_OFSX)*2,190,0);
-            MoveWindow(hTheme,D(PANEL_OFSX)+D(PNLITEM_OFSX),D(PANEL_OFSY)+11*D(PANEL_WY)-2,D(PANEL_WX)-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hLang,Xb(D(PANEL_OFSX))+D(PNLITEM_OFSX),Yb(D(PANEL_OFSY))+9*D(PNLITEM_WY)-2,(D(PANEL_WX))-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hTheme,Xb(D(PANEL_OFSX))+D(PNLITEM_OFSX),Yb(D(PANEL_OFSY))+11*D(PNLITEM_WY)-2,(D(PANEL_WX))-D(PNLITEM_OFSX)*2,190,0);
             manager_setpos(manager_g);
             redrawmainwnd();
 
@@ -1583,7 +1588,6 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     else
                     {
                         manager_expand(manager_g,floating_itembar);
-                        manager_setpos(manager_g);
                     }
                     break;
 
@@ -1918,7 +1922,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
         case WM_SIZE:
             mainx_c=x;
             mainy_c=y;
-            D(DRVITEM_WX)=x-D(DRVITEM_OFSX)*2;
+            if(scrollvisible)mainx_c-=GetSystemMetrics(SM_CXVSCROLL);
             break;
 
         case WM_VSCROLL:
@@ -1973,7 +1977,6 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             if(floating_itembar>=0&&i==2)
             {
                 manager_expand(manager_g,floating_itembar);
-                manager_setpos(manager_g);
             }
             break;
 

@@ -28,7 +28,7 @@ vstra            = 24 // 11000 resize vertically to fit the area while keeping a
 htile_vstra      = 25 // 11**1 resize horizontally to fit the area and tile vertically while keeping aspect ratio
 vtile_hstra      = 22 // 1*11* resize vertically to fit the area and tile horizontally while keeping aspect ratio
 
-//Font
+// Font
 FONT_NAME                = "tahoma"
 FONT_SIZE                = 10
 
@@ -93,9 +93,9 @@ PANEL_OFSX               = 10
 PANEL_OFSY               = 10
 PANEL_WX                 = 135
 PANEL_WY                 = 17
-PANEL_INSIDE_COLOR       = 0xC9B0B0
+PANEL_INSIDE_COLOR       = 0xC9B0B0 // set 0xFF000000 to expose the background
 PANEL_OUTLINE_COLOR      = 0x000000
-PANEL_OUTLINE_WIDTH      = 1
+PANEL_OUTLINE_WIDTH      = 1        // set 0 to remove the borders
 PANEL_OUTLINE_ROUND      = 10
 PANEL_BITMAP_FILENAME    = ""
 PANEL_BITMAP_ANCHOR      = 0
@@ -104,12 +104,13 @@ PANEL_BITMAP_FILL        = 0
 // Items on left panel
 PNLITEM_OFSX             = 4
 PNLITEM_OFSY             = 3
-PNLITEM_WY               = 16
+PNLITEM_WY               = 17
 
 // Checkboxes on left panel
 CHKBOX_TEXT_OFSX         = 18
 CHKBOX_TEXT_COLOR        = 0
 CHKBOX_TEXT_COLOR_H      = 0x90FF90
+CHKBOX_SIZE              = 16
 BUTTON_BITMAP_CHECKED    = "checked.webp"
 BUTTON_BITMAP_CHECKED_H  = "checked.webp"
 BUTTON_BITMAP_UNCHECKED  = "unchecked.webp"
@@ -143,11 +144,11 @@ DRVLIST_BITMAP_ANCHOR    = 0
 DRVLIST_BITMAP_FILL      = 0
 
 // Driver items
-DRVITEM_WX               = 420
+DRVITEM_WX               = -10
 DRVITEM_WY               = 32
 DRVITEM_OFSX             = 10
 DRVITEM_OFSY             = 15
-DRVITEM_DIST_Y0          = 50
+DRVITEM_DIST_Y0          = 37 //50
 DRVITEM_DIST_Y1          = 37
 
 // Driver item content

@@ -22,6 +22,11 @@ img_t box[BOX_NUM];
 img_t icon[ICON_NUM];
 //}
 
+int Xb(int x){return x>=0?x:(mainx_c+x);}
+int Yb(int y){return y>=0?y:(mainy_c+y);}
+int Xt(int x,int o){return x>=0?x:(mainx_c+x-o);}
+int Yt(int y,int o){return y>=0?y:(mainy_c+y-o);}
+
 //{ Image
 void box_init(img_t *img,int i)
 {
@@ -247,9 +252,7 @@ void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fil
             if(anchor&ALIGN_BOTTOM) y=y2-yi-wy;
             if(anchor&ALIGN_HCENTER)x=(x2-x1-wx)/2;
             if(anchor&ALIGN_VCENTER)y=(y2-y1-wy)/2;
-
-            //if(img->hasalpha)
-            if(1)
+            if(img->hasalpha)
                 AlphaBlend(dc,x,y,wx,wy,img->dc,0,0,img->sx,img->sy,blend);
             else if(wx==img->sx&&wy==img->sy)
                 BitBlt(dc,x,y,wx,wy,img->dc,0,0,SRCCOPY);
@@ -397,6 +400,7 @@ void canvas_begin(canvas_t *canvas,HWND hwnd,int x,int y)
     }
     canvas->clipping=CreateRectRgnIndirect(&canvas->ps.rcPaint);
     if(!canvas->clipping)log_err("ERROR in canvas_begin(): failed BeginPaint\n");
+    SetStretchBltMode(canvas->hdcMem,HALFTONE);
     //r=SelectClipRgn(canvas->hdcMem,canvas->clipping);
     //if(!r)log_err("ERROR in canvas_begin(): failed SelectClipRgn\n");
 }

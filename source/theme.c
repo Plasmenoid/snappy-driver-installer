@@ -19,12 +19,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 //{ Global vars
 monitor_t mon_lang,mon_theme;
-
-WCHAR *themedata=0;
-WCHAR *langdata=0;
-WCHAR langlist[64][250];
-WCHAR themelist[64][250];
-hashtable_t theme_strs,lang_strs;
+vault_t vLang,vTheme;
 //}
 
 //{ Vault
@@ -44,25 +39,34 @@ void vault_stopmonitors()
     if(mon_theme)monitor_stop(mon_theme);
 }
 
-void vault_init()
+void vault_init1(vault_t *v,entry_t *entry,int num)
 {
     char buf[BUFLEN];
     int i;
 
-    hash_init(&theme_strs,ID_INF_LIST,THEME_NM*4,0);
-    hash_init(&lang_strs,ID_INF_LIST,STR_NM*4,0);
+    memset(v,0,sizeof(vault_t));
+    v->entry=entry;
+    v->num=num;
 
-    for(i=0;i<THEME_NM;i++)
+    hash_init(&v->strs,ID_INF_LIST,num*4,0);
+    for(i=0;i<num;i++)
     {
-        sprintf(buf,"%S",theme[i].name);
-        hash_add(&theme_strs,buf,strlen(buf),(int)i+1,HASH_MODE_INTACT);
+        sprintf(buf,"%S",v->entry[i].name);
+        hash_add(&v->strs,buf,strlen(buf),(int)i+1,HASH_MODE_INTACT);
     }
+}
 
-    for(i=0;i<STR_NM;i++)
-    {
-        sprintf(buf,"%S",language[i].name);
-        hash_add(&lang_strs,buf,strlen(buf),(int)i+1,HASH_MODE_INTACT);
-    }
+void vault_free1(vault_t *v)
+{
+    if(v->odata)free(v->odata);
+    if(v->data)free(v->data);
+    hash_free(&v->strs);
+}
+
+void vault_init()
+{
+    vault_init1(&vLang,language,STR_NM);
+    vault_init1(&vTheme,theme,THEME_NM);
 }
 
 void vault_free()
@@ -72,11 +76,8 @@ void vault_free()
     for(i=0;i<BOX_NUM;i++)box_free(&box[i]);
     for(i=0;i<ICON_NUM;i++)icon_free(&icon[i]);
 
-    if(themedata)free(themedata);
-    if(langdata)free(langdata);
-
-    hash_free(&theme_strs);
-    hash_free(&lang_strs);
+    vault_free1(&vLang);
+    vault_free1(&vTheme);
 }
 
 void *vault_loadfile(const WCHAR *filename,int *sz)
@@ -190,7 +191,7 @@ int vault_findstr(WCHAR *str)
     return (int)b;
 }
 
-void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
+void vault_parse(vault_t *val,WCHAR *data)
 {
     WCHAR *lhs,*rhs,*le;
     WCHAR *tmp;
@@ -217,7 +218,7 @@ void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
 
         // Parse LHS
         int r;
-        r=vault_findvar(tbl,lhs);
+        r=vault_findvar(&val->strs,lhs);
         if(r<0)
         {
             //printf("Error: unknown var '%ws'\n",lhs);
@@ -225,7 +226,7 @@ void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
         {
             int v,r1,r2;
             r1=vault_findstr(rhs);
-            r2=vault_findvar(tbl,rhs);
+            r2=vault_findvar(&val->strs,rhs);
 
             if(r1)               // String
             {
@@ -251,29 +252,32 @@ void vault_parse(WCHAR *data,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
                 v=(int)tmp;
             }
             else if(r2>=0)      // Var
-                v=entry[r2].val;
+                v=val->entry[r2].val;
             else                // Number
                 v=vault_readvalue(rhs);
 
             //if(r2<0)printf("-RHS:'%ws'\n",L"",rhs);
             //if(r2>=0)printf("+RHS:'%ws'\n",L"",rhs);
             //log("%d,%d,%X,{%ws|%ws}\n",r2,v,v,lhs,rhs);
-            entry[r].val=v;
-            entry[r].init=1;
+            val->entry[r].val=v;
+            val->entry[r].init=1;
         }
         lhs=le+1;
     }
-    //if(*origdata)free(*origdata); // BUG: leaking memory
-    *origdata=data;
+    if(val->odata)free(val->odata);
+    val->odata=val->data;
+    val->data=data;
 }
 
-void vault_loadfromfile(WCHAR *filename,entry_t *entry,hashtable_t *tbl,WCHAR **origdata)
+void vault_loadfromfile(vault_t *v,WCHAR *filename)
 {
     WCHAR *data;
     int sz;
 
     if(!filename[0])return;
     //printf("{%ws\n",filename);
+    //if(v->odata)free(v->odata);
+    //v->odata=v->data;
     data=vault_loadfile(filename,&sz);
     if(!data)
     {
@@ -281,15 +285,17 @@ void vault_loadfromfile(WCHAR *filename,entry_t *entry,hashtable_t *tbl,WCHAR **
         return;
     }
     data[sz]=0;
-    vault_parse(data,entry,tbl,origdata);
+    vault_parse(v,data);
 }
 
-void vault_loadfromres(int id,entry_t *entry,hashtable_t *tbl,int num,WCHAR **origdata)
+void vault_loadfromres(vault_t *v,int id)
 {
     WCHAR *data;
     char *data1;
     int sz,i;
 
+    //if(v->odata)free(v->odata);
+    //v->odata=v->data;
     get_resource(id,(void **)&data1,&sz);
     data=malloc(sz*2+2);
     int j=0;
@@ -299,35 +305,26 @@ void vault_loadfromres(int id,entry_t *entry,hashtable_t *tbl,int num,WCHAR **or
         data[i]=data1[j];
     }
     data[sz]=0;
-    vault_parse(data,entry,tbl,origdata);
-    for(i=0;i<num;i++)
-        if(entry[i].init<1)log_err("ERROR in vault_loadfromres: not initialized '%ws'\n",entry[i].name);
+    vault_parse(v,data);
+    for(i=0;i<v->num;i++)
+        if(v->entry[i].init<1)log_err("ERROR in vault_loadfromres: not initialized '%ws'\n",v->entry[i].name);
 }
 //}
 
 //{ Lang/theme
-void lang_load(WCHAR *filename)
-{
-    vault_loadfromres(IDR_LANG, language,&lang_strs,STR_NM,&langdata);
-    vault_loadfromfile(filename,language,&lang_strs,       &langdata);
-}
-
-void theme_load(WCHAR *filename)
-{
-    vault_loadfromres(IDR_THEME,theme,&theme_strs,THEME_NM,&themedata);
-    vault_loadfromfile(filename,theme,&theme_strs,         &themedata);
-}
-
 void lang_set(int i)
 {
     //printf("%d,'%ws'\n",i,langlist[i]);
-    lang_load(langlist[i]);
+    vault_loadfromres(&vLang,IDR_LANG);
+    vault_loadfromfile(&vLang,vLang.namelist[i]);
 }
 
 void theme_set(int i)
 {
     //printf("%d,'%ws'\n",i,themelist[i]);
-    theme_load(themelist[i]);
+    vault_loadfromres(&vTheme,IDR_THEME);
+    vault_loadfromfile(&vTheme,vTheme.namelist[i]);
+
     for(i=0;i<BOX_NUM;i++)box_init(&box[i],i);
     icon_init(&icon[0],ITEM_EXPAND_UP);
     icon_init(&icon[1],ITEM_EXPAND_UP_H);
@@ -359,14 +356,14 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
         wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
-        vault_loadfromfile(buf,language,&lang_strs,&langdata);
+        vault_loadfromfile(&vLang,buf);
         if(language[STR_LANG_CODE].val==(locale&0xFF))
         {
             wsprintf(langauto2,L"Auto (%s)",STR(STR_LANG_NAME));
             wcscpy(langauto,buf);
         }
         SendMessage(hwnd,CB_ADDSTRING,0,(int)STR(STR_LANG_NAME));
-        wcscpy(langlist[i],buf);
+        wcscpy(vLang.namelist[i],buf);
         i++;
     }
     while(FindNextFile(hFind,&FindFileData)!=0);
@@ -375,13 +372,13 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
     if(i)
     {
         SendMessage(hwnd,CB_ADDSTRING,0,(int)langauto2);
-        wcscpy(langlist[i],langauto);
+        wcscpy(vLang.namelist[i],langauto);
         i++;
     }
     if(!i)
     {
         SendMessage(hwnd,CB_ADDSTRING,0,(int)L"English");
-        langlist[i][0]=0;
+        vLang.namelist[i][0]=0;
     }
 }
 
@@ -401,9 +398,9 @@ void theme_enum(HWND hwnd,WCHAR *path)
     {
         wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
         D(THEME_NAME)=(int)L"";
-        vault_loadfromfile(buf,theme,&theme_strs,&themedata);
+        vault_loadfromfile(&vTheme,buf);
         SendMessage(hwnd,CB_ADDSTRING,0,(int)D(THEME_NAME));
-        wcscpy(themelist[i],buf);
+        wcscpy(vTheme.namelist[i],buf);
         i++;
     }
     while(FindNextFile(hFind,&FindFileData)!=0);
@@ -412,7 +409,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
     if(!i)
     {
         SendMessage(hwnd,CB_ADDSTRING,0,(int)L"(default)");
-        themelist[i][0]=0;
+        vTheme.namelist[i][0]=0;
     }
 }
 
