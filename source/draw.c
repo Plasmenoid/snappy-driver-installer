@@ -22,6 +22,11 @@ img_t box[BOX_NUM];
 img_t icon[ICON_NUM];
 //}
 
+int Xa(int x){return x>=0?x:(main1x_c+x);}
+int Ya(int y){return y>=0?y:(main1y_c+y);}
+int Xr(int x,int o){return x>=0?x:(main1x_c+x-o);}
+int Yr(int y,int o){return y>=0?y:(main1y_c+y-o);}
+
 int Xb(int x){return x>=0?x:(mainx_c+x);}
 int Yb(int y){return y>=0?y:(mainy_c+y);}
 int Xt(int x,int o){return x>=0?x:(mainx_c+x-o);}

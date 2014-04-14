@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define NUM_PANELS          11
+
 //{ Structs
 typedef struct _img_t
 {
@@ -48,7 +50,7 @@ typedef struct _panelitem_t
 typedef struct _panel_t
 {
     panelitem_t *items;
-    int x,y,wx,wy;
+    int index;
 }panel_t;
 
 //}
@@ -58,6 +60,11 @@ extern img_t box[BOX_NUM];
 extern img_t icon[ICON_NUM];
 //}
 
+
+int Xa(int x);
+int Ya(int y);
+int Xr(int x,int o);
+int Yr(int y,int o);
 
 int Xb(int x);
 int Yb(int y);
