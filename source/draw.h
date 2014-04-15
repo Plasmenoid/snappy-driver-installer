@@ -16,6 +16,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define NUM_PANELS          12
+#define PAN_ENT          18
 
 //{ Structs
 typedef struct _img_t

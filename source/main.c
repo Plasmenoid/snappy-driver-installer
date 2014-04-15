@@ -873,7 +873,7 @@ void mkdir_r(const WCHAR *path)
 //{ Panel
 int panel_hitscan(panel_t *panel,int hx,int hy)
 {
-    int idofs=11*panel->index+11;
+    int idofs=PAN_ENT*panel->index+PAN_ENT;
     int wy=D(PANEL_WY+idofs);
 
     if(!wy)return -1;
@@ -910,7 +910,7 @@ void panel_draw(HDC hdc,panel_t *panel)
     POINT p;
     int cur_i;
     int i;
-    int idofs=11*panel->index+11;
+    int idofs=PAN_ENT*panel->index+PAN_ENT;
     int x=Xp(panel),y=Yp(panel);
     int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
     int wy=D(PANEL_WY+idofs);
@@ -947,7 +947,7 @@ void panel_draw(HDC hdc,panel_t *panel)
             case TYPE_BUTTON:
                 if(panel->index>=8&&panel->index<=10&&D(PANEL_OUTLINE_WIDTH+idofs)<0)
                 {
-                    int o,R,G,B;
+                    /*int o,R,G,B;
                     o=D(PANEL_INSIDE_COLOR+idofs);
                     if(i==cur_i)
                     {
@@ -959,9 +959,9 @@ void panel_draw(HDC hdc,panel_t *panel)
                         if(G>255)G=255;
                         if(B>255)B=255;
                         D(PANEL_INSIDE_COLOR+idofs)=R+(G<<8)+(B<<16);
-                    }
+                    }*/
                     box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_PANEL_H+panel->index*2+2:BOX_PANEL+panel->index*2+2);
-                    D(PANEL_INSIDE_COLOR+idofs)=o;
+                    //D(PANEL_INSIDE_COLOR+idofs)=o;
                 }
                 else
                     box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
@@ -1652,7 +1652,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_MOUSEMOVE:
             GetClientRect(hwnd,&rect);
             i=panels_hitscan(x,y,&j);
-            log_con("%d,%d\n",j,i);
+            //log_con("%d,%d\n",j,i);
 
             if(i>0)
             {
