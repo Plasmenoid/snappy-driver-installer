@@ -66,6 +66,11 @@ STR_SHOW_DUP_H          = "Show duplicate drivers."
 STR_SHOW_INVALID        = "Show invalid"
 STR_SHOW_INVALID_H      = "Show drivers which are incompatible with the current system."
 
+STR_OPTIONS             = "Options"
+STR_OPTIONS_H           = ""
+STR_REBOOT              = "Reboot PC after installation"
+STR_REBOOT_H            = ""
+
 // Sysinfo
 STR_SYSINF_WINDOWS      = "Windows"
 STR_SYSINF_VERSION      = "Version"

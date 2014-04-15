@@ -22,15 +22,45 @@ img_t box[BOX_NUM];
 img_t icon[ICON_NUM];
 //}
 
-int Xa(int x){return x>=0?x:(main1x_c+x);}
-int Ya(int y){return y>=0?y:(main1y_c+y);}
-int Xr(int x,int o){return x>=0?x:(main1x_c+x-o);}
-int Yr(int y,int o){return y>=0?y:(main1y_c+y-o);}
 
-int Xb(int x){return x>=0?x:(mainx_c+x);}
-int Yb(int y){return y>=0?y:(mainy_c+y);}
-int Xt(int x,int o){return x>=0?x:(mainx_c+x-o);}
-int Yt(int y,int o){return y>=0?y:(mainy_c+y-o);}
+int Xp(panel_t *p)
+{
+    int idofs=11*p->index+11;
+    int x=D(PANEL_OFSX+idofs);
+
+    return x>=0?x:(main1x_c+x);
+}
+int Yp(panel_t *p)
+{
+    int idofs=11*p->index+11;
+    int y=D(PANEL_OFSY+idofs);
+
+    return y>=0?y:(main1y_c+y);
+}
+int XP(panel_t *p)
+{
+    int idofs=11*p->index+11;
+    int x=D(PANEL_WX+idofs),o=D(PANEL_OFSX+idofs);
+
+    return x>=0?x:(main1x_c+x-o);
+}
+int YP(panel_t *p)
+{
+    int idofs=11*p->index+11;
+    int y=D(PANEL_WY+idofs),o=D(PANEL_OFSY+idofs);
+
+    return y>=0?y:(main1y_c+y-o);
+}
+
+int Xm(int x){return x>=0?x:(main1x_c+x);}
+int Ym(int y){return y>=0?y:(main1y_c+y);}
+int XM(int x,int o){return x>=0?x:(main1x_c+x-o);}
+int YM(int y,int o){return y>=0?y:(main1y_c+y-o);}
+
+int Xg(int x){return x>=0?x:(mainx_c+x);}
+int Yg(int y){return y>=0?y:(mainy_c+y);}
+int XG(int x,int o){return x>=0?x:(mainx_c+x-o);}
+int YG(int y,int o){return y>=0?y:(mainy_c+y-o);}
 
 //{ Image
 void box_init(img_t *img,int i)
@@ -284,22 +314,6 @@ void drawcheckbox(HDC hdc,int x,int y,int wx,int wy,int checked,int active)
         image_draw(hdc,&icon[i],x,y,wx,wy,0,HSTR|VSTR);
     else
         DrawFrameControl(hdc,&rect,DFC_BUTTON,DFCS_BUTTONCHECK|(checked?DFCS_CHECKED:0));
-}
-
-void drawrevision(HDC hdcMem,int y)
-{
-    WCHAR buf[BUFLEN];
-    version_t v;
-
-    v.d=atoi(SVN_REV_D);
-    v.m=atoi(SVN_REV_M);
-    v.y=SVN_REV_Y;
-
-    wsprintf(buf,L"%s (",TEXT(SVN_REV2));
-    str_date(&v,buf+wcslen(buf));
-    wcscat(buf,L")");
-    SetTextColor(hdcMem,D(MAINWND_TEXT_COLOR));
-    TextOut(hdcMem,D(PANEL_OFSX),y-20,buf,wcslen(buf));
 }
 
 void drawpopup(int itembar,int type,int x,int y,HWND hwnd)

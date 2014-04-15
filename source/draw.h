@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define NUM_PANELS          11
+#define NUM_PANELS          12
 
 //{ Structs
 typedef struct _img_t
@@ -61,15 +61,20 @@ extern img_t icon[ICON_NUM];
 //}
 
 
-int Xa(int x);
-int Ya(int y);
-int Xr(int x,int o);
-int Yr(int y,int o);
+int Xp(panel_t *p);
+int Yp(panel_t *p);
+int XP(panel_t *p);
+int YP(panel_t *p);
 
-int Xb(int x);
-int Yb(int y);
-int Xt(int x,int o);
-int Yt(int y,int o);
+int Xm(int x);
+int Ym(int y);
+int XM(int x,int o);
+int YM(int y,int o);
+
+int Xg(int x);
+int Yg(int y);
+int XG(int x,int o);
+int YG(int y,int o);
 
 // Image
 void box_init(img_t *img,int i);

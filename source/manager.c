@@ -269,14 +269,14 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
     int i;
     int pos;
     int ofsy=getscrollpos();
-    int cutoff=calc_cutoff(manager)+D(ITEM_DIST_Y0);
+    int cutoff=calc_cutoff(manager)+D(DRVITEM_DIST_Y0);
     int ofs=0;
-    int wx=Xt(D(DRVITEM_WX),Xb(D(DRVITEM_OFSX)));
+    int wx=XG(D(DRVITEM_WX),Xg(D(DRVITEM_OFSX)));
 
     *r=-2;
     *zone=0;
-    y-=-D(ITEM_DIST_Y0);
-    x-=Xb(D(DRVITEM_OFSX));
+    y-=-D(DRVITEM_DIST_Y0);
+    x-=Xg(D(DRVITEM_OFSX));
     if(x<0||x>wx)return;
     itembar=manager->items_list;
     for(i=0;i<manager->items_handle.items;i++,itembar++)
@@ -289,7 +289,7 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
         {
             x-=D(ITEM_CHECKBOX_OFS_X);
             y-=D(ITEM_CHECKBOX_OFS_Y)+pos;
-            ofs=(itembar->first)?0:30;
+            ofs=(itembar->first)?0:D(DRVITEM_LINE_INTEND);
             if(x-ofs>0)*r=i;
             if(x-ofs>0&&x-ofs<D(ITEM_CHECKBOX_SIZE)&&y>0&&y<D(ITEM_CHECKBOX_SIZE))*zone=1;
             if(x>wx-50&&!ofs)*zone=expertmode?2:2;
@@ -463,8 +463,8 @@ void itembar_init(itembar_t *item,devicematch_t *devicematch,hwidmatch_t *hwidma
     memset(item,0,sizeof(itembar_t));
     item->devicematch=devicematch;
     item->hwidmatch=hwidmatch;
-    item->curpos=(-D(ITEM_DIST_Y0))<<16;
-    item->tagpos=(-D(ITEM_DIST_Y0))<<16;
+    item->curpos=(-D(DRVITEM_DIST_Y0))<<16;
+    item->tagpos=(-D(DRVITEM_DIST_Y0))<<16;
     item->index=groupindex;
     item->rm=rm;
     item->first=first;
@@ -483,7 +483,7 @@ void itembar_setpos(itembar_t *itembar,int *pos,int *cnt)
 {
     if(itembar->isactive)
     {
-        *pos+=*cnt?D(ITEM_DIST_Y1):D(ITEM_DIST_Y0);
+        *pos+=*cnt?D(DRVITEM_DIST_Y1):D(DRVITEM_DIST_Y0);
         (*cnt)--;
     }
     itembar->oldpos=itembar->curpos;
@@ -774,13 +774,13 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
     HICON hIcon;
     WCHAR bufw[BUFLEN];
     HRGN hrgn=0,hrgn2;
-    int x=Xb(D(DRVITEM_OFSX));
-    int wx=Xt(D(DRVITEM_WX),x);
+    int x=Xg(D(DRVITEM_OFSX));
+    int wx=XG(D(DRVITEM_WX),x);
     int r=D(box[box_status(index)].index+3);
     int intend=0;
 
     itembar_t *itembar=&manager->items_list[index];
-    int pos=(itembar->curpos>>16)-D(ITEM_DIST_Y0);
+    int pos=(itembar->curpos>>16)-D(DRVITEM_DIST_Y0);
     if(index>=SLOT_RESTORE_POINT)pos-=ofsy;
 
     if(!itembar->first)
@@ -793,10 +793,10 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
     }
     if(intend)
     {
-        x+=30;
-        wx-=30;
+        x+=D(DRVITEM_LINE_INTEND);
+        wx-=D(DRVITEM_LINE_INTEND);
     }
-    if(pos<=-D(ITEM_DIST_Y0))return 0;
+    if(pos<=-D(DRVITEM_DIST_Y0))return 0;
     if(pos>mainy_c)return 0;
     if(wx<0)return 0;
 
@@ -809,14 +809,14 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
     if(index==SLOT_EXTRACTING&&itembar->install_status&&installmode==MODE_NONE)
         cl=((GetTickCount()-manager->animstart)/200)%2;
     SelectClipRgn(hdc,hrgn2);
-    if(intend)
+    if(intend&&D(DRVITEM_LINE_WIDTH))
     {
         HPEN oldpen,newpen;
 
-        newpen=CreatePen(PS_SOLID,3,RGB(0,0,0));
+        newpen=CreatePen(PS_SOLID,D(DRVITEM_LINE_WIDTH),D(DRVITEM_LINE_COLOR));
         oldpen=SelectObject(hdc,newpen);
-        MoveToEx(hdc,x-30/2,(manager->items_list[intend].curpos>>16)-D(ITEM_DIST_Y0)+D(DRVITEM_WY)-ofsy,0);
-        LineTo(hdc,x-30/2,pos+D(DRVITEM_WY)/2);
+        MoveToEx(hdc,x-D(DRVITEM_LINE_INTEND)/2,(manager->items_list[intend].curpos>>16)-D(DRVITEM_DIST_Y0)+D(DRVITEM_WY)-ofsy,0);
+        LineTo(hdc,x-D(DRVITEM_LINE_INTEND)/2,pos+D(DRVITEM_WY)/2);
         LineTo(hdc,x,pos+D(DRVITEM_WY)/2);
         SelectObject(hdc,oldpen);
         DeleteObject(newpen);
@@ -1014,7 +1014,7 @@ int isbehind(manager_t *manager,int pos,int ofsy,int j)
     itembar_t *itembar;
 
     if(j<SLOT_RESTORE_POINT)return 0;
-    if(pos-ofsy<=-D(ITEM_DIST_Y0))return 1;
+    if(pos-ofsy<=-D(DRVITEM_DIST_Y0))return 1;
     if(pos-ofsy>mainy_c)return 1;
 
     itembar=&manager->items_list[j-1];

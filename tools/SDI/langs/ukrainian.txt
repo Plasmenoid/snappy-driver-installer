@@ -66,6 +66,11 @@ STR_SHOW_DUP_H          = "Відображати дублюючі в драйв
 STR_SHOW_INVALID        = "Невідповідні"
 STR_SHOW_INVALID_H      = "Відображати невідповідні драйвери.\n\nЦі драйвери розраховані на інші версії Windows і їх встановлення не рекомендується."
 
+//STR_OPTIONS             = "Опции" // translate
+STR_OPTIONS             = "Options"
+//STR_REBOOT              = "Перезагрузить ПК по окончанию" // translate
+STR_REBOOT_H            = ""
+
 // Информация о системе
 STR_SYSINF_WINDOWS      = "Windows"
 STR_SYSINF_VERSION      = "Версія"
