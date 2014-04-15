@@ -29,9 +29,9 @@ panelitem_t panel1[]=
 panelitem_t panel2[]=
 {
     {TYPE_GROUP,0,3,0},
-    {TYPE_BUTTON,STR_INSTALL,               ID_INSTALL,0},
-    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
-    {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
+    {0,STR_INSTALL,               ID_INSTALL,0},
+    {0,STR_SELECT_ALL,            ID_SELECT_ALL,0},
+    {0,STR_SELECT_NONE,           ID_SELECT_NONE,0},
 };
 
 panelitem_t panel3[]=
@@ -91,9 +91,8 @@ panelitem_t panel8[]=
 
 panelitem_t panel9[]=
 {
-    {TYPE_GROUP,0,2,0},
-    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
-    {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
+    {TYPE_GROUP,0,1,0},
+    {TYPE_BUTTON,STR_INSTALL,               ID_INSTALL,0},
 };
 
 panelitem_t panel10[]=
@@ -104,10 +103,16 @@ panelitem_t panel10[]=
 
 panelitem_t panel11[]=
 {
-    {TYPE_GROUP,0,3,0},
-    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
-    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
+    {TYPE_GROUP,0,1,0},
     {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
+};
+
+panelitem_t panel12[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_TEXT,STR_OPTIONS,0,0},
+    {TYPE_CHECKBOX,STR_RESTOREPOINT,        0,0},
+    {TYPE_CHECKBOX,STR_REBOOT,              0,0},
 };
 
 panel_t panels[NUM_PANELS]=
@@ -122,7 +127,8 @@ panel_t panels[NUM_PANELS]=
     {panel8,  7},
     {panel9,  8},
     {panel10, 9},
-    {panel11,10}
+    {panel11,10},
+    {panel12,11},
 };
 
 // Manager
@@ -868,27 +874,32 @@ void mkdir_r(const WCHAR *path)
 int panel_hitscan(panel_t *panel,int hx,int hy)
 {
     int idofs=11*panel->index+11;
+    int wy=D(PANEL_WY+idofs);
 
-    if(!D(PANEL_WY+idofs))return -1;
-    hx-=Xa(D(PANEL_OFSX+idofs))+D(PNLITEM_OFSX);
-    hy-=Ya(D(PANEL_OFSY+idofs))+D(PNLITEM_OFSY);
+    if(!wy)return -1;
+    hx-=Xp(panel)+D(PNLITEM_OFSX);
+    hy-=Yp(panel)+D(PNLITEM_OFSY);
 
     if(!expertmode&&panel->items[0].type==TYPE_GROUP_BREAK)return -1;
-    if(hx<0||hy<0||hx>D(PANEL_WX))return -1;
-    if(hy>=D(PNLITEM_WY)*(panel->items[0].action_id))return -1;
+    if(hx<0||hy<0||hx>XP(panel)-D(PNLITEM_OFSX)*2)return -1;
+    if(hy>=wy*(panel->items[0].action_id))return -1;
 
-    return hy/D(PNLITEM_WY)+1;
+    return hy/wy+1;
 }
 
 int panels_hitscan(int hx,int hy,int *ii)
 {
-    int i,r;
+    int i,r=-1;
 
+    *ii=-1;
     for(i=0;i<NUM_PANELS;i++)
     {
         r=panel_hitscan(&panels[i],hx,hy);
-        *ii=i;
-        if(r>=0)return r;
+        if(r>=0&&panels[i].items[r].type)
+        {
+            *ii=i;
+            return r;
+        }
     }
     return -1;
 }
@@ -900,8 +911,9 @@ void panel_draw(HDC hdc,panel_t *panel)
     int cur_i;
     int i;
     int idofs=11*panel->index+11;
-    int x=Xa(D(PANEL_OFSX+idofs)),y=Ya(D(PANEL_OFSY+idofs));
+    int x=Xp(panel),y=Yp(panel);
     int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
+    int wy=D(PANEL_WY+idofs);
 
     GetCursorPos(&p);
     ScreenToClient(hMain,&p);
@@ -933,9 +945,29 @@ void panel_draw(HDC hdc,panel_t *panel)
                 break;
 
             case TYPE_BUTTON:
-                box_draw(hdc,x+ofsx,y+ofsy,x+Xr(D(PANEL_WX+idofs),D(PANEL_OFSX+idofs))-ofsx,y+ofsy+D(CHKBOX_SIZE),i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
+                if(panel->index>=8&&panel->index<=10&&D(PANEL_OUTLINE_WIDTH+idofs)<0)
+                {
+                    int o,R,G,B;
+                    o=D(PANEL_INSIDE_COLOR+idofs);
+                    if(i==cur_i)
+                    {
+                        R=o&0xFF;
+                        G=(o>>8)&0xFF;
+                        B=(o>>16)&0xFF;
+                        R+=50;G+=50;B+=50;
+                        if(R>255)R=255;
+                        if(G>255)G=255;
+                        if(B>255)B=255;
+                        D(PANEL_INSIDE_COLOR+idofs)=R+(G<<8)+(B<<16);
+                    }
+                    box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_PANEL_H+panel->index*2+2:BOX_PANEL+panel->index*2+2);
+                    D(PANEL_INSIDE_COLOR+idofs)=o;
+                }
+                else
+                    box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
+
                 SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-                if(i==1&&panel->index==1)
+                if(i==1&&panel->index==8)
                 {
                     int j,cnt=0;
                     itembar_t *itembar;
@@ -945,10 +977,10 @@ void panel_draw(HDC hdc,panel_t *panel)
                     if(itembar->checked)cnt++;
 
                     wsprintf(buf,L"%s (%d)",STR(panel->items[i].str_id),cnt);
-                    TextOut(hdc,x+ofsx+5,y+ofsy+2,buf,wcslen(buf));
+                    TextOut(hdc,x+ofsx+wy/2,y+ofsy+(wy-D(FONT_SIZE)-2)/2,buf,wcslen(buf));
                 }
                 else
-                    TextOut(hdc,x+ofsx+5,y+ofsy+2,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
+                    TextOut(hdc,x+ofsx+wy/2,y+ofsy+(wy-D(FONT_SIZE)-2)/2,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
 
                 y+=D(PNLITEM_WY);
                 break;
@@ -975,10 +1007,11 @@ void panel_draw(HDC hdc,panel_t *panel)
 
             case TYPE_GROUP_BREAK:
             case TYPE_GROUP:
+                if(panel->index>=8&&panel->index<=10)break;
                 if(i)y+=D(PNLITEM_WY);
                 box_draw(hdc,x,y,
-                         x+Xr(D(PANEL_WX+idofs),D(PANEL_OFSX+idofs)),
-                         y+D(PNLITEM_WY)*panel->items[i].action_id+ofsy*2,BOX_PANEL+panel->index+1);
+                         x+XP(panel),
+                         y+D(PNLITEM_WY)*panel->items[i].action_id+ofsy*2,BOX_PANEL+panel->index*2+2);
                 break;
 
             default:
@@ -1489,8 +1522,8 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_SIZING:
             {
                 RECT *r=(RECT *)lParam;
-                int minx=D(DRVLIST_OFSX)+280;
-                int miny=Yb(D(PANEL_OFSY))+16*D(PNLITEM_WY);
+                int minx=D(MAINWND_MINX);
+                int miny=D(MAINWND_MINY);
 
                 switch(wParam)
                 {
@@ -1581,17 +1614,17 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             SetLayeredWindowAttributes(hMain,0,D(MAINWND_TRANSPARENCY),LWA_ALPHA);
             SetLayeredWindowAttributes(hPopup,0,D(POPUP_TRANSPARENCY),LWA_ALPHA);
 
-            MoveWindow(hField,D(DRVLIST_OFSX),D(DRVLIST_OFSY),x-D(DRVLIST_OFSX),y-D(DRVLIST_OFSY),TRUE);
-            MoveWindow(hLang,Xa(D(PANEL_OFSX))+D(PNLITEM_OFSX),Ya(D(PANEL_OFSY))+9*D(PNLITEM_WY)-2,(D(PANEL_WX))-D(PNLITEM_OFSX)*2,190,0);
-            MoveWindow(hTheme,Xa(D(PANEL_OFSX))+D(PNLITEM_OFSX),Ya(D(PANEL_OFSY))+11*D(PNLITEM_WY)-2,(D(PANEL_WX))-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hField,Xm(D(DRVLIST_OFSX)),Ym(D(DRVLIST_OFSY)),XM(D(DRVLIST_WX),D(DRVLIST_OFSX)),YM(D(DRVLIST_WY),D(DRVLIST_OFSY)),TRUE);
+            MoveWindow(hLang, Xp(&panels[2])+D(PNLITEM_OFSX),Yp(&panels[2])+1*D(PNLITEM_WY)-2,XP(&panels[2])-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hTheme,Xp(&panels[2])+D(PNLITEM_OFSX),Yp(&panels[2])+3*D(PNLITEM_WY)-2,XP(&panels[2])-D(PNLITEM_OFSX)*2,190,0);
             manager_setpos(manager_g);
-            redrawmainwnd();
 
             GetWindowRect(hwnd,&rect);
             main1x_c=x;
             main1y_c=y;
             mainx_w=rect.right-rect.left;
             mainy_w=rect.bottom-rect.top;
+            redrawmainwnd();
             break;
 
         case WM_TIMER:
@@ -1607,8 +1640,8 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
             box_draw(canvasMain.hdcMem,0,0,rect.right+1,rect.bottom+1,BOX_MAINWND);
             SelectObject(canvasMain.hdcMem,hFont);
-            //drawrevision(canvasMain.hdcMem,rect.bottom);
-            for(i=0;i<NUM_PANELS;i++)panel_draw(canvasMain.hdcMem,&panels[i]);
+            panel_draw(canvasMain.hdcMem,&panels[7]);// draw revision
+            for(i=0;i<NUM_PANELS;i++)if(i!=7)panel_draw(canvasMain.hdcMem,&panels[i]);
             canvas_end(&canvasMain);
             redrawfield();
             break;
@@ -1619,11 +1652,17 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_MOUSEMOVE:
             GetClientRect(hwnd,&rect);
             i=panels_hitscan(x,y,&j);
+            log_con("%d,%d\n",j,i);
 
-            if(i==1&&j==7)
-                drawpopup(-1,FLOATING_ABOUT,x,y,hwnd);
+            if(i>0)
+            {
+                if(i==1&&j==7)
+                    drawpopup(-1,FLOATING_ABOUT,x,y,hwnd);
+                else
+                    drawpopup(panels[j].items[i].str_id+1,i>0&&i<4&&j==0?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
+            }
             else
-                drawpopup(panels[j].items[i].str_id+1,i>0&&i<4&&j==0?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
+                drawpopup(-1,FLOATING_NONE,x,y,hwnd);
 
             if(panel_lasti!=i+j*255)redrawmainwnd();
             panel_lasti=i+j*255;
@@ -1636,7 +1675,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(i<4&&j==0)
                 RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
             else
-            log_con("%d,%d\n",j,i);
+            //log_con("%d,%d\n",j,i);
             if(panels[j].items[i].type==TYPE_CHECKBOX||TYPE_BUTTON)
             {
                 panels[j].items[i].checked^=1;
@@ -2009,7 +2048,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             GetClientRect(hwnd,&rect);
             canvas_begin(&canvasField,hwnd,rect.right,rect.bottom);
 
-            BitBlt(canvasField.hdcMem,0,0,rect.right,rect.bottom,canvasMain.hdcMem,D(DRVLIST_OFSX),D(DRVLIST_OFSY),SRCCOPY);
+            BitBlt(canvasField.hdcMem,0,0,rect.right,rect.bottom,canvasMain.hdcMem,Xm(D(DRVLIST_OFSX)),Ym(D(DRVLIST_OFSY)),SRCCOPY);
             box_draw(canvasField.hdcMem,0,0,rect.right,rect.bottom,BOX_DRVLIST);
             manager_draw(manager_g,canvasField.hdcMem,y);
 
