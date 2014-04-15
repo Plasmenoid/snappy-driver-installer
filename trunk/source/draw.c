@@ -25,28 +25,28 @@ img_t icon[ICON_NUM];
 
 int Xp(panel_t *p)
 {
-    int idofs=11*p->index+11;
+    int idofs=PAN_ENT*p->index+PAN_ENT;
     int x=D(PANEL_OFSX+idofs);
 
     return x>=0?x:(main1x_c+x);
 }
 int Yp(panel_t *p)
 {
-    int idofs=11*p->index+11;
+    int idofs=PAN_ENT*p->index+PAN_ENT;
     int y=D(PANEL_OFSY+idofs);
 
     return y>=0?y:(main1y_c+y);
 }
 int XP(panel_t *p)
 {
-    int idofs=11*p->index+11;
+    int idofs=PAN_ENT*p->index+PAN_ENT;
     int x=D(PANEL_WX+idofs),o=D(PANEL_OFSX+idofs);
 
     return x>=0?x:(main1x_c+x-o);
 }
 int YP(panel_t *p)
 {
-    int idofs=11*p->index+11;
+    int idofs=PAN_ENT*p->index+PAN_ENT;
     int y=D(PANEL_WY+idofs),o=D(PANEL_OFSY+idofs);
 
     return y>=0?y:(main1y_c+y-o);
