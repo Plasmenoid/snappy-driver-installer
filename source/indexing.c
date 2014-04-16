@@ -633,6 +633,7 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
                 {
                     WCHAR bufw1[4096];
                     WCHAR bufw2[4096];
+                    if(!drp_count)drp_count=1;
                     wsprintf(bufw1,L"Indexing %d/%d",num,drp_count);
                     wsprintf(bufw2,L"%s\\%s",path,FindFileData.cFileName);
                     manager_g->items_list[SLOT_INDEXING].isactive=1;
@@ -706,6 +707,7 @@ void driverpack_init(driverpack_t *drp,WCHAR const *driverpack_path,WCHAR const 
 
     sprintf(buf,"%ws",driverpack_filename);
     drp->drpfilename=heap_memcpy(&drp->text_handle,driverpack_filename,wcslen(driverpack_filename)*2+2);
+    drp->indexes.size=0;
 }
 
 void driverpack_free(driverpack_t *drp)

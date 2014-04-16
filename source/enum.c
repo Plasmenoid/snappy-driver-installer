@@ -601,52 +601,16 @@ int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product);
 
 void state_getsysinfo_slow(state_t *state)
 {
-    WCHAR buf[BUFLEN];
-    WCHAR filename[BUFLEN];
-    WCHAR *pw,*pe,pchar;
-    FILE *f;
-    int  sz;
-
     WCHAR model[BUFLEN];
     WCHAR manuf[BUFLEN];
     WCHAR product[BUFLEN];
 
     time_sysinfo=GetTickCount();
-    if(1)
-    {
-        getbaseboard(manuf,model,product);
-        state->manuf=heap_memcpy(&state->text_handle,manuf,wcslen(manuf)*2+2);
-        state->product=heap_memcpy(&state->text_handle,product,wcslen(product)*2+2);
-        state->model=heap_memcpy(&state->text_handle,model,wcslen(model)*2+2);
-    }
-    else
-    {
-        wsprintf(filename,L"%s\\output.txt",state->text+state->temp);
-        wsprintf(buf,L"/c wmic baseboard GET /value >\"%s\\output.txt\"",state->text+state->temp);
-        time_test=GetTickCount()-time_test;
-        log_con("1");
-        RunSilent(L"cmd",buf,SW_HIDE,1);
-        log_con("2");
-        f=_wfopen(filename,L"rb");
-        if(!f)return;
-        fseek(f,0,SEEK_END);
-        sz=ftell(f);
-        if(!sz)return;
-        fseek(f,0,SEEK_SET);
-        fread(buf,1,sz,f);
-        fclose(f);
-        buf[sz/2]=0;
 
-        pw=wcsstr(buf,L"Manufacturer=");
-        if(!pw)return;
-        pw+=13;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
-        state->manuf=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
-        *pe=pchar;pw=wcsstr(buf,L"Product=");pw+=8;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
-        state->product=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
-        *pe=pchar;pw=wcsstr(buf,L"Model=");pw+=6;pe=wcschr(pw,L'\r');pchar=*pe;*pe=0;
-        state->model=heap_memcpy(&state->text_handle,pw,wcslen(pw)*2+2);
-        _wremove(filename);
-    }
+    getbaseboard(manuf,model,product);
+    state->manuf=heap_memcpy(&state->text_handle,manuf,wcslen(manuf)*2+2);
+    state->product=heap_memcpy(&state->text_handle,product,wcslen(product)*2+2);
+    state->model=heap_memcpy(&state->text_handle,model,wcslen(model)*2+2);
 
     time_sysinfo=GetTickCount()-time_sysinfo;
 }
