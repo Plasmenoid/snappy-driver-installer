@@ -437,6 +437,7 @@ monitor_t monitor_start(LPCTSTR szDirectory, DWORD notifyFilter, int subdirs, Fi
 {
 	monitor_t pMonitor = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(*pMonitor));
 
+	wcscpy(pMonitor->dir,szDirectory);
 	pMonitor->hDir=CreateFile(szDirectory,FILE_LIST_DIRECTORY,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
 	                            NULL,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OVERLAPPED,NULL);
 
@@ -483,20 +484,51 @@ void CALLBACK monitor_callback(DWORD dwErrorCode,DWORD dwNumberOfBytesTransfered
 			pNotify=(PFILE_NOTIFY_INFORMATION)&pMonitor->buffer[offset];
 			offset+=pNotify->NextEntryOffset;
 
-#			if defined(UNICODE)
-			{
-			    lstrcpynW(szFile,pNotify->FileName,min(MAX_PATH,pNotify->FileNameLength/sizeof(WCHAR)+1));
-			}
-#			else
-			{
-			    int count = WideCharToMultiByte(CP_ACP,0,pNotify->FileName,
-			                                    pNotify->FileNameLength/sizeof(WCHAR),
-			                                    szFile,MAX_PATH-1,NULL,NULL);
-			    szFile[count]=L'\0';
-			}
-#			endif
+            lstrcpynW(szFile,pNotify->FileName,min(MAX_PATH,pNotify->FileNameLength/sizeof(WCHAR)+1));
 
-			pMonitor->callback(szFile,pNotify->Action,pMonitor->lParam);
+			{
+                FILE *f;
+                WCHAR buf[BUFLEN];
+                int m=0,sz=-1,flag;
+
+                errno=0;
+                wsprintf(buf,L"%ws\\%ws",pMonitor->dir,szFile);
+                f=_wfsopen(buf,L"rb",0x10);
+                if(f)m=2;
+                if(!f)
+                {
+                    f=_wfopen(buf,L"rb");
+                    if(f)m=1;
+                }
+                if(f)
+                {
+                    fseek(f,0,SEEK_END);
+                    sz=ftell(f);
+                    fclose(f);
+                    if(m==1)
+                    {
+                        Sleep(5);
+                        f=_wfsopen(buf,L"rb",0x10);
+                        if(f)
+                        {
+                            m=2;
+                            fclose(f);
+                        }
+                    }
+                }
+                /*
+                a1: moving (m==0)
+                a2: deleting
+                a3: coping (m==3)
+                */
+
+                flag=((pNotify->Action==1&&m==0)||
+                        pNotify->Action==2||
+                        (pNotify->Action==3&&m==2));
+
+                log_con("%cMONITOR: a:%d,m:%d,e:%02d,%9d,'%ws'\n",flag?'+':'-',pNotify->Action,m,errno,sz,buf);
+                if(flag)pMonitor->callback(szFile,pNotify->Action,pMonitor->lParam);
+			}
 
 		}while(pNotify->NextEntryOffset!=0);
 	}

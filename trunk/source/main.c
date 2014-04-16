@@ -396,8 +396,7 @@ void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
     UNREFERENCED_PARAMETER(action);
     UNREFERENCED_PARAMETER(lParam);
 
-    if(StrStrIW(szFile,L".7z")||StrStrIW(szFile,L".inf")){}
-    //SetEvent(event);
+    if(StrStrIW(szFile,L".7z")||StrStrIW(szFile,L".inf"))SetEvent(event);
 }
 
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)

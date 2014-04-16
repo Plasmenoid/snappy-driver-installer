@@ -52,6 +52,7 @@ typedef struct _monitor_t
 	LPARAM     lParam;
 	DWORD      notifyFilter;
 	BOOL       fStop;
+	WCHAR      dir[BUFLEN];
 	int        subdirs;
 	FileChangeCallback callback;
 }*monitor_t;
