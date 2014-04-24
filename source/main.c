@@ -396,7 +396,7 @@ void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
     UNREFERENCED_PARAMETER(action);
     UNREFERENCED_PARAMETER(lParam);
 
-    if(StrStrIW(szFile,L".7z")||StrStrIW(szFile,L".inf"))SetEvent(event);
+    //if(StrStrIW(szFile,L".7z")||StrStrIW(szFile,L".inf"))SetEvent(event);
 }
 
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
@@ -879,9 +879,9 @@ int panel_hitscan(panel_t *panel,int hx,int hy)
     hx-=Xp(panel)+D(PNLITEM_OFSX);
     hy-=Yp(panel)+D(PNLITEM_OFSY);
 
-    if(!expertmode&&panel->items[0].type==TYPE_GROUP_BREAK)return -1;
-    if(hx<0||hy<0||hx>XP(panel)-D(PNLITEM_OFSX)*2)return -1;
-    if(hy>=wy*(panel->items[0].action_id))return -1;
+    if(!expertmode&&panel->items[0].type==TYPE_GROUP_BREAK)return -2;
+    if(hx<0||hy<0||hx>XP(panel)-D(PNLITEM_OFSX)*2)return -3;
+    if(hy>=wy*(panel->items[0].action_id))return -4;
 
     return hy/wy+1;
 }
@@ -945,23 +945,7 @@ void panel_draw(HDC hdc,panel_t *panel)
 
             case TYPE_BUTTON:
                 if(panel->index>=8&&panel->index<=10&&D(PANEL_OUTLINE_WIDTH+idofs)<0)
-                {
-                    /*int o,R,G,B;
-                    o=D(PANEL_INSIDE_COLOR+idofs);
-                    if(i==cur_i)
-                    {
-                        R=o&0xFF;
-                        G=(o>>8)&0xFF;
-                        B=(o>>16)&0xFF;
-                        R+=50;G+=50;B+=50;
-                        if(R>255)R=255;
-                        if(G>255)G=255;
-                        if(B>255)B=255;
-                        D(PANEL_INSIDE_COLOR+idofs)=R+(G<<8)+(B<<16);
-                    }*/
                     box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_PANEL_H+panel->index*2+2:BOX_PANEL+panel->index*2+2);
-                    //D(PANEL_INSIDE_COLOR+idofs)=o;
-                }
                 else
                     box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
 

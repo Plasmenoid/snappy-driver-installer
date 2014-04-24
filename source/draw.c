@@ -333,7 +333,8 @@ void drawpopup(int itembar,int type,int x,int y,HWND hwnd)
 
     if(type!=FLOATING_NONE)
     {
-        if(type==FLOATING_CMPDRIVER||type==FLOATING_DRIVERLST)
+        if(type==FLOATING_ABOUT)p.y=p.y-floating_y-30;
+        //if(type==FLOATING_CMPDRIVER||type==FLOATING_DRIVERLST)
         {
             hMonitor=MonitorFromPoint(p,MONITOR_DEFAULTTONEAREST);
             mi.cbSize=sizeof(MONITORINFO);
@@ -345,7 +346,6 @@ void drawpopup(int itembar,int type,int x,int y,HWND hwnd)
             if(p.y+floating_y>mi.rcWork.bottom-20)p.y=p.y-floating_y-30;
             if(p.y<5)p.y=5;
         }
-        if(type==FLOATING_ABOUT)p.y=p.y-floating_y-30;
 
         MoveWindow(hPopup,p.x+10,p.y+20,floating_x,floating_y,1);
         if(needupdate)InvalidateRect(hPopup,0,0);
