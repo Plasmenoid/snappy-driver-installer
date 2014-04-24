@@ -253,8 +253,8 @@ PANEL7_BITMAP_FILL_H     = PANEL_BITMAP_FILL
 // Panel, revision
 PANEL8_OFSX              = PANEL_OFSX
 PANEL8_OFSY              = -25
-PANEL8_WX                = 220
-PANEL8_WY                = 1
+PANEL8_WX                = PANEL_WX
+PANEL8_WY                = PANEL_WY
 PANEL8_INSIDE_COLOR      = 0xFF000000
 PANEL8_OUTLINE_COLOR     = PANEL_OUTLINE_COLOR
 PANEL8_OUTLINE_WIDTH     = 0
