@@ -1597,16 +1597,17 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             SetLayeredWindowAttributes(hMain,0,D(MAINWND_TRANSPARENCY),LWA_ALPHA);
             SetLayeredWindowAttributes(hPopup,0,D(POPUP_TRANSPARENCY),LWA_ALPHA);
 
-            MoveWindow(hField,Xm(D(DRVLIST_OFSX)),Ym(D(DRVLIST_OFSY)),XM(D(DRVLIST_WX),D(DRVLIST_OFSX)),YM(D(DRVLIST_WY),D(DRVLIST_OFSY)),TRUE);
-            MoveWindow(hLang, Xp(&panels[2])+D(PNLITEM_OFSX),Yp(&panels[2])+1*D(PNLITEM_WY)-2,XP(&panels[2])-D(PNLITEM_OFSX)*2,190,0);
-            MoveWindow(hTheme,Xp(&panels[2])+D(PNLITEM_OFSX),Yp(&panels[2])+3*D(PNLITEM_WY)-2,XP(&panels[2])-D(PNLITEM_OFSX)*2,190,0);
-            manager_setpos(manager_g);
-
             GetWindowRect(hwnd,&rect);
             main1x_c=x;
             main1y_c=y;
             mainx_w=rect.right-rect.left;
             mainy_w=rect.bottom-rect.top;
+
+            MoveWindow(hField,Xm(D(DRVLIST_OFSX)),Ym(D(DRVLIST_OFSY)),XM(D(DRVLIST_WX),D(DRVLIST_OFSX)),YM(D(DRVLIST_WY),D(DRVLIST_OFSY)),TRUE);
+            MoveWindow(hLang, Xp(&panels[2])+D(PNLITEM_OFSX),Yp(&panels[2])+1*D(PNLITEM_WY)-2,XP(&panels[2])-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hTheme,Xp(&panels[2])+D(PNLITEM_OFSX),Yp(&panels[2])+3*D(PNLITEM_WY)-2,XP(&panels[2])-D(PNLITEM_OFSX)*2,190,0);
+            manager_setpos(manager_g);
+
             redrawmainwnd();
             break;
 
