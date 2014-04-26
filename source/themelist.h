@@ -204,6 +204,8 @@ enum
     PROGR_S_BITMAP_ANCHOR,
     PROGR_S_BITMAP_FILL,
 
+    PANEL_LIST_OFSX,
+
 // Left panel
     PANEL_OFSX,
     PANEL_OFSY,

@@ -201,6 +201,8 @@ entry_t theme[THEME_NM]=
     DEF_VAL("PROGR_S_BITMAP_ANCHOR")
     DEF_VAL("PROGR_S_BITMAP_FILL")
 
+    DEF_VAL("PANEL_LIST_OFSX")
+
 // Left panel
     DEF_VAL("PANEL_OFSX")
     DEF_VAL("PANEL_OFSY")

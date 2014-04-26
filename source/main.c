@@ -44,6 +44,14 @@ panelitem_t panel3[]=
     {TYPE_CHECKBOX,STR_EXPERT,              ID_EXPERT_MODE,0},
 };
 
+panelitem_t panel3_w[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_TEXT,STR_LANG,0,0},
+    {TYPE_TEXT,STR_THEME,0,0},
+    {TYPE_CHECKBOX,STR_EXPERT,              ID_EXPERT_MODE,0},
+};
+
 panelitem_t panel4[]=
 {
     {TYPE_GROUP_BREAK,0,4,0},
@@ -330,7 +338,8 @@ void settings_parse(const WCHAR *str,int ind)
     LocalFree(argv);
     if(statemode==STATEMODE_EXIT)return;
     // Expert mode
-    panels[2].items[5].checked=expertmode;
+    panel3[5].checked=expertmode;
+    panel3_w[3].checked=expertmode;
 
     // Left panel
     panel_setfilters(panels);
@@ -759,6 +768,7 @@ void theme_refresh()
         log_err("ERROR in theme_refresh(): hMain is 0\n");
         return;
     }
+    panels[2].items=D(PANEL_LIST_OFSX)?panel3_w:panel3;
     GetWindowRect(hMain,&rect);
     MoveWindow(hMain,rect.left,rect.top,D(MAINWND_WX),D(MAINWND_WY)+1,1);
     MoveWindow(hMain,rect.left,rect.top,D(MAINWND_WX),D(MAINWND_WY),1);
@@ -994,7 +1004,7 @@ void panel_draw(HDC hdc,panel_t *panel)
                 if(i)y+=D(PNLITEM_WY);
                 box_draw(hdc,x,y,
                          x+XP(panel),
-                         y+D(PNLITEM_WY)*panel->items[i].action_id+ofsy*2,BOX_PANEL+panel->index*2+2);
+                         y+(wy+1)*panel->items[i].action_id+ofsy*2,BOX_PANEL+panel->index*2+2);
                 break;
 
             default:
@@ -1389,18 +1399,20 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(f==CB_ERR)
             {
                 theme_set(f);
+                panels[2].items=D(PANEL_LIST_OFSX)?panel3_w:panel3;
                 j=SendMessage(hTheme,CB_GETCOUNT,0,0);
                 for(i=0;i<j;i++)
                     if(StrStrI(vTheme.namelist[i],(WCHAR *)D(THEME_NAME)))f=i;
             }else
                 theme_set(f);
+            panels[2].items=D(PANEL_LIST_OFSX)?panel3_w:panel3;
 
             setfont();
             SendMessage(hTheme,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
             SendMessage(hLang,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
             SendMessage(hTheme,CB_SETCURSEL,f,0);
-            redrawmainwnd();
             theme_refresh();
+            redrawmainwnd();
             break;
 
         case WM_BUNDLEREADY:
@@ -1603,9 +1615,13 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             mainx_w=rect.right-rect.left;
             mainy_w=rect.bottom-rect.top;
 
+            i=D(PNLITEM_OFSX)+D(PANEL_LIST_OFSX);
+            j=D(PANEL_LIST_OFSX)?0:1;
+            f=D(PANEL_LIST_OFSX)?4:0;
             MoveWindow(hField,Xm(D(DRVLIST_OFSX)),Ym(D(DRVLIST_OFSY)),XM(D(DRVLIST_WX),D(DRVLIST_OFSX)),YM(D(DRVLIST_WY),D(DRVLIST_OFSY)),TRUE);
-            MoveWindow(hLang, Xp(&panels[2])+D(PNLITEM_OFSX),Yp(&panels[2])+1*D(PNLITEM_WY)-2,XP(&panels[2])-D(PNLITEM_OFSX)*2,190,0);
-            MoveWindow(hTheme,Xp(&panels[2])+D(PNLITEM_OFSX),Yp(&panels[2])+3*D(PNLITEM_WY)-2,XP(&panels[2])-D(PNLITEM_OFSX)*2,190,0);
+            MoveWindow(hLang, Xp(&panels[2])+i,Yp(&panels[2])+j*D(PNLITEM_WY)-2+f,XP(&panels[2])-i-D(PNLITEM_OFSX),190,0);
+            j=D(PANEL_LIST_OFSX)?1:3;
+            MoveWindow(hTheme,Xp(&panels[2])+i,Yp(&panels[2])+j*D(PNLITEM_WY)-2+f,XP(&panels[2])-i-D(PNLITEM_OFSX),190,0);
             manager_setpos(manager_g);
 
             redrawmainwnd();

@@ -351,6 +351,7 @@ PANEL12_BITMAP_ANCHOR_H  = PANEL_BITMAP_ANCHOR
 PANEL12_BITMAP_FILL_H    = PANEL_BITMAP_FILL
 
 // Items on left panel
+PANEL_LIST_OFSX          = 0
 PNLITEM_OFSX             = 4
 PNLITEM_OFSY             = 3
 PNLITEM_WY               = 17
