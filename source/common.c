@@ -458,10 +458,18 @@ next
 void hash_add(hashtable_t *t,const char *s,int s_sz,int key,int mode)
 {
     hashitem_t *cur;
+    char buf[BUFLEN];
     int curi;
     int previ=-1;
     int cur_deep=0;
     //if(key==0)log("*** zero added (%s)%.*s***\n",hashes[t->id],s_sz,s);
+    if(t->flags&HASH_FLAG_STR_TO_LOWER)
+    {
+        memcpy(buf,s,s_sz);
+        strtolower(buf,s_sz);
+        buf[s_sz]=0;
+        s=buf;
+    }
     curi=hash_getcode(s,s_sz)%t->size;
     cur=&t->items[curi];
 
@@ -517,7 +525,17 @@ void hash_add(hashtable_t *t,const char *s,int s_sz,int key,int mode)
 int hash_find(hashtable_t *t,const char *s,int sz,int *isfound)
 {
     hashitem_t *cur;
+    char buf[BUFLEN];
+    char *os=s;
     int curi;
+
+    if((t->flags&HASH_FLAG_STR_TO_LOWER))
+    {
+        memcpy(buf,s,sz);
+        strtolower(buf,sz);
+        buf[sz]=0;
+        s=buf;
+    }
 
     t->search_all++;
     if(!t->size)
@@ -528,6 +546,20 @@ int hash_find(hashtable_t *t,const char *s,int sz,int *isfound)
     }
     curi=hash_getcode(s,sz)%t->size;
     cur=&t->items[curi];
+
+    if(cur->next<0)
+    {
+        t->cmp_all++;
+        if(sz==cur->strlen&&memcmp(s,getstr(t,cur),sz)==0)
+        {
+            t->finddata.findnext=cur->next;
+            t->finddata.findstr=os;
+            t->finddata.findstrlen=sz;
+            *isfound=1;
+            return cur->key;
+        }
+            else t->cmp_miss++;
+    }
 
     if(cur->next==0)
     {
@@ -543,7 +575,7 @@ int hash_find(hashtable_t *t,const char *s,int sz,int *isfound)
         if(sz==cur->strlen&&memcmp(s,getstr(t,cur),sz)==0)
         {
             t->finddata.findnext=cur->next;
-            t->finddata.findstr=s;
+            t->finddata.findstr=os;
             t->finddata.findstrlen=sz;
             *isfound=1;
             return cur->key;

@@ -123,6 +123,12 @@ panelitem_t panel12[]=
     {TYPE_CHECKBOX,STR_REBOOT,              0,0},
 };
 
+panelitem_t panel13[]=
+{
+    {TYPE_GROUP,0,1,0},
+    {TYPE_TEXT,0,0,0},
+};
+
 panel_t panels[NUM_PANELS]=
 {
     {panel1,  0},
@@ -137,6 +143,7 @@ panel_t panels[NUM_PANELS]=
     {panel10, 9},
     {panel11,10},
     {panel12,11},
+    {panel13,12},
 };
 
 // Manager
@@ -2211,6 +2218,7 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
             SelectObject(hdcMem,hFont);
             DrawText(hdcMem,STR(floating_itembar),-1,&rect,DT_WORDBREAK|DT_CALCRECT);
             AdjustWindowRectEx(&rect,WS_POPUPWINDOW|WS_VISIBLE,0,0);
+            popup_resize(rect.right-rect.left+D(POPUP_OFSX)*2,rect.bottom-rect.top+D(POPUP_OFSY)*2);
             wp->cx=rect.right+D(POPUP_OFSX)*2;
             wp->cy=rect.bottom+D(POPUP_OFSY)*2;
             ReleaseDC(hwnd,hdcMem);

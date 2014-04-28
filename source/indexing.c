@@ -698,9 +698,9 @@ void driverpack_init(driverpack_t *drp,WCHAR const *driverpack_path,WCHAR const 
     heap_init(&drp->HWID_list_handle,ID_DRIVERPACK_HWID_list,(void **)&drp->HWID_list,0,sizeof(data_HWID_t));
     heap_init(&drp->text_handle,ID_DRIVERPACK_text,(void **)&drp->text,0,1);
 
-    hash_init(&drp->string_list,ID_STRINGS,16,HASH_FLAG_KEYS_ARE_POINTERS|HASH_FLAG_STR_TO_LOWER);
+    hash_init(&drp->string_list,ID_STRINGS,1024,HASH_FLAG_KEYS_ARE_POINTERS|HASH_FLAG_STR_TO_LOWER);
     hash_init(&drp->section_list,ID_SECTIONS,16,HASH_FLAG_KEYS_ARE_POINTERS|HASH_FLAG_STR_TO_LOWER);
-    hash_init(&drp->cat_list,ID_CAT_LIST,512,HASH_FLAG_STR_TO_LOWER);
+    hash_init(&drp->cat_list,ID_CAT_LIST,512*8,HASH_FLAG_STR_TO_LOWER);
 
     sprintf(buf,"%ws",driverpack_path);
     drp->drppath=heap_memcpy(&drp->text_handle,driverpack_path,wcslen(driverpack_path)*2+2);
@@ -973,7 +973,7 @@ void driverpack_print(driverpack_t *drp)
     }
     fprintf(f,"  HWIDS:%d/%d\n",HWID_index_last+1,drp->HWID_list_handle.items);
 
-    hash_stats(&drp->indexes);
+    //hash_stats(&drp->indexes);
 /*    for(i=0;i<drp->indexes.items_handle.items;i++)
     {
         fprintf(f,"%d,%d,%d\n",i,drp->indexes.items[i].key,drp->indexes.items[i].next);

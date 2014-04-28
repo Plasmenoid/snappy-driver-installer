@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define NUM_PANELS          12
+#define NUM_PANELS          13
 #define PAN_ENT          18
 
 //{ Structs
