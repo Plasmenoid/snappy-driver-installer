@@ -998,7 +998,10 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
 
             // Expand icon
             if(groupsize(manager,itembar->index)>1&&itembar->first)
-                image_draw(hdc,&icon[(itembar->isactive&2?0:2)+(zone==2?1:0)],x+wx-D(ITEM_ICON_SIZE)*2+10,pos,32,32,0,HSTR|VSTR);
+            {
+                int xo=x+wx-D(ITEM_ICON_SIZE)*2+10;
+                image_draw(hdc,&icon[(itembar->isactive&2?0:2)+(zone==2?1:0)],xo,pos,xo+32,pos+32,0,HSTR|VSTR);
+            }
             break;
 
     }

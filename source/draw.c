@@ -75,7 +75,7 @@ void box_init(img_t *img,int i)
     filename=(WCHAR *)D(img->index+4);
     if(!*filename)return;
 
-    for(j=0;j<BOX_NUM;j++)
+    for(j=0;j<i;j++)
         if(box[j].index&&j!=i)
             if(!wcscmp(filename,(WCHAR *)D(box[j].index+4)))
     {
@@ -265,7 +265,10 @@ void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int id)
         return;
     }
     drawrect(hdc,x1,y1,x2,y2,D(i),D(i+1),D(i+2),D(i+3));
-    if(box[id].big)image_draw(hdc,&box[id],x1,y1,x2,y2,D(i+5),D(i+6));
+    if(box[id].big)
+        image_draw(hdc,&box[id],x1,y1,x2,y2,D(i+5),D(i+6));
+/*    else
+        drawrect(hdc,x1,y1,x2,y2,0xFF,D(i+2),D(i+2),D(i+3));*/
 }
 
 void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fill)
@@ -275,8 +278,8 @@ void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fil
 
     if(!img)return;
 
-    wx=(fill&HSTR)?x2:img->sx;
-    wy=(fill&VSTR)?y2:img->sy;
+    wx=(fill&HSTR)?x2-x1:img->sx;
+    wy=(fill&VSTR)?y2-y1:img->sy;
 
     for(xi=0;xi<x2;xi+=wx)
     {
@@ -298,6 +301,7 @@ void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fil
         }
         if((fill&HTILE)==0)break;
     }
+    //drawrect(dc,x1,y1,x2,y2,0xFF000000,0xFF00,1,0);
 }
 
 void drawcheckbox(HDC hdc,int x,int y,int wx,int wy,int checked,int active)
@@ -311,7 +315,7 @@ void drawcheckbox(HDC hdc,int x,int y,int wx,int wy,int checked,int active)
     rect.bottom=y+wy;
 
     if(icon[i].bitmap)
-        image_draw(hdc,&icon[i],x,y,wx,wy,0,HSTR|VSTR);
+        image_draw(hdc,&icon[i],x,y,x+wx,y+wy,0,HSTR|VSTR);
     else
         DrawFrameControl(hdc,&rect,DFC_BUTTON,DFCS_BUTTONCHECK|(checked?DFCS_CHECKED:0));
 }
