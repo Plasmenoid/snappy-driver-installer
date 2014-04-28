@@ -49,6 +49,8 @@ enum
     BOX_PANEL11_H,
     BOX_PANEL12,
     BOX_PANEL12_H,
+    BOX_PANEL13,
+    BOX_PANEL13_H,
 
     BOX_BUTTON,
     BOX_BUTTON_H,
