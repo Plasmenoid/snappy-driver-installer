@@ -82,6 +82,7 @@ void box_init(img_t *img,int i)
         //printf("Match %d,'%ws'\n",j,D(box[j].index+4));
         img->big=box[j].big;
         img->bitmap=box[j].bitmap;
+        img->hasalpha=box[j].hasalpha;
         img->dc=box[j].dc;
         img->sx=box[j].sx;
         img->sy=box[j].sy;
