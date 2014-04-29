@@ -275,12 +275,18 @@ void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int id)
 void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fill)
 {
     BLENDFUNCTION blend={AC_SRC_OVER,0,255,AC_SRC_ALPHA};
-    int xi,yi,wx,wy;
+    int xi,yi,wx,wy,wx1,wy1,wx2,wy2;
 
     if(!img)return;
 
     wx=(fill&HSTR)?x2-x1:img->sx;
     wy=(fill&VSTR)?y2-y1:img->sy;
+    if(fill&ASPECT)
+    {
+        if(fill&HSTR)wy=img->sy*((double)wx/img->sx);
+        if(fill&VSTR)wx=img->sx*((double)wy/img->sy);
+    }
+
 
     for(xi=0;xi<x2;xi+=wx)
     {
@@ -291,12 +297,18 @@ void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fil
             if(anchor&ALIGN_BOTTOM) y=y2-yi-wy;
             if(anchor&ALIGN_HCENTER)x=(x2-x1-wx)/2;
             if(anchor&ALIGN_VCENTER)y=(y2-y1-wy)/2;
+
+            wx1=(x+wx>x2)?x2-x:wx;
+            wy1=(y+wy>y2)?y2-y:wy;
+            wx2=(x+wx>x2)?wx1:img->sx;
+            wy2=(y+wy>y2)?wy1:img->sy;
+
             if(img->hasalpha)
-                AlphaBlend(dc,x,y,wx,wy,img->dc,0,0,img->sx,img->sy,blend);
-            else if(wx==img->sx&&wy==img->sy)
-                BitBlt(dc,x,y,wx,wy,img->dc,0,0,SRCCOPY);
+                AlphaBlend(dc,x,y,wx1,wy1,img->dc,0,0,wx2,wy2,blend);
+            else if(wx==wx2&&wy==wy2)
+                BitBlt(dc,x,y,wx1,wy1,img->dc,0,0,SRCCOPY);
             else
-                StretchBlt(dc,x,y,wx,wy,img->dc,0,0,img->sx,img->sy,SRCCOPY);
+                StretchBlt(dc,x,y,wx1,wy1,img->dc,0,0,wx2,wy2,SRCCOPY);
 
             if((fill&VTILE)==0)break;
         }

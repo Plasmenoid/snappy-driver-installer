@@ -522,7 +522,7 @@ void hash_add(hashtable_t *t,const char *s,int s_sz,int key,int mode)
     if(previ>=0)(&t->items[previ])->next=curi;
 }
 
-int hash_find(hashtable_t *t,const char *s,int sz,int *isfound)
+int hash_find(hashtable_t *t,char *s,int sz,int *isfound)
 {
     hashitem_t *cur;
     char buf[BUFLEN];
@@ -589,7 +589,7 @@ int hash_find(hashtable_t *t,const char *s,int sz,int *isfound)
     return 0;
 }
 
-int hash_find_str(hashtable_t *t,const char *s)
+int hash_find_str(hashtable_t *t,char *s)
 {
     int b;
     return hash_find(t,s,strlen(s),&b);

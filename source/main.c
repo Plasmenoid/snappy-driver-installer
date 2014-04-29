@@ -119,8 +119,8 @@ panelitem_t panel12[]=
 {
     {TYPE_GROUP,0,3,0},
     {TYPE_TEXT,STR_OPTIONS,0,0},
-    {TYPE_CHECKBOX,STR_RESTOREPOINT,        0,0},
-    {TYPE_CHECKBOX,STR_REBOOT,              0,0},
+    {TYPE_CHECKBOX,STR_RESTOREPOINT,        ID_RESTPNT,0},
+    {TYPE_CHECKBOX,STR_REBOOT,              ID_REBOOT,0},
 };
 
 panelitem_t panel13[]=
@@ -277,6 +277,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-nofeaturescore"))flags|=FLAG_NOFEATURESCORE;else
         if(!wcscmp(pr,L"-showdrpnames")) flags|=FLAG_SHOWDRPNAMES;else
         if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
+        if(!wcscmp(pr,L"-showconsole"))  flags|=FLAG_SHOWCONSOLE;else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
@@ -378,6 +379,7 @@ void settings_save()
     if(flags&FLAG_NORESTOREPOINT)fwprintf(f,L"-norestorepnt ");
     if(flags&FLAG_NOFEATURESCORE)fwprintf(f,L"-nofeaturescore ");
     if(flags&FLAG_SHOWDRPNAMES)fwprintf(f,L"-showdrpnames ");
+    if(flags&FLAG_SHOWCONSOLE)fwprintf(f,L"-showconsole ");
     fclose(f);
 }
 
@@ -409,6 +411,7 @@ void SignalHandler(int signum)
 
 void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
 {
+    UNREFERENCED_PARAMETER(szFile);
     UNREFERENCED_PARAMETER(action);
     UNREFERENCED_PARAMETER(lParam);
 
@@ -473,7 +476,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     }
     //signal(SIGSEGV,SignalHandler);
 #ifndef CONSOLE_MODE
-    ShowWindow(GetConsoleWindow(),expertmode?SW_SHOWNOACTIVATE:hideconsole);
+    ShowWindow(GetConsoleWindow(),(expertmode&&flags&FLAG_SHOWCONSOLE)?SW_SHOWNOACTIVATE:hideconsole);
 #endif
 
     if(log_verbose&LOG_VERBOSE_ARGS)
@@ -924,12 +927,15 @@ void panel_draw(HDC hdc,panel_t *panel)
 {
     WCHAR buf[BUFLEN];
     POINT p;
+    HRGN rgn=0;
     int cur_i;
     int i;
     int idofs=PAN_ENT*panel->index+PAN_ENT;
     int x=Xp(panel),y=Yp(panel);
     int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
     int wy=D(PANEL_WY+idofs);
+
+    if(XP(panel)<0)return;
 
     GetCursorPos(&p);
     ScreenToClient(hMain,&p);
@@ -1009,15 +1015,21 @@ void panel_draw(HDC hdc,panel_t *panel)
             case TYPE_GROUP:
                 if(panel->index>=8&&panel->index<=10)break;
                 if(i)y+=D(PNLITEM_WY);
-                box_draw(hdc,x,y,
-                         x+XP(panel),
-                         y+(wy+1)*panel->items[i].action_id+ofsy*2,BOX_PANEL+panel->index*2+2);
+                box_draw(hdc,x,y,x+XP(panel),y+(wy+1)*panel->items[i].action_id+ofsy*2,
+                         BOX_PANEL+panel->index*2+2);
+                rgn=CreateRectRgn(x,y,x+XP(panel),y+(wy+1)*panel->items[i].action_id+ofsy*2);
+                SelectClipRgn(hdc,rgn);
                 break;
 
             default:
                 break;
         }
 
+    }
+    if(rgn)
+    {
+        SelectClipRgn(hdc,0);
+        DeleteObject(rgn);
     }
 }
 //}
@@ -1663,7 +1675,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
             if(i>0)
             {
-                if(i==1&&j==7)
+                if((i==1&&j==7)||(j==12))
                     drawpopup(-1,FLOATING_ABOUT,x,y,hwnd);
                 else
                     drawpopup(panels[j].items[i].str_id+1,i>0&&i<4&&j==0?FLOATING_SYSINFO:FLOATING_TOOLTIP,x,y,hwnd);
@@ -1897,6 +1909,10 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     manager_filter(manager_g,filters);
                     manager_setpos(manager_g);
                     //manager_print(manager_g);
+                    break;
+
+                case ID_RESTPNT:
+                    manager_g->items_list[SLOT_RESTORE_POINT].checked=panels[11].items[2].checked;
                     break;
 
                 default:

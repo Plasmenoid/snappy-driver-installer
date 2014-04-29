@@ -384,6 +384,10 @@ void manager_toggle(manager_t *manager,int index)
     {
         itembar1->install_status=STR_INST_STOPPING;
     }
+    if(index==SLOT_RESTORE_POINT)
+    {
+        panels[11].items[2].checked=itembar1->checked;
+    }
     group=itembar1->index;
 
     itembar=manager->items_list;
@@ -431,7 +435,11 @@ void manager_selectnone(manager_t *manager)
     itembar_t *itembar;
     int i;
 
-    manager->items_list[SLOT_RESTORE_POINT].checked=0;
+    if(manager->items_list[SLOT_RESTORE_POINT].isactive)
+    {
+        panels[11].items[2].checked=0;
+        manager->items_list[SLOT_RESTORE_POINT].checked=0;
+    }
     itembar=&manager->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)itembar->checked=0;
 }
@@ -442,7 +450,8 @@ void manager_selectall(manager_t *manager)
     int i,group=-1;
 
     itembar=&manager->items_list[SLOT_RESTORE_POINT];
-    if(itembar->install_status==STR_RESTOREPOINT&&itembar->isactive)itembar->checked=1;
+    if(itembar->install_status==STR_RESTOREPOINT&&itembar->isactive)
+        panels[11].items[2].checked=itembar->checked=1;
 
     itembar=&manager->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
