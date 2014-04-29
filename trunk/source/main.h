@@ -104,6 +104,7 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define VTILE         2
 #define HSTR          4
 #define VSTR          8
+#define ASPECT       16
 
 // Messages
 #define WM_BUNDLEREADY      WM_APP+1
@@ -157,6 +158,9 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define ID_WIN_8           36
 #define ID_WIN_81          37
 
+#define ID_RESTPNT         38
+#define ID_REBOOT          39
+
 #define ID_HWID_CLIP      100
 #define ID_HWID_WEB       200
 
@@ -183,6 +187,7 @@ extern int main1x_c,main1y_c;
 extern int mainx_c,mainy_c;
 extern HFONT hFont;
 extern HWND hPopup,hMain,hField;
+extern panel_t panels[NUM_PANELS];
 
 // Window helpers
 extern int floating_type;

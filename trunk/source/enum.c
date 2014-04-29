@@ -1004,8 +1004,10 @@ void isnotebook_a(state_t *state)
     int x,y;
     int min_v=99,min_x=0,min_y=0;
     int diag;
+    int batdev=0;
     WCHAR *buf;
     SYSTEM_POWER_STATUS *battery;
+    device_t *cur_device;
 
     buf=(WCHAR *)(state->text+state->monitors);
     battery=(SYSTEM_POWER_STATUS *)(state->text+state->battery);
@@ -1024,7 +1026,25 @@ void isnotebook_a(state_t *state)
         }
     }
 
-    if((battery->BatteryFlag&128)==0)
+    for(i=0;i<state->devices_handle.items;i++)
+    {
+        cur_device=&state->devices_list[i];
+        WCHAR *p;
+        char *s=state->text;
+
+        if(cur_device->HardwareID)
+        {
+            p=(WCHAR *)(s+cur_device->HardwareID);
+            while(*p)
+            {
+                if(StrStrI(p,L"*ACPI0003"))batdev=1;
+                p+=lstrlen(p)+1;
+            }
+        }
+    }
+
+
+    if((battery->BatteryFlag&128)==0||batdev)
     {
         if(!buf[0])
             isLaptop=1;

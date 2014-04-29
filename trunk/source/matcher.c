@@ -170,6 +170,8 @@ void genmarker(state_t *state)
             }
         }
     }
+    if(!*marker)sprintf(marker,"OEM_nb");
+    log_con("Marker: '%s'\n",marker);
 }
 
 int calc_identifierscore(int dev_pos,int dev_ishw,int inf_pos)
