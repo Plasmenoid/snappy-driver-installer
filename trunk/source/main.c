@@ -2110,7 +2110,6 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             canvas_begin(&canvasField,hwnd,rect.right,rect.bottom);
 
             BitBlt(canvasField.hdcMem,0,0,rect.right,rect.bottom,canvasMain.hdcMem,Xm(D(DRVLIST_OFSX)),Ym(D(DRVLIST_OFSY)),SRCCOPY);
-            box_draw(canvasField.hdcMem,0,0,rect.right,rect.bottom,BOX_DRVLIST);
             manager_draw(manager_g,canvasField.hdcMem,y);
 
             canvas_end(&canvasField);
