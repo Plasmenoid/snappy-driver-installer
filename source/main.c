@@ -1466,7 +1466,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 panels[2].items=D(PANEL_LIST_OFSX)?panel3_w:panel3;
                 j=SendMessage(hTheme,CB_GETCOUNT,0,0);
                 for(i=0;i<j;i++)
-                    if(StrStrI(vTheme.namelist[i],(WCHAR *)D(THEME_NAME)))f=i;
+                    if(StrStrI(vTheme.namelist[i],(WCHAR *)D(THEME_NAME))){f=i;break;}
             }else
                 theme_set(f);
             panels[2].items=D(PANEL_LIST_OFSX)?panel3_w:panel3;
