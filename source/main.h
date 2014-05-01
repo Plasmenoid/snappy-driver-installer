@@ -200,6 +200,7 @@ extern int ret_global;
 extern WCHAR drpext_dir[BUFLEN];
 extern WCHAR data_dir  [BUFLEN];
 extern WCHAR state_file[BUFLEN];
+extern WCHAR finish_rb [BUFLEN];
 extern int filters;
 extern int flags;
 extern int statemode;
@@ -272,6 +273,7 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
 BOOL CALLBACK LicenseProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
 
 //new
+void set_rstpnt(int checked);
 void drvdir();
 WCHAR *getHWIDby(int id,int num);
 void escapeAmpUrl(WCHAR *buf,WCHAR *source);

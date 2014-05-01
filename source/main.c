@@ -1300,6 +1300,13 @@ void extractto()
     }
 }
 
+void set_rstpnt(int checked)
+{
+    manager_g->items_list[SLOT_RESTORE_POINT].checked=panels[11].items[2].checked=checked;
+    //if(D(PANEL12_WY))manager_g->items_list[SLOT_RESTORE_POINT].isactive=checked;
+    manager_setpos(manager_g);
+}
+
 void drvdir()
 {
     BROWSEINFO lpbi;
@@ -1526,7 +1533,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                         installmode=MODE_NONE;
                         wsprintf(buf,L" /c %s",needreboot?finish_rb:finish);
                         if(*(needreboot?finish_rb:finish))
-                            RunSilent(L"cmd",buf,SW_HIDE,0);
+                            RunSilent(L"cmd",buf,SW_SHOW,0);
                         if(flags&FLAG_AUTOCLOSE)PostMessage(hMain,WM_CLOSE,0,0);
                     }
                 }
@@ -1950,7 +1957,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     break;
 
                 case ID_RESTPNT:
-                    manager_g->items_list[SLOT_RESTORE_POINT].checked=panels[11].items[2].checked;
+                    set_rstpnt(panels[11].items[2].checked);
                     break;
 
                 default:
