@@ -15,7 +15,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option parameters="-disableinstall -extractdir:temp1" />
+				<Option parameters="-disableinstall -extractdir:temp1 -showconsole" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-fexpensive-optimizations" />
@@ -35,7 +35,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option parameters="-disableinstall" />
+				<Option parameters="-disableinstall -extractdir:temp1 -showconsole" />
 				<Compiler>
 					<Add option="-pg" />
 					<Add option="-g" />

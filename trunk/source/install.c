@@ -217,6 +217,13 @@ unsigned int __stdcall thread_install(void *arg)
         instflag&INSTALLDRIVERS?STR_INST_INSTALLING:STR_EXTR_EXTRACTING;
     manager_g->items_list[SLOT_EXTRACTING].isactive=1;
     manager_setpos(manager_g);
+    if(panels[11].items[3].checked)
+    {
+        flags|=FLAG_AUTOINSTALL;
+        wcscpy(finish_rb,L"Shutdown.exe -r -t 15");
+    }
+    else
+        flags&=~FLAG_AUTOINSTALL;
 
     // Restore point
     if(manager_g->items_list[SLOT_RESTORE_POINT].checked)
@@ -262,7 +269,7 @@ unsigned int __stdcall thread_install(void *arg)
         }
         redrawfield();
         if(hinstLib)FreeLibrary(hinstLib);
-        manager_g->items_list[SLOT_RESTORE_POINT].checked=0;
+        set_rstpnt(0);
         manager_g->items_list[SLOT_RESTORE_POINT].percent=0;
     }
 goaround:
