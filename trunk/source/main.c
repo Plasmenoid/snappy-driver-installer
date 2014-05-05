@@ -172,7 +172,7 @@ HWND hLang=0;
 HWND hTheme=0;
 
 // Window helpers
-int panel_lasti;
+int panel_lasti=0;
 int field_lasti,field_lastz;
 int main1x_c,main1y_c;
 int mainx_c,mainy_c;
@@ -931,6 +931,7 @@ void panel_draw_inv(panel_t *panel)
     int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
     RECT rect;
 
+    if(!panel)return;
     rect.left=x;
     rect.top=y;
     rect.right=x+XP(panel);
@@ -1749,10 +1750,10 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
             if(panel_lasti!=i+j*256)
             {
-                panel_draw_inv(&panels[j]);
+                if(j>=0)panel_draw_inv(&panels[j]);
                 panel_draw_inv(&panels[panel_lasti/256]);
             }
-            panel_lasti=i+j*256;
+            if(j>=0)panel_lasti=i+j*256;
             break;
 
         case WM_LBUTTONUP:
