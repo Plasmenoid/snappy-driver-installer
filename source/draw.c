@@ -437,8 +437,8 @@ void canvas_begin(canvas_t *canvas,HWND hwnd,int x,int y)
     canvas->clipping=CreateRectRgnIndirect(&canvas->ps.rcPaint);
     if(!canvas->clipping)log_err("ERROR in canvas_begin(): failed BeginPaint\n");
     SetStretchBltMode(canvas->hdcMem,HALFTONE);
-    //r=SelectClipRgn(canvas->hdcMem,canvas->clipping);
-    //if(!r)log_err("ERROR in canvas_begin(): failed SelectClipRgn\n");
+    r=SelectClipRgn(canvas->hdcMem,canvas->clipping);
+    if(!r)log_err("ERROR in canvas_begin(): failed SelectClipRgn\n");
 }
 
 void canvas_end(canvas_t *canvas)

@@ -739,7 +739,7 @@ void redrawfield()
         return;
     }
     InvalidateRect(hField,NULL,TRUE);
-    UpdateWindow(hField);
+    //UpdateWindow(hField);
 }
 
 void redrawmainwnd()
@@ -751,7 +751,7 @@ void redrawmainwnd()
     }
     //log_con("Redraw main %d\n",cntd++);
     InvalidateRect(hMain,NULL,TRUE);
-    UpdateWindow(hMain);
+    //UpdateWindow(hMain);
 }
 
 void lang_refresh()
@@ -923,6 +923,21 @@ int panels_hitscan(int hx,int hy,int *ii)
     return -1;
 }
 
+void panel_draw_inv(panel_t *panel)
+{
+    int x=Xp(panel),y=Yp(panel);
+    int idofs=PAN_ENT*panel->index+PAN_ENT;
+    int wy=D(PANEL_WY+idofs);
+    int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
+    RECT rect;
+
+    rect.left=x;
+    rect.top=y;
+    rect.right=x+XP(panel);
+    rect.bottom=y+(wy+1)*panel->items[0].action_id+ofsy*2;
+    InvalidateRect(hMain,&rect,0);
+}
+
 void panel_draw(HDC hdc,panel_t *panel)
 {
     WCHAR buf[BUFLEN];
@@ -936,6 +951,7 @@ void panel_draw(HDC hdc,panel_t *panel)
     int wy=D(PANEL_WY+idofs);
 
     if(XP(panel)<0)return;
+    //if(panel_lasti/256!=panel->index)return;
 
     GetCursorPos(&p);
     ScreenToClient(hMain,&p);
@@ -1508,7 +1524,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     int cnt=0;
                     if(installmode==MODE_SCANNING)
                     {
-                        manager_selectall(manager_g);
+                        if(!panels[11].items[3].checked)manager_selectall(manager_g);
                         itembar_t *itembar=&manager_g->items_list[RES_SLOTS];
                         for(i=RES_SLOTS;i<manager_g->items_handle.items;i++,itembar++)
                             if(itembar->checked)
@@ -1522,7 +1538,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
                     if(installmode==MODE_NONE||(installmode==MODE_SCANNING&&cnt))
                     {
-                        manager_selectall(manager_g);
+                        if(!panels[11].items[3].checked)manager_selectall(manager_g);
                         if((flags&FLAG_EXTRACTONLY)==0)
                         wsprintf(extractdir,L"%s\\SDI",manager_g->matcher->state->text+manager_g->matcher->state->temp);
                         manager_install(INSTALLDRIVERS);
@@ -1705,9 +1721,12 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             box_draw(canvasMain.hdcMem,0,0,rect.right+1,rect.bottom+1,BOX_MAINWND);
             SelectObject(canvasMain.hdcMem,hFont);
             panel_draw(canvasMain.hdcMem,&panels[7]);// draw revision
-            for(i=0;i<NUM_PANELS;i++)if(i!=7)panel_draw(canvasMain.hdcMem,&panels[i]);
+            for(i=0;i<NUM_PANELS;i++)if(i!=7)
+            {
+                SelectClipRgn(canvasMain.hdcMem,canvasMain.clipping);
+                panel_draw(canvasMain.hdcMem,&panels[i]);
+            }
             canvas_end(&canvasMain);
-            redrawfield();
             break;
 
         case WM_ERASEBKGND:
@@ -1728,8 +1747,12 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             else
                 drawpopup(-1,FLOATING_NONE,x,y,hwnd);
 
-            if(panel_lasti!=i+j*255)redrawmainwnd();
-            panel_lasti=i+j*255;
+            if(panel_lasti!=i+j*256)
+            {
+                panel_draw_inv(&panels[j]);
+                panel_draw_inv(&panels[panel_lasti/256]);
+            }
+            panel_lasti=i+j*256;
             break;
 
         case WM_LBUTTONUP:
