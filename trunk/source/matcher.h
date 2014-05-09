@@ -16,7 +16,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define NUM_DECS 11*4
-#define NUM_MARKERS 19
+#define NUM_MARKERS 21
 
 #define STATUS_BETTER       0x001
 #define STATUS_SAME         0x002
@@ -85,6 +85,7 @@ int calc_decorscore(int id,state_t *state);
 int calc_markerscore(state_t *state,char *path);
 int isvalid_usb30hub(hwidmatch_t *hwidmatch,state_t *state,WCHAR *str);
 int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state);
+int calc_notebook(hwidmatch_t *hwidmatch);
 int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore);
 int calc_status(hwidmatch_t *hwidmatch,state_t *state);
 

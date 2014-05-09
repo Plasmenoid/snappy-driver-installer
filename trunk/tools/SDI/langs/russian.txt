@@ -121,7 +121,7 @@ STR_ABOUT_DEV_TITLE     = "Разработчик: "
 //STR_ABOUT_DEV_LIST
 STR_ABOUT_TESTERS_TITLE = "Тестеры: "
 //STR_ABOUT_TESTERS_LIST
-STR_ABOUT_LICENSE       = "This program is licensed under the terms of the GNU General Public License version 3"
+STR_ABOUT_LICENSE       = "Snappy Driver Installer распространяется на условиях лицензии GNU General Public License version 3\n\n\n\n\nSnappy Driver Installer использует технологии:\n* WebP (BSD license)\n* Backtrace (BSD license)\n* 7-Zip (GNU Library or Lesser General Public License\n version 2)\n\nSnappy Driver Installer использует технологию драйверпаков, разработанную командой DriverPacks.net.\n\n(Щелкните левой кнопкой мыши, чтобы открыть сайты)"
 
 // Всплывающее окно (при удерживании Ctrl или пробела)
 STR_HINT_UNKNOWN        = "неизвестно"

@@ -161,6 +161,12 @@ typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTA
 #define ID_RESTPNT         38
 #define ID_REBOOT          39
 
+#define ID_URL0            40
+#define ID_URL1            41
+#define ID_URL2            42
+#define ID_URL3            43
+#define ID_URL4            44
+
 #define ID_HWID_CLIP      100
 #define ID_HWID_WEB       200
 
@@ -279,5 +285,6 @@ void drvdir();
 WCHAR *getHWIDby(int id,int num);
 void escapeAmpUrl(WCHAR *buf,WCHAR *source);
 void escapeAmp(WCHAR *buf,WCHAR *source);
+void contextmenu3(int x,int y);
 void contextmenu2(int x,int y);
 void contextmenu(int x,int y);

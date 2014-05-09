@@ -350,7 +350,7 @@ void drawpopup(int itembar,int type,int x,int y,HWND hwnd)
 
     if(type!=FLOATING_NONE)
     {
-        if(type==FLOATING_ABOUT)p.y=p.y-floating_y-30;
+        //if(type==FLOATING_ABOUT)p.y=p.y-floating_y-30;
         //if(type==FLOATING_CMPDRIVER||type==FLOATING_DRIVERLST)
         {
             hMonitor=MonitorFromPoint(p,MONITOR_DEFAULTTONEAREST);

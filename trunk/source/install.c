@@ -222,8 +222,6 @@ unsigned int __stdcall thread_install(void *arg)
         flags|=FLAG_AUTOINSTALL;
         wcscpy(finish_rb,L"Shutdown.exe -r -t 15");
     }
-    else
-        flags&=~FLAG_AUTOINSTALL;
 
     // Restore point
     if(manager_g->items_list[SLOT_RESTORE_POINT].checked)

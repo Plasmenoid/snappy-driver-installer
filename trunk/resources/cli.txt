@@ -21,6 +21,10 @@ Task-oriented
                 If <Filename> absent used %temp%\SDI2\InstalledID.txt
                 See also "HWIDInstalled" option.
 
+-PATH <pathToDrivers>
+                Runs as a replacement of DPInst.
+                For exit codes refer to the documentaion of DPInst
+
 /verbose:<flags>  Set log detail level.
 /ls:<file>        Load snapshot.
 /lzma             Compress driverpacks.
@@ -69,6 +73,7 @@ Autoinstall
 -----
 Debug
 -----
+/showconsole    Displays console window.
 /failsafe       Disable indexing of WINDOWS\inf.
 /disableinstall Suppress driver installation and creation of a restore point.
 /noslowsysinfo  Suppress gathering information about motherboard.

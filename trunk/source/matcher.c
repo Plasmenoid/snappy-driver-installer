@@ -111,6 +111,8 @@ const markers_t markers[NUM_MARKERS]=
     {"all8x64", 6, 2, 1},
     {"ntx86",  -1,-1, 0},
     {"ntx64",  -1,-1, 1},
+    {"x86\\",  -1,-1, 0},
+    {"x64\\",  -1,-1, 1},
 };
 
 char marker[BUFLEN];
@@ -332,6 +334,18 @@ int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state)
     return 1;
 }
 
+int calc_notebook(hwidmatch_t *hwidmatch)
+{
+    if(StrStrIA(getdrp_infpath(hwidmatch),"_nb\\")||
+       StrStrIA(getdrp_infpath(hwidmatch),"Touchpad_Mouse\\"))
+    {
+        if(!isLaptop)return 0;
+        if(!*marker)return 0;
+        if(!StrStrIA(getdrp_infpath(hwidmatch),marker))return 0;
+    }
+    return 1;
+}
+
 int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
 {
     char buf[BUFLEN];
@@ -348,20 +362,18 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
         getdrp_drvsectionAtPos(hwidmatch->drp,buf,pos,manufacturer_index);
         if(calc_decorscore(calc_secttype(buf),state)>curscore)return 0;
     }
-    if(strstr(getdrp_infpath(hwidmatch),"_nb\\"))
-    {
-        if(!isLaptop)return 0;
-        if(!*marker)return 0;
-        if(!StrStrIA(getdrp_infpath(hwidmatch),marker))return 0;
-    }
 
-    if(strstr(getdrp_infpath(hwidmatch),"intel_2nd\\"))
+    if(!calc_notebook(hwidmatch))return 0;
+
+    if(StrStrIA(getdrp_infpath(hwidmatch),"intel_2nd\\"))
         if(!isvalid_usb30hub(hwidmatch,state,L"IUSB3\\ROOT_HUB30&VID_8086&PID_1E31"))return 0;
 
-    if(strstr(getdrp_infpath(hwidmatch),"intel_4th\\"))
+    if(StrStrIA(getdrp_infpath(hwidmatch),"intel_4th\\"))
         if(!isvalid_usb30hub(hwidmatch,state,L"IUSB3\\ROOT_HUB30&VID_8086&PID_8C31"))return 0;
 
-    if(strstr(getdrp_infpath(hwidmatch),"matchver\\"))
+    if(StrStrIA(getdrp_infpath(hwidmatch),"matchver\\")||
+       StrStrIA(getdrp_infpath(hwidmatch),"L\\Realtek\\")||
+       StrStrIA(getdrp_infpath(hwidmatch),"L\\R\\"))
         if(!isvalid_ver(hwidmatch,state))return 0;
 
     //log("Sc:%d\n\n",curscore);
