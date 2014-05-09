@@ -1340,6 +1340,7 @@ void set_rstpnt(int checked)
     manager_g->items_list[SLOT_RESTORE_POINT].checked=panels[11].items[2].checked=checked;
     //if(D(PANEL12_WY))manager_g->items_list[SLOT_RESTORE_POINT].isactive=checked;
     manager_setpos(manager_g);
+    redrawfield();
 }
 
 void drvdir()
@@ -1566,6 +1567,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                     {
                         WCHAR buf[BUFLEN];
                         installmode=MODE_NONE;
+                        if(!panels[11].items[3].checked)wcscpy(finish_rb,L"Shutdown.exe -r -t 15");
                         wsprintf(buf,L" /c %s",needreboot?finish_rb:finish);
                         if(*(needreboot?finish_rb:finish))
                             RunSilent(L"cmd",buf,SW_SHOW,0);
@@ -1612,6 +1614,21 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             DragFinish(hDrop);
             break;
 		}
+
+        case WM_WINDOWPOSCHANGING:
+            {
+                WINDOWPOS *wpos=(WINDOWPOS*)lParam;
+
+                SystemParametersInfo(SPI_GETWORKAREA,0,&rect,0);
+                if(rect.right<wpos->cx||rect.bottom<wpos->cy)
+                {
+                    wpos->cx=rect.right-20;
+                    wpos->cy=rect.bottom-20;
+                    wpos->x=10;
+                    wpos->y=10;
+                }
+            }
+            break;
 
         case WM_SIZING:
             {
@@ -2005,6 +2022,13 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
                 case ID_RESTPNT:
                     set_rstpnt(panels[11].items[2].checked);
+                    break;
+
+                case ID_REBOOT:
+                    if(panels[11].items[3].checked)
+                        flags|=FLAG_AUTOINSTALL;
+                    else
+                        flags&=~FLAG_AUTOINSTALL;
                     break;
 
                 default:
