@@ -381,10 +381,10 @@ CHKBOX_TEXT_OFSX         = 18
 CHKBOX_TEXT_COLOR        = 0
 CHKBOX_TEXT_COLOR_H      = 0x90FF90
 CHKBOX_SIZE              = 16
-BUTTON_BITMAP_CHECKED    = "checked.webp"
-BUTTON_BITMAP_CHECKED_H  = "checked.webp"
-BUTTON_BITMAP_UNCHECKED  = "unchecked.webp"
-BUTTON_BITMAP_UNCHECKED_H= "unchecked.webp"
+BUTTON_BITMAP_CHECKED    = "metallic\checked.webp"
+BUTTON_BITMAP_CHECKED_H  = "metallic\checked.webp"
+BUTTON_BITMAP_UNCHECKED  = "metallic\unchecked.webp"
+BUTTON_BITMAP_UNCHECKED_H= "metallic\unchecked.webp"
 
 // Buttons on left panel
 BUTTON_INSIDE_COLOR      = 0xFFE0E0

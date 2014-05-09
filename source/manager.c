@@ -1522,7 +1522,7 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int index)
 
         td.x=p0;TextOutF(&td,c0,L"%s",STR(STR_HINT_DRP));td.x=p1;
         TextOutF(&td,c0,L"%s\\%s",getdrp_packpath(hwidmatch_f),getdrp_packname(hwidmatch_f));
-        TextOutF(&td,(!isLaptop&&strstr(getdrp_infpath(hwidmatch_f),"_nb\\"))!=0?D(POPUP_CMP_INVALID_COLOR):c0
+        TextOutF(&td,calc_notebook(hwidmatch_f)?c0:D(POPUP_CMP_INVALID_COLOR)
                  ,L"%S%S",getdrp_infpath(hwidmatch_f),getdrp_infname(hwidmatch_f));
     }
 
@@ -1638,11 +1638,12 @@ void popup_about(HDC hdcMem)
     rect.left=td.x;
     rect.top=td.y;
     rect.right=D(POPUP_WX)-p0*2;
-    rect.bottom=80;
+    rect.bottom=240;
     DrawText(hdcMem,STR(STR_ABOUT_LICENSE),-1,&rect,DT_WORDBREAK);
     td.y+=td.wy*3;
     TextOutF(&td,td.col,L"%s%s",STR(STR_ABOUT_DEV_TITLE),STR(STR_ABOUT_DEV_LIST));
     TextOutF(&td,td.col,L"%s%s",STR(STR_ABOUT_TESTERS_TITLE),STR(STR_ABOUT_TESTERS_LIST));
+    td.y+=td.wy*11;
 
     popup_resize(D(POPUP_WX),td.y+D(POPUP_OFSY));
 }

@@ -146,6 +146,24 @@ panel_t panels[NUM_PANELS]=
     {panel13,12},
 };
 
+const WCHAR *menu3str[]=
+{
+    L"SDI at samforum.org (Russian)",
+    L"SDI at forum.oszone.net (Russian)",
+    L"SDI at Google Code",
+    L"SamDrivers",
+    L"DriverPacks.net",
+};
+
+WCHAR *menu3url[]=
+{
+    L"http://samforum.org/showthread.php?t=31662",
+    L"http://forum.oszone.net/thread-277409.html",
+    L"http://code.google.com/p/snappy-driver-installer",
+    L"http://driveroff.net/sam",
+    L"http://driverpacks.net",
+};
+
 // Manager
 manager_t manager_v[2];
 manager_t *manager_g=&manager_v[0];
@@ -928,7 +946,7 @@ void panel_draw_inv(panel_t *panel)
     int x=Xp(panel),y=Yp(panel);
     int idofs=PAN_ENT*panel->index+PAN_ENT;
     int wy=D(PANEL_WY+idofs);
-    int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
+    int ofsy=D(PNLITEM_OFSY);
     RECT rect;
 
     if(!panel)return;
@@ -1777,6 +1795,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
                 InvalidateRect(hwnd,NULL,TRUE);
             }
+            if(j==7||j==12)contextmenu3(x,y);
             break;
 
         case WM_RBUTTONDOWN:
@@ -1864,6 +1883,10 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
                 default:
                     break;
+            }
+            if(wp>=ID_URL0&&wp<=ID_URL4)
+            {
+                RunSilent(L"open",menu3url[wp-ID_URL0],SW_SHOWNORMAL,0);
             }
             if(wp>=ID_WIN_2000&&wp<=ID_WIN_81)
             {
@@ -2041,6 +2064,19 @@ void contextmenu2(int x,int y)
     GetWindowRect(hMain,&rect);
     TrackPopupMenu(hPopupMenu,TPM_LEFTALIGN,rect.left+x,rect.top+y,0,hMain,NULL);
 }
+
+void contextmenu3(int x,int y)
+{
+    int i;
+    RECT rect;
+    HMENU hPopupMenu=CreatePopupMenu();
+
+    for(i=0;i<5;i++)InsertMenu(hPopupMenu,i,MF_BYPOSITION|MF_STRING,ID_URL0+i,menu3str[i]);
+    SetForegroundWindow(hMain);
+    GetWindowRect(hMain,&rect);
+    TrackPopupMenu(hPopupMenu,TPM_LEFTALIGN,rect.left+x,rect.top+y,0,hMain,NULL);
+}
+
 
 void contextmenu(int x,int y)
 {
