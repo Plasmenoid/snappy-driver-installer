@@ -111,6 +111,7 @@ void updateoverall(manager_t *manager)
     {
         double d=(manager->items_list[itembar_act].percent)/_totalitems;
         if(manager->items_list[itembar_act].checked==0)d=0;
+        if(itembar_act==SLOT_RESTORE_POINT)d=0;
         manager->items_list[SLOT_EXTRACTING].percent=(int)(_processeditems*1000./_totalitems+d);
         manager->items_list[SLOT_EXTRACTING].val1=_processeditems;
         manager->items_list[SLOT_EXTRACTING].val2=_totalitems;
@@ -119,6 +120,7 @@ void updateoverall(manager_t *manager)
 
 void updatecur()
 {
+    if(itembar_act==SLOT_RESTORE_POINT)return;
     if(showpercent(manager_g->items_list[itembar_act].install_status))
         manager_g->items_list[itembar_act].percent=
             (int)(ar_proceed*(instflag&INSTALLDRIVERS&&
@@ -217,11 +219,7 @@ unsigned int __stdcall thread_install(void *arg)
         instflag&INSTALLDRIVERS?STR_INST_INSTALLING:STR_EXTR_EXTRACTING;
     manager_g->items_list[SLOT_EXTRACTING].isactive=1;
     manager_setpos(manager_g);
-    if(panels[11].items[3].checked)
-    {
-        flags|=FLAG_AUTOINSTALL;
-        wcscpy(finish_rb,L"Shutdown.exe -r -t 15");
-    }
+    if(panels[11].items[3].checked)flags|=FLAG_AUTOINSTALL;
 
     // Restore point
     if(manager_g->items_list[SLOT_RESTORE_POINT].checked)

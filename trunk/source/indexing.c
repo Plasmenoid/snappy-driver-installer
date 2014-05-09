@@ -21,6 +21,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 //{ Global variables
 int drp_count;
+int drp_cur;
 int loaded_unpacked=0;
 const tbl_t table_version[NUM_VER_NAMES]=
 {
@@ -551,6 +552,7 @@ void collection_load(collection_t *col)
 
     if(flags&FLAG_KEEPUNPACKINDEX)loaded_unpacked=driverpack_loadindex(unpacked_drp);
     drp_count=collection_scanfolder_count(col,col->driverpack_dir);
+    drp_cur=0;
     collection_scanfolder(col,col->driverpack_dir);
     manager_g->items_list[SLOT_INDEXING].isactive=0;
     if(col->driverpack_handle.items<=1&&(flags&FLAG_DPINSTMODE)==0)
@@ -608,7 +610,6 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
     WIN32_FIND_DATA FindFileData;
     WCHAR buf[1024];
     driverpack_t *drp;
-    int num=0;
 
     wsprintf(buf,L"%s\\*.*",path);
     hFind=FindFirstFile(buf,&FindFileData);
@@ -634,16 +635,16 @@ void collection_scanfolder(collection_t *col,const WCHAR *path)
                     WCHAR bufw1[4096];
                     WCHAR bufw2[4096];
                     if(!drp_count)drp_count=1;
-                    wsprintf(bufw1,L"Indexing %d/%d",num,drp_count);
+                    wsprintf(bufw1,L"Indexing %d/%d",drp_cur,drp_count);
                     wsprintf(bufw2,L"%s\\%s",path,FindFileData.cFileName);
                     manager_g->items_list[SLOT_INDEXING].isactive=1;
-                    manager_g->items_list[SLOT_INDEXING].val1=num;
+                    manager_g->items_list[SLOT_INDEXING].val1=drp_cur;
                     manager_g->items_list[SLOT_INDEXING].val2=drp_count;
-                    itembar_settext(manager_g,SLOT_INDEXING,bufw2,(num)*1000/drp_count);
+                    itembar_settext(manager_g,SLOT_INDEXING,bufw2,(drp_cur)*1000/drp_count);
                     manager_setpos(manager_g);
                     drp=&col->driverpack_list[index];
                     driverpack_genindex(drp);
-                    num++;
+                    drp_cur++;
                 }
             }else
             if(_wcsicmp(FindFileData.cFileName+len-4,L".inf")==0&&loaded_unpacked==0)
