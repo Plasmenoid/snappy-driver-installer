@@ -20,6 +20,134 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 //{ Global vars
 img_t box[BOX_NUM];
 img_t icon[ICON_NUM];
+
+panelitem_t panel1[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_TEXT,STR_SHOW_SYSINFO,0,0},
+    {TYPE_TEXT,0,0,0},
+    {TYPE_TEXT,0,0,0},
+};
+
+panelitem_t panel2[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {0,STR_INSTALL,               ID_INSTALL,0},
+    {0,STR_SELECT_ALL,            ID_SELECT_ALL,0},
+    {0,STR_SELECT_NONE,           ID_SELECT_NONE,0},
+};
+
+panelitem_t panel3[]=
+{
+    {TYPE_GROUP,0,5,0},
+    {TYPE_TEXT,STR_LANG,0,0},
+    {TYPE_TEXT,0,0,0},
+    {TYPE_TEXT,STR_THEME,0,0},
+    {TYPE_TEXT,0,0,0},
+    {TYPE_CHECKBOX,STR_EXPERT,              ID_EXPERT_MODE,0},
+};
+
+panelitem_t panel3_w[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_TEXT,STR_LANG,0,0},
+    {TYPE_TEXT,STR_THEME,0,0},
+    {TYPE_CHECKBOX,STR_EXPERT,              ID_EXPERT_MODE,0},
+};
+
+panelitem_t panel4[]=
+{
+    {TYPE_GROUP_BREAK,0,4,0},
+    {TYPE_BUTTON,STR_OPENLOGS,              ID_OPENLOGS,0},
+    {TYPE_BUTTON,STR_SNAPSHOT,              ID_SNAPSHOT,0},
+    {TYPE_BUTTON,STR_EXTRACT,               ID_EXTRACT,0},
+    {TYPE_BUTTON,STR_DRVDIR,                ID_DRVDIR,0},
+};
+
+panelitem_t panel5[]=
+{
+    {TYPE_GROUP_BREAK,0,7,0},
+    {TYPE_TEXT,STR_SHOW_FOUND,0,0},
+    {TYPE_CHECKBOX, STR_SHOW_MISSING,       ID_SHOW_MISSING,0},
+    {TYPE_CHECKBOX, STR_SHOW_NEWER,         ID_SHOW_NEWER,0},
+    {TYPE_CHECKBOX, STR_SHOW_CURRENT,       ID_SHOW_CURRENT,0},
+    {TYPE_CHECKBOX, STR_SHOW_OLD,           ID_SHOW_OLD,0},
+    {TYPE_CHECKBOX, STR_SHOW_BETTER,        ID_SHOW_BETTER,0},
+    {TYPE_CHECKBOX, STR_SHOW_WORSE_RANK,    ID_SHOW_WORSE_RANK,0},
+};
+
+panelitem_t panel6[]=
+{
+    {TYPE_GROUP_BREAK,0,4,0},
+    {TYPE_TEXT,STR_SHOW_NOTFOUND,0,0},
+    {TYPE_CHECKBOX, STR_SHOW_NF_MISSING,    ID_SHOW_NF_MISSING,0},
+    {TYPE_CHECKBOX, STR_SHOW_NF_UNKNOWN,    ID_SHOW_NF_UNKNOWN,0},
+    {TYPE_CHECKBOX, STR_SHOW_NF_STANDARD,   ID_SHOW_NF_STANDARD,0},
+};
+
+panelitem_t panel7[]=
+{
+    {TYPE_GROUP_BREAK,0,3,0},
+    {TYPE_CHECKBOX, STR_SHOW_ONE,           ID_SHOW_ONE,0},
+    {TYPE_CHECKBOX, STR_SHOW_DUP,           ID_SHOW_DUP,0},
+    {TYPE_CHECKBOX, STR_SHOW_INVALID,       ID_SHOW_INVALID,0},
+
+};
+
+panelitem_t panel8[]=
+{
+    {TYPE_GROUP,0,1,0},
+    {TYPE_TEXT,0,0,0},
+};
+
+panelitem_t panel9[]=
+{
+    {TYPE_GROUP,0,1,0},
+    {TYPE_BUTTON,STR_INSTALL,               ID_INSTALL,0},
+};
+
+panelitem_t panel10[]=
+{
+    {TYPE_GROUP,0,1,0},
+    {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
+};
+
+panelitem_t panel11[]=
+{
+    {TYPE_GROUP,0,1,0},
+    {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
+};
+
+panelitem_t panel12[]=
+{
+    {TYPE_GROUP,0,3,0},
+    {TYPE_TEXT,STR_OPTIONS,0,0},
+    {TYPE_CHECKBOX,STR_RESTOREPOINT,        ID_RESTPNT,0},
+    {TYPE_CHECKBOX,STR_REBOOT,              ID_REBOOT,0},
+};
+
+panelitem_t panel13[]=
+{
+    {TYPE_GROUP,0,1,0},
+    {TYPE_TEXT,0,0,0},
+};
+
+panel_t panels[NUM_PANELS]=
+{
+    {panel1,  0},
+    {panel2,  1},
+    {panel3,  2},
+    {panel4,  3},
+    {panel5,  4},
+    {panel6,  5},
+    {panel7,  6},
+    {panel8,  7},
+    {panel9,  8},
+    {panel10, 9},
+    {panel11,10},
+    {panel12,11},
+    {panel13,12},
+};
 //}
 
 
@@ -455,5 +583,205 @@ void canvas_end(canvas_t *canvas)
     r=DeleteObject(canvas->clipping);
     if(!r)log_err("ERROR in canvas_end(): failed DeleteObject\n");
     EndPaint(canvas->hwnd,&canvas->ps);
+}
+//}
+
+//{ Panel
+int panel_hitscan(panel_t *panel,int hx,int hy)
+{
+    int idofs=PAN_ENT*panel->index+PAN_ENT;
+    int wy=D(PANEL_WY+idofs);
+
+    if(!wy)return -1;
+    hx-=Xp(panel)+D(PNLITEM_OFSX);
+    hy-=Yp(panel)+D(PNLITEM_OFSY);
+
+    if(!expertmode&&panel->items[0].type==TYPE_GROUP_BREAK)return -2;
+    if(hx<0||hy<0||hx>XP(panel)-D(PNLITEM_OFSX)*2)return -3;
+    if(hy>=wy*(panel->items[0].action_id))return -4;
+
+    return hy/wy+1;
+}
+
+int panels_hitscan(int hx,int hy,int *ii)
+{
+    int i,r=-1;
+
+    *ii=-1;
+    for(i=0;i<NUM_PANELS;i++)
+    {
+        r=panel_hitscan(&panels[i],hx,hy);
+        if(r>=0&&panels[i].items[r].type)
+        {
+            *ii=i;
+            return r;
+        }
+    }
+    return -1;
+}
+
+void panel_draw_inv(panel_t *panel)
+{
+    int x=Xp(panel),y=Yp(panel);
+    int idofs=PAN_ENT*panel->index+PAN_ENT;
+    int wy=D(PANEL_WY+idofs);
+    int ofsy=D(PNLITEM_OFSY);
+    RECT rect;
+
+    if(!panel)return;
+    rect.left=x;
+    rect.top=y;
+    rect.right=x+XP(panel);
+    rect.bottom=y+(wy+1)*panel->items[0].action_id+ofsy*2;
+    InvalidateRect(hMain,&rect,0);
+}
+
+void panel_draw(HDC hdc,panel_t *panel)
+{
+    WCHAR buf[BUFLEN];
+    POINT p;
+    HRGN rgn=0;
+    int cur_i;
+    int i;
+    int idofs=PAN_ENT*panel->index+PAN_ENT;
+    int x=Xp(panel),y=Yp(panel);
+    int ofsx=D(PNLITEM_OFSX),ofsy=D(PNLITEM_OFSY);
+    int wy=D(PANEL_WY+idofs);
+
+    if(XP(panel)<0)return;
+    //if(panel_lasti/256!=panel->index)return;
+
+    GetCursorPos(&p);
+    ScreenToClient(hMain,&p);
+    cur_i=panel_hitscan(panel,p.x,p.y);
+
+    if(!D(PANEL_WY+idofs))return;
+    for(i=0;i<panel->items[0].action_id+1;i++)
+    {
+        if(i==1&&panel->index==0)
+        {
+            wsprintf(buf,L"%s",STR(STR_SYSINF_MOTHERBOARD));
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+150,y+ofsy,buf,wcslen(buf));
+
+            wsprintf(buf,L"%s",STR(STR_SYSINF_ENVIRONMENT));
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+300,y+ofsy,buf,wcslen(buf));
+        }
+        if(i==2&&panel->index==0)
+        {
+            wsprintf(buf,L"%s (%d-bit)",get_winverstr(manager_g),manager_g->matcher->state->architecture?64:32);
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+10,y+ofsy,buf,wcslen(buf));
+
+            wsprintf(buf,L"%s",manager_g->matcher->state->text+manager_g->matcher->state->product);
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+160,y+ofsy,buf,wcslen(buf));
+
+            wsprintf(buf,L"%s",STR(STR_SYSINF_WINDIR));
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+310,y+ofsy,buf,wcslen(buf));
+
+            wsprintf(buf,L"%s",manager_g->matcher->state->text+manager_g->matcher->state->windir);
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+410,y+ofsy,buf,wcslen(buf));
+        }
+        if(i==3&&panel->index==0)
+        {
+            if(XP(panel)<160)
+                wsprintf(buf,L"%s",manager_g->matcher->state->text+manager_g->matcher->state->product);
+            else
+                wsprintf(buf,L"%s",manager_g->matcher->state->platform.szCSDVersion);
+
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+10,y+ofsy,buf,wcslen(buf));
+
+            wsprintf(buf,L"%s: %s",STR(STR_SYSINF_TYPE),STR(isLaptop?STR_SYSINF_LAPTOP:STR_SYSINF_DESKTOP));
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+160,y+ofsy,buf,wcslen(buf));
+
+            wsprintf(buf,L"%s",STR(STR_SYSINF_TEMP));
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+310,y+ofsy,buf,wcslen(buf));
+
+            wsprintf(buf,L"%s",manager_g->matcher->state->text+manager_g->matcher->state->temp);
+            SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+            TextOut(hdc,x+ofsx+410,y+ofsy,buf,wcslen(buf));
+        }
+        if(panel->items[i].type==TYPE_GROUP_BREAK&&!expertmode)break;
+        switch(panel->items[i].type)
+        {
+            case TYPE_CHECKBOX:
+                drawcheckbox(hdc,x+ofsx-1,y+ofsy,D(CHKBOX_SIZE)-1,D(CHKBOX_SIZE)-1,panel->items[i].checked,i==cur_i);
+                SetTextColor(hdc,D(i==cur_i?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
+                TextOut(hdc,x+D(CHKBOX_TEXT_OFSX)+ofsx,y+ofsy,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
+                y+=D(PNLITEM_WY);
+                break;
+
+            case TYPE_BUTTON:
+                if(panel->index>=8&&panel->index<=10&&D(PANEL_OUTLINE_WIDTH+idofs)<0)
+                    box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_PANEL_H+panel->index*2+2:BOX_PANEL+panel->index*2+2);
+                else
+                    box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
+
+                SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+                if(i==1&&panel->index==8)
+                {
+                    int j,cnt=0;
+                    itembar_t *itembar;
+
+                    itembar=&manager_g->items_list[RES_SLOTS];
+                    for(j=RES_SLOTS;j<manager_g->items_handle.items;j++,itembar++)
+                    if(itembar->checked)cnt++;
+
+                    wsprintf(buf,L"%s (%d)",STR(panel->items[i].str_id),cnt);
+                    TextOut(hdc,x+ofsx+wy/2,y+ofsy+(wy-D(FONT_SIZE)-2)/2,buf,wcslen(buf));
+                }
+                else
+                    TextOut(hdc,x+ofsx+wy/2,y+ofsy+(wy-D(FONT_SIZE)-2)/2,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
+
+                y+=D(PNLITEM_WY);
+                break;
+
+            case TYPE_TEXT:
+                if(i==1&&panel->index==7)
+                {
+                    version_t v;
+
+                    v.d=atoi(SVN_REV_D);
+                    v.m=atoi(SVN_REV_M);
+                    v.y=SVN_REV_Y;
+
+                    wsprintf(buf,L"%s (",TEXT(SVN_REV2));
+                    str_date(&v,buf+wcslen(buf));
+                    wcscat(buf,L")");
+                    SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
+                    TextOut(hdc,x+ofsx,y+ofsy,buf,wcslen(buf));
+                }
+                SetTextColor(hdc,D(i==cur_i&&i>11?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
+                TextOut(hdc,x+ofsx,y+ofsy,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
+                y+=D(PNLITEM_WY);
+                break;
+
+            case TYPE_GROUP_BREAK:
+            case TYPE_GROUP:
+                if(panel->index>=8&&panel->index<=10)break;
+                if(i)y+=D(PNLITEM_WY);
+                box_draw(hdc,x,y,x+XP(panel),y+(wy+1)*panel->items[i].action_id+ofsy*2,
+                         BOX_PANEL+panel->index*2+2);
+                rgn=CreateRectRgn(x,y,x+XP(panel),y+(wy+1)*panel->items[i].action_id+ofsy*2);
+                SelectClipRgn(hdc,rgn);
+                break;
+
+            default:
+                break;
+        }
+
+    }
+    if(rgn)
+    {
+        SelectClipRgn(hdc,0);
+        DeleteObject(rgn);
+    }
 }
 //}

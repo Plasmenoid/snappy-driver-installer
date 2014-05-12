@@ -247,9 +247,9 @@ DWORD RunSilent(WCHAR* file,WCHAR* cmd,int show,int wait)
     ShExecInfo.lpParameters=cmd;
     ShExecInfo.nShow=show;
 
+    log_con("Run(%ws,%ws,%d,%d)\n",file,cmd,show,wait);
     if(!wcscmp(file,L"open"))
     {
-        log_con("Open '%ws'\n",cmd);
         ShellExecute(NULL, L"open", cmd, NULL, NULL, SW_SHOWNORMAL);
 
     }
