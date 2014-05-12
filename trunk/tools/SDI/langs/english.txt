@@ -69,7 +69,7 @@ STR_SHOW_INVALID_H      = "Show drivers which are incompatible with the current 
 STR_OPTIONS             = "Options"
 STR_OPTIONS_H           = ""
 STR_REBOOT              = "Reboot PC after installation"
-STR_REBOOT_H            = ""
+STR_REBOOT_H            = "Reboot PC(if required) after installation.\n\nHINT: You can cancel rebooting PC anytime by clearing the checkbox."
 
 // Sysinfo
 STR_SYSINF_WINDOWS      = "Windows"

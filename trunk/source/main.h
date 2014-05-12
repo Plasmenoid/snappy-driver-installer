@@ -193,7 +193,6 @@ extern int main1x_c,main1y_c;
 extern int mainx_c,mainy_c;
 extern HFONT hFont;
 extern HWND hPopup,hMain,hField;
-extern panel_t panels[NUM_PANELS];
 
 // Window helpers
 extern int floating_type;
@@ -262,13 +261,6 @@ const WCHAR *get_winverstr(manager_t *manager);
 void mkdir_r(const WCHAR *path);
 void snapshot();
 void extractto();
-
-// Panel
-void panel_setfilters(panel_t *panel);
-int  panels_hitscan(int hx,int hy,int *ii);
-int  panel_hitscan(panel_t *panel,int x,int y);
-void panel_draw_inv(panel_t *panel);
-void panel_draw(HDC hdc,panel_t *panel);
 
 // GUI
 void gui(int nCmd);

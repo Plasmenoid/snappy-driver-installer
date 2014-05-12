@@ -59,6 +59,10 @@ typedef struct _panel_t
 //{ Global vars
 extern img_t box[BOX_NUM];
 extern img_t icon[ICON_NUM];
+
+extern panelitem_t panel3[];
+extern panelitem_t panel3_w[];
+extern panel_t panels[NUM_PANELS];
 //}
 
 
@@ -99,3 +103,11 @@ void canvas_init(canvas_t *canvas);
 void canvas_free(canvas_t *canvas);
 void canvas_begin(canvas_t *canvas,HWND hwnd,int x,int y);
 void canvas_end(canvas_t *canvas);
+
+// Panel
+void panel_setfilters(panel_t *panel);
+int  panels_hitscan(int hx,int hy,int *ii);
+int  panel_hitscan(panel_t *panel,int x,int y);
+void panel_draw_inv(panel_t *panel);
+void panel_draw(HDC hdc,panel_t *panel);
+
