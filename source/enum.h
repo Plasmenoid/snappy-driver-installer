@@ -68,6 +68,7 @@ typedef struct _infdata_t
     int catalogfile;
     int feature;
     int inf_pos;
+    ofst cat;
 }infdata_t;
 
 typedef struct _device_t
@@ -107,6 +108,7 @@ typedef struct _driver_t
     ofst InfPath;
     ofst InfSection;
     ofst InfSectionExt;
+    ofst cat;
     version_t version;
 
     int catalogfile;
@@ -132,6 +134,12 @@ typedef struct _state_m_t
     ofst windir;
     ofst temp;
 
+    ofst cs_manuf;
+    ofst cs_model;
+    int ChassisType;
+    int revision;
+    char reserved[1024];
+
     driverpack_t windirinf;
 }state_m_t;
 
@@ -149,6 +157,12 @@ typedef struct _state_t
 
     ofst windir;
     ofst temp;
+
+    ofst cs_manuf;
+    ofst cs_model;
+    int ChassisType;
+    int revision;
+    char reserved[1024];
 
     driverpack_t windirinf;
 
@@ -186,6 +200,9 @@ int  state_load(state_t *state,const WCHAR *filename);
 void state_fakeOSversion(state_t *state);
 void log_add(CHAR const *format,...);
 void state_print(state_t *state);
+WCHAR *state_getproduct(state_t *state);
+WCHAR *state_getmanuf(state_t *state);
+WCHAR *state_getmodel(state_t *state);
 void state_getsysinfo_fast(state_t *state);
 void state_getsysinfo_slow(state_t *state);
 void state_scandevices(state_t *state);
@@ -193,4 +210,5 @@ void state_scandevices(state_t *state);
 int GetMonitorDevice(WCHAR* adapterName,DISPLAY_DEVICE *ddMon);
 int GetMonitorSizeFromEDID(WCHAR* adapterName,int *Width,int *Height);
 int iswide(int x,int y);
+int opencatfile(state_t *state,driver_t *cur_driver);
 void isnotebook_a(state_t *state);
