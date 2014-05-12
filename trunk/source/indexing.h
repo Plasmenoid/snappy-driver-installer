@@ -100,10 +100,8 @@ typedef struct _driverpack_t
     int type;
 
     collection_t *col;
-    FILE *fi;// deprecated
 
     hashtable_t section_list;
-    hashtable_t dup_list;// deprecated
     hashtable_t string_list;
     hashtable_t indexes;
     hashtable_t cat_list;

@@ -6,7 +6,7 @@
 const GUID CLSID_WbemLocator={0x4590F811,0x1D3A,0x11D0,{ 0x89,0x1F,0x00,0xAA,0x00,0x4B,0x2E,0x24}};
 
 int init=0;
-extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product)
+extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_manuf,WCHAR *cs_model,int *type)
 {
     IWbemLocator *pLoc=0;
     IWbemServices *pSvc=0;
@@ -69,7 +69,7 @@ extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product)
         WBEM_FLAG_FORWARD_ONLY|WBEM_FLAG_RETURN_IMMEDIATELY,NULL,&pEnumerator);
     if(FAILED(hres))
     {
-        printf("FAILED to query for baseboard. Error code = 0x%X\n",hres);
+        printf("FAILED to query for Win32_BaseBoard. Error code = 0x%X\n",hres);
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
@@ -97,6 +97,90 @@ extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product)
             if(vtProp3.bstrVal)wcscpy(product,vtProp3.bstrVal);
         }
     }
+
+    hres=pSvc->ExecQuery(
+        _bstr_t(L"WQL"),
+        _bstr_t(L"SELECT * FROM Win32_ComputerSystem"),
+        WBEM_FLAG_FORWARD_ONLY|WBEM_FLAG_RETURN_IMMEDIATELY,NULL,&pEnumerator);
+    if(FAILED(hres))
+    {
+        printf("FAILED to query for Win32_ComputerSystem. Error code = 0x%X\n",hres);
+        pSvc->Release();
+        pLoc->Release();
+        CoUninitialize();
+        return 0;
+    }
+    else
+    {
+        IWbemClassObject *pclsObj;
+        ULONG uReturn=0;
+
+        while(pEnumerator)
+        {
+            hres=pEnumerator->Next(WBEM_INFINITE,1,&pclsObj,&uReturn);
+            if(0==uReturn)break;
+
+            VARIANT vtProp1,vtProp2;
+
+            hres=pclsObj->Get(L"Manufacturer",0,&vtProp1,0,0);
+            if(vtProp1.bstrVal)wcscpy(cs_manuf,vtProp1.bstrVal);
+
+            hres=pclsObj->Get(L"Model",0,&vtProp2,0,0);
+            if(vtProp2.bstrVal)wcscpy(cs_model,vtProp2.bstrVal);
+        }
+    }
+
+    hres=pSvc->ExecQuery(
+        _bstr_t(L"WQL"),
+        _bstr_t(L"SELECT * FROM Win32_SystemEnclosure"),
+        WBEM_FLAG_FORWARD_ONLY|WBEM_FLAG_RETURN_IMMEDIATELY,NULL,&pEnumerator);
+    if(FAILED(hres))
+    {
+        printf("FAILED to query for Win32_SystemEnclosure. Error code = 0x%X\n",hres);
+        pSvc->Release();
+        pLoc->Release();
+        CoUninitialize();
+        return 0;
+    }
+    else
+    {
+        IWbemClassObject *pclsObj;
+        ULONG uReturn=0;
+
+        while(pEnumerator)
+        {
+            hres=pEnumerator->Next(WBEM_INFINITE,1,&pclsObj,&uReturn);
+            if(0==uReturn)break;
+
+            VARIANT vtProp;
+            hres=pclsObj->Get(L"ChassisTypes",0,&vtProp,0,0);// Uint16
+            if(!FAILED(hres))
+            {
+                if((vtProp.vt==VT_NULL)||(vtProp.vt==VT_EMPTY))
+                    *type=0;
+                else
+                    if((vtProp.vt&VT_ARRAY))
+                    {
+                        long lLower,lUpper;
+                        UINT32 Element=NULL;
+                        SAFEARRAY *pSafeArray=vtProp.parray;
+                        SafeArrayGetLBound(pSafeArray,1,&lLower);
+                        SafeArrayGetUBound(pSafeArray,1,&lUpper);
+
+                        for(long i=lLower;i<=lUpper;i++)
+                        {
+                            hres=SafeArrayGetElement(pSafeArray,&i,&Element);
+                            *type=Element;
+                        }
+                        SafeArrayDestroy(pSafeArray);
+                    }
+                    VariantClear(&vtProp);
+                    pclsObj->Release();
+                    pclsObj=NULL;
+            }
+        }
+    }
+
     init=1;
 
     pSvc->Release();

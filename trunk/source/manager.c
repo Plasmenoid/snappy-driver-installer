@@ -1519,6 +1519,7 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int index)
     {
         TextOutF(&td,isvalidcat(hwidmatch_f,manager->matcher->state)?cb:D(POPUP_CMP_INVALID_COLOR),
                  L"cat: (%d)%S",pickcat(hwidmatch_f,manager->matcher->state),getdrp_drvcat(hwidmatch_f,pickcat(hwidmatch_f,manager->matcher->state)));
+//        TextOutF(&td,0,L"cat: (*)%S",t+cur_driver->cat);
 
         td.x=p0;TextOutF(&td,c0,L"%s",STR(STR_HINT_DRP));td.x=p1;
         TextOutF(&td,c0,L"%s\\%s",getdrp_packpath(hwidmatch_f),getdrp_packname(hwidmatch_f));
@@ -1685,10 +1686,10 @@ void popup_sysinfo(manager_t *manager,HDC hdcMem)
 
     td.x=p0;
     TextOutF(&td,td.col,STR(STR_SYSINF_MOTHERBOARD));td.x=p1;
-    TextOutSF(&td,STR(STR_SYSINF_PRODUCT),L"%s",state->text+state->product);
-    TextOutSF(&td,STR(STR_SYSINF_MODEL),L"%s",state->text+state->model);
-    TextOutSF(&td,STR(STR_SYSINF_MANUF),L"%s",state->text+state->manuf);
-    TextOutSF(&td,STR(STR_SYSINF_TYPE),L"%s",isLaptop?STR(STR_SYSINF_LAPTOP):STR(STR_SYSINF_DESKTOP));
+    TextOutSF(&td,STR(STR_SYSINF_PRODUCT),L"%s",state_getproduct(state));
+    TextOutSF(&td,STR(STR_SYSINF_MODEL),L"%s",state_getmodel(state));
+    TextOutSF(&td,STR(STR_SYSINF_MANUF),L"%s",state_getmanuf(state));
+    TextOutSF(&td,STR(STR_SYSINF_TYPE),L"%s[%d]",isLaptop?STR(STR_SYSINF_LAPTOP):STR(STR_SYSINF_DESKTOP),state->ChassisType);
 
     td.x=p0;
     TextOutF(&td,td.col,STR(STR_SYSINF_BATTERY));td.x=p1;

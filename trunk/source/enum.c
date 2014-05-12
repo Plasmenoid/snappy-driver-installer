@@ -306,6 +306,7 @@ void state_init(state_t *state)
     heap_alloc(&state->text_handle,2);
     state->text[0]=0;
     state->text[1]=0;
+    state->revision=SVN_REV;
 
     //log("sizeof(device_t)=%d\nsizeof(driver_t)=%d\n\n",sizeof(device_t),sizeof(driver_t));
 }
@@ -471,6 +472,9 @@ void state_print(state_t *state)
         log("  Product:     %ws\n",state->text+state->product);
         log("  Model:       %ws\n",state->text+state->model);
         log("  Manuf:       %ws\n",state->text+state->manuf);
+        log("  cs_Model:    %ws\n",state->text+state->cs_model);
+        log("  cs_Manuf:    %ws\n",state->text+state->cs_manuf);
+        log("  Chassis:     %d\n",state->ChassisType);
 
         log("\nBattery\n");
         battery=(SYSTEM_POWER_STATUS *)(state->text+state->battery);
@@ -597,22 +601,102 @@ void state_getsysinfo_fast(state_t *state)
     isnotebook_a(state);
 }
 
-int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product);
+int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_manuf,WCHAR *cs_model,int *type);
+
+WCHAR *state_getproduct(state_t *state)
+{
+    WCHAR *s=(WCHAR *)(state->text+state->product);
+
+    if(StrStrIW(s,L"Product"))return (WCHAR *)(state->text+state->cs_model);
+    return s;
+}
+
+WCHAR *state_getmanuf(state_t *state)
+{
+    WCHAR *s=(WCHAR *)(state->text+state->manuf);
+
+    if(StrStrIW(s,L"Vendor"))return (WCHAR *)(state->text+state->cs_manuf);
+    return s;
+}
+
+WCHAR *state_getmodel(state_t *state)
+{
+    WCHAR *s=(WCHAR *)(state->text+state->model);
+
+    if(!*s)return (WCHAR *)(state->text+state->cs_model);
+    return s;
+}
 
 void state_getsysinfo_slow(state_t *state)
 {
-    WCHAR model[BUFLEN];
     WCHAR manuf[BUFLEN];
+    WCHAR model[BUFLEN];
     WCHAR product[BUFLEN];
+    WCHAR cs_manuf[BUFLEN];
+    WCHAR cs_model[BUFLEN];
 
     time_sysinfo=GetTickCount();
 
-    getbaseboard(manuf,model,product);
+    getbaseboard(manuf,model,product,cs_manuf,cs_model,&state->ChassisType);
     state->manuf=heap_memcpy(&state->text_handle,manuf,wcslen(manuf)*2+2);
     state->product=heap_memcpy(&state->text_handle,product,wcslen(product)*2+2);
     state->model=heap_memcpy(&state->text_handle,model,wcslen(model)*2+2);
+    state->cs_manuf=heap_memcpy(&state->text_handle,cs_manuf,wcslen(cs_manuf)*2+2);
+    state->cs_model=heap_memcpy(&state->text_handle,cs_model,wcslen(cs_model)*2+2);
 
     time_sysinfo=GetTickCount()-time_sysinfo;
+}
+
+int opencatfile(state_t *state,driver_t *cur_driver)
+{
+    WCHAR filename[BUFLEN];
+    CHAR bufa[BUFLEN];
+
+    wcscpy(filename,(WCHAR *)(state->text+state->windir));
+    wsprintf(filename+wcslen(filename)-4,
+             L"system32\\CatRoot\\{F750E6C3-38EE-11D1-85E5-00C04FC295EE}\\%ws",
+             (WCHAR *)(state->text+cur_driver->InfPath));
+
+    wcscpy(filename+wcslen(filename)-3,L"cat");
+    {
+        FILE *f;
+        char *buft;
+        int len;
+
+        *bufa=0;
+        f=_wfopen(filename,L"rb");
+        if(f)
+        {
+            //log_con("Open '%ws'\n",filename);
+            fseek(f,0,SEEK_END);
+            len=ftell(f);
+            fseek(f,0,SEEK_SET);
+            buft=(char *)malloc(len);
+            fread(buft,len,1,f);
+            fclose(f);
+            {
+                unsigned bufal=0;
+                char *p=buft;
+
+                while(p+11<buft+len)
+                {
+                    if(*p=='O'&&!memcmp(p,L"OSAttr",11))
+                    {
+                        if(!*bufa||bufal<wcslen((WCHAR *)(p+19)))
+                        {
+                            sprintf(bufa,"%ws",p+19);
+                            bufal=strlen(bufa);
+                        }
+                    }
+                    p++;
+                }
+                //if(*bufa)log_con("[%s]\n",bufa);
+            }
+            free(buft);
+        }
+    }
+
+    return *bufa?heap_strcpy(&state->text_handle,bufa):0;
 }
 
 void state_scandevices(state_t *state)
@@ -803,6 +887,7 @@ void state_scandevices(state_t *state)
                     //log("Skipped '%ws'\n",filename,inf_pos);
                     cur_driver->feature=infdata->feature;
                     cur_driver->catalogfile=infdata->catalogfile;
+                    cur_driver->cat=infdata->cat;
                     inf_pos=infdata->inf_pos;
                 }else
                 {
@@ -844,10 +929,14 @@ void state_scandevices(state_t *state)
                     }
                     if(inf_pos==-1)
                         log_err("ERROR: not found '%s'\n",sect);
+
+                    cur_driver->cat=opencatfile(state,cur_driver);
+
                     //log("Added '%ws',%d\n",filename,inf_pos);
                     infdata=malloc(sizeof(infdata_t));
                     infdata->catalogfile=cur_driver->catalogfile;
                     infdata->feature=cur_driver->feature;
+                    infdata->cat=cur_driver->cat;
                     infdata->inf_pos=inf_pos;
                     sprintf(bufa,"%ws%ws",filename,state->text+cur_driver->MatchingDeviceId);
                     hash_add(&inf_list,bufa,strlen(bufa),(int)infdata,HASH_MODE_INTACT);
@@ -1042,7 +1131,6 @@ void isnotebook_a(state_t *state)
             }
         }
     }
-
 
     if((battery->BatteryFlag&128)==0||batdev)
     {

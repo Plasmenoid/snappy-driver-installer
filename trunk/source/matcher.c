@@ -154,10 +154,9 @@ void genmarker(state_t *state)
     WCHAR *str;
 
     *marker=0;
-    if(state->manuf)
-        str=(WCHAR *)(state->text+state->manuf);
-    else
-        return;
+
+    str=state_getmanuf(state);
+    if(!str)return;
 
     //log_con("Manuf '%ws'\n",str);
     for(i=0;i<21;i++)
