@@ -206,7 +206,7 @@ unsigned int __stdcall thread_install(void *arg)
     RESTOREPOINTINFOW pRestorePtSpec;
     STATEMGRSTATUS pSMgrStatus;
     HINSTANCE hinstLib=0;
-    MYPROC ProcAdd;
+    WINAPI5t_SRSetRestorePointW WIN5f_SRSetRestorePointW;
     int r=0;
     int failed=0,installed=0;
 
@@ -225,9 +225,9 @@ unsigned int __stdcall thread_install(void *arg)
     if(manager_g->items_list[SLOT_RESTORE_POINT].checked)
     {
         hinstLib=LoadLibrary(L"SrClient.dll");
-        ProcAdd=(MYPROC)GetProcAddress(hinstLib,"SRSetRestorePointW");
+        WIN5f_SRSetRestorePointW=(WINAPI5t_SRSetRestorePointW)GetProcAddress(hinstLib,"SRSetRestorePointW");
 
-        if(hinstLib&&ProcAdd)
+        if(hinstLib&&WIN5f_SRSetRestorePointW)
         {
             manager_g->items_list[SLOT_RESTORE_POINT].percent=500;
             manager_g->items_list[SLOT_RESTORE_POINT].install_status=STR_REST_CREATING;
@@ -243,7 +243,7 @@ unsigned int __stdcall thread_install(void *arg)
             if(flags&FLAG_DISABLEINSTALL)
                 Sleep(2000);
             else
-                r=ProcAdd(&pRestorePtSpec,&pSMgrStatus);
+                r=WIN5f_SRSetRestorePointW(&pRestorePtSpec,&pSMgrStatus);
             EnterCriticalSection(&sync);
 
             log_con("rt rest point{ %d(%d)\n",r,pSMgrStatus.nStatus);
@@ -261,7 +261,7 @@ unsigned int __stdcall thread_install(void *arg)
         else
         {
             manager_g->items_list[SLOT_RESTORE_POINT].install_status=STR_REST_FAILED;
-            log_err("ERROR in thread_install: Failed to create restore point %d,%d\n",hinstLib,ProcAdd);
+            log_err("ERROR in thread_install: Failed to create restore point %d\n",hinstLib);
         }
         redrawfield();
         if(hinstLib)FreeLibrary(hinstLib);
@@ -445,6 +445,14 @@ goaround:
         manager_g->items_list[SLOT_EXTRACTING].install_status=
             needreboot?STR_INST_COMPLITED_RB:STR_INST_COMPLITED;
         installmode=MODE_SCANNING;
+
+        FLASHWINFO fi;
+        fi.cbSize=sizeof(FLASHWINFO);
+        fi.hwnd=hMain;
+        fi.dwFlags=FLASHW_ALL|FLASHW_TIMERNOFG;
+        fi.uCount=1;
+        fi.dwTimeout=0;
+        FlashWindowEx(&fi);
     }
     itembar_act=0;
     log_con("Mode:%d\n",installmode);

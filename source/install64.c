@@ -25,6 +25,8 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include <newdev.h>
 #include <stdio.h>
 
+void print_error(int r,const WCHAR *s);
+
 void print_error(int r,const WCHAR *s)
 {
     WCHAR buf[4096];
@@ -35,6 +37,11 @@ void print_error(int r,const WCHAR *s)
 
 int WINAPI WinMain(HINSTANCE hThisInstance,HINSTANCE hPrevInstance,LPSTR lpszArgument,int nCmdShow)
 {
+	UNREFERENCED_PARAMETER(hThisInstance)
+	UNREFERENCED_PARAMETER(hPrevInstance)
+	UNREFERENCED_PARAMETER(lpszArgument)
+	UNREFERENCED_PARAMETER(nCmdShow)
+
 	WCHAR **argv;
     int argc;
     int ret=0,needreboot=0,lr;

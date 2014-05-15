@@ -136,6 +136,12 @@ void panel_setfilters(panel_t *panel)
 }
 
 //{ Main
+int main2(int argc, char* argv[]);
+void str_unicode2ansi(char *a)
+{
+    WCHAR *u=(WCHAR *)a;
+    while((*a++=*u++));
+}
 void settings_parse(const WCHAR *str,int ind)
 {
     WCHAR buf[BUFLEN];
@@ -168,16 +174,31 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-showdrpnames")) flags|=FLAG_SHOWDRPNAMES;else
         if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
         if(!wcscmp(pr,L"-showconsole"))  flags|=FLAG_SHOWCONSOLE;else
+        if(!wcscmp(pr,L"-torrent"))
+        {
+            WCHAR cmd[BUFLEN];
+            char **argv1;
+            wsprintf(cmd,L"torrent.exe %s",wcsstr(GetCommandLineW(),L"-torrent")+9);
+            log_con("\nExecuting '%ws'\n",cmd);
+            statemode=STATEMODE_EXIT;
+            argv1=(char **)CommandLineToArgvW(cmd,&argc);
+            for(i=0;i<argc;i++)str_unicode2ansi(argv1[i]);
+            ret_global=main2(argc,argv1);
+            log_con("Ret: %d\n",ret_global);
+            LocalFree(argv1);
+            break;
+        }
+        else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
-            wsprintf(cmd,L"7za %s",wcsstr(GetCommandLineW(),L"-7z")+4);
+            wsprintf(cmd,L"7za.exe %s",wcsstr(GetCommandLineW(),L"-7z")+4);
             log_con("Executing '%ws'\n",cmd);
             registerall();
             statemode=STATEMODE_EXIT;
             ret_global=Extract7z(cmd);
             log_con("Ret: %d\n",ret_global);
-            return;
+            break;
         }
         else
         if(!wcscmp(pr,L"-PATH"))
@@ -200,7 +221,7 @@ void settings_parse(const WCHAR *str,int ind)
             wsprintf(buf,L" /c rd /s /q \"%s\"",extractdir);
             RunSilent(L"cmd",buf,SW_HIDE,1);
             statemode=STATEMODE_EXIT;
-            return;
+            break;
         }
         else
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else

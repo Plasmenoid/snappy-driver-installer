@@ -14,7 +14,9 @@
 				<Option use_console_runner="0" />
 				<Option parameters="asd qwe" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-Os" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -28,20 +30,37 @@
 				<Option use_console_runner="0" />
 				<Option parameters="asd qwe" />
 				<Compiler>
+					<Add option="-pg" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-pg -lgmon" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-fomit-frame-pointer" />
-			<Add option="-fexpensive-optimizations" />
-			<Add option="-Os" />
+			<Add option="-Wnon-virtual-dtor" />
+			<Add option="-Wshadow" />
+			<Add option="-Winit-self" />
+			<Add option="-Wredundant-decls" />
+			<Add option="-Wcast-align" />
+			<Add option="-Wundef" />
+			<Add option="-Wfloat-equal" />
+			<Add option="-Winline" />
+			<Add option="-Wunreachable-code" />
+			<Add option="-Wmissing-declarations" />
+			<Add option="-Wmissing-include-dirs" />
+			<Add option="-Wswitch-enum" />
+			<Add option="-Wswitch-default" />
+			<Add option="-Wmain" />
+			<Add option="-Wextra" />
 			<Add option="-Wall" />
 			<Add option="-m64" />
+			<Add option="-fno-exceptions" />
+			<Add option="-fno-rtti" />
 			<Add option="-DUNICODE" />
 		</Compiler>
 		<Linker>
-			<Add option="-s" />
 			<Add library="user32" />
 			<Add library="kernel32" />
 			<Add library="newdev" />
