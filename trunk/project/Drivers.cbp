@@ -21,7 +21,6 @@
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
 					<Add option="-g" />
-					<Add option="-finput-charset=cp1251" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
@@ -48,6 +47,7 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Wnon-virtual-dtor" />
 			<Add option="-Wshadow" />
 			<Add option="-Winit-self" />
 			<Add option="-Wredundant-decls" />
@@ -63,11 +63,12 @@
 			<Add option="-Wmain" />
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
-			<Add option="-fexceptions" />
+			<Add option="-fno-exceptions" />
 			<Add option="-Wno-format" />
 			<Add option="-fno-builtin-log" />
 			<Add option="-I..\source\lzma" />
 			<Add option="-m32" />
+			<Add option="-finput-charset=CP1251" />
 			<Add option="-DWIN32" />
 			<Add option="-D_CONSOLE" />
 			<Add option="-DEXCLUDE_COM" />
@@ -105,6 +106,10 @@
 			<Add library="newdev" />
 			<Add library="comctl32" />
 			<Add library="wbemuuid" />
+			<Add library="torrent" />
+			<Add library="wsock32" />
+			<Add library="ws2_32" />
+			<Add library="boost_system" />
 			<Add directory="../external" />
 		</Linker>
 		<ExtraCommands>
@@ -120,6 +125,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../source/cli.h" />
+		<Unit filename="../source/client_test.cpp">
+			<Option compiler="gcc" use="1" buildCommand="$compiler $options $includes -c $file -o $object -DBOOST_ALL_NO_LIB -DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_HASH_MAP_BUCKETS=1021 -DBOOST_ASIO_SEPARATE_COMPILATION -DBOOST_EXCEPTION_DISABLE -DBOOST_MULTI_INDEX_DISABLE_SERIALIZATION -DBOOST_SYSTEM_STATIC_LINK=1 -DTORRENT_DISABLE_GEO_IP -DTORRENT_NO_DEPRECATE -DTORRENT_PRODUCTION_ASSERTS=1 -DTORRENT_RELEASE_ASSERTS=1 -DTORRENT_USE_I2P=0 -DTORRENT_USE_ICONV=0 -DTORRENT_USE_IPV6=0 -DTORRENT_USE_TOMMATH" />
+		</Unit>
 		<Unit filename="../source/common.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -34,7 +34,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <time.h>
 _CRTIMP double __cdecl sqrt (double);   //#include <math.h>
-typedef WINBOOL (__cdecl *MYPROC)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTATUS pSMgrStatus);
+typedef WINBOOL (__cdecl *WINAPI5t_SRSetRestorePointW)(PRESTOREPOINTINFOW pRestorePtSpec,PSTATEMGRSTATUS pSMgrStatus);
 #include <errno.h>
 #include <ctype.h>
 #include <signal.h>
@@ -272,6 +272,7 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
 BOOL CALLBACK LicenseProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
 
 //new
+void str_unicode2ansi(char *a);
 void set_rstpnt(int checked);
 void drvdir();
 WCHAR *getHWIDby(int id,int num);
