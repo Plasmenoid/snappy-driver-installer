@@ -24,6 +24,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include <setupapi.h>
 #include <ddk\cfgmgr32.h>
 #include <shlwapi.h>
+#include <shobjidl.h>
 #include <shellapi.h>
 #include <shlobj.h>
 #include <ddk\newdev.h>

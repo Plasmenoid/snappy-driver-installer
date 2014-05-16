@@ -689,7 +689,7 @@ void theme_refresh()
     SendMessage(hTheme,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
     SendMessage(hLang,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
 
-    if(!hMain)
+    if(!hMain||!hField)
     {
         log_err("ERROR in theme_refresh(): hMain is 0\n");
         return;
@@ -795,13 +795,12 @@ void mkdir_r(const WCHAR *path)
     {
         *p=0;
         if(_wmkdir(buf)<0&&errno!=EEXIST)
-            log_err("ERROR in mkdir_r(): failed _wmkdir(%ws)\n",buf);
+            log_err("ERROR in mkdir_r(): failed _wmkdir(%ws,%d)\n",buf,errno);
         *p=L'\\';
         p++;
-
     }
     if(_wmkdir(buf)<0&&errno!=EEXIST)
-        log_err("ERROR in mkdir_r(): failed _wmkdir(%ws)\n",buf);
+        log_err("ERROR in mkdir_r(): failed _wmkdir(%ws,%d)\n",buf,errno);
 }
 //}
 
@@ -1141,6 +1140,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_CREATE:
             // Canvas
             canvas_init(&canvasMain);
+            hMain=hwnd;
 
             // Field
             hField=CreateWindowMF(classField,NULL,hwnd,0,WS_VSCROLL);

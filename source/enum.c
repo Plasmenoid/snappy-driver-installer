@@ -601,8 +601,6 @@ void state_getsysinfo_fast(state_t *state)
     isnotebook_a(state);
 }
 
-int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_manuf,WCHAR *cs_model,int *type);
-
 WCHAR *state_getproduct(state_t *state)
 {
     WCHAR *s=(WCHAR *)(state->text+state->product);
