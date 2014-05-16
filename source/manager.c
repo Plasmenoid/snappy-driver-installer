@@ -1644,7 +1644,7 @@ void popup_about(HDC hdcMem)
     td.y+=td.wy*3;
     TextOutF(&td,td.col,L"%s%s",STR(STR_ABOUT_DEV_TITLE),STR(STR_ABOUT_DEV_LIST));
     TextOutF(&td,td.col,L"%s%s",STR(STR_ABOUT_TESTERS_TITLE),STR(STR_ABOUT_TESTERS_LIST));
-    td.y+=td.wy*11;
+    td.y+=td.wy*12;
 
     popup_resize(D(POPUP_WX),td.y+D(POPUP_OFSY));
 }

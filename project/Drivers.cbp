@@ -105,11 +105,11 @@
 			<Add library="shlwapi" />
 			<Add library="newdev" />
 			<Add library="comctl32" />
-			<Add library="wbemuuid" />
 			<Add library="torrent" />
 			<Add library="wsock32" />
 			<Add library="ws2_32" />
 			<Add library="boost_system" />
+			<Add library="wbemuuid" />
 			<Add directory="../external" />
 		</Linker>
 		<ExtraCommands>
