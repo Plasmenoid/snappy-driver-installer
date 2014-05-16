@@ -44,6 +44,7 @@ int showpercent(int a);
 void updateoverall(manager_t *manager);
 void updatecur();
 void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb);
+void removeextrainfs(WCHAR *inf);
 void _7z_total(long long i);
 int _7z_setcomplited(long long i);
 unsigned int __stdcall thread_install(void *arg);

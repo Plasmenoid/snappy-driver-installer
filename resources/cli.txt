@@ -21,13 +21,13 @@ Task-oriented
                 If <Filename> absent used %temp%\SDI2\InstalledID.txt
                 See also "HWIDInstalled" option.
 
--PATH <pathToDrivers>
+/PATH <pathToDrivers>
                 Runs as a replacement of DPInst.
                 For exit codes refer to the documentaion of DPInst
+/delextrainfs   Deletes unused infs after extracting.
 
 /verbose:<flags>  Set log detail level.
 /ls:<file>        Load snapshot.
-/lzma             Compress driverpacks.
 /nogui            Run without GUI-interface.
 /nologfile        Suppress creating logs
 /nosnapshot       Suppress creating snapshots.

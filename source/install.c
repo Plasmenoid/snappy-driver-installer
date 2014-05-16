@@ -201,23 +201,21 @@ void removeextrainfs(WCHAR *inf)
     WIN32_FIND_DATA FindFileData;
 
     while(wcschr(s,L'\\'))s=wcschr(s,L'\\')+1;
-    log_con("INF: %ws,%ws\n",inf,s);
 
     wcscpy(buf,inf);
     wcscpy(buf+(s-inf),L"*.inF");
-    log_con("BUF: %ws\n",buf);
     hFind=FindFirstFile(buf,&FindFileData);
     if(hFind!=INVALID_HANDLE_VALUE)
     do
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
         wcscpy(buf+(s-inf),FindFileData.cFileName);
-        log_con("Found %ws,%ws\n",buf,FindFileData.cFileName);
-        if(!StrStrIW(FindFileData.cFileName,inf))
-        //log_con("del %d\n",DeleteFile(buf));
+        if(!StrStrIW(inf,FindFileData.cFileName))
+            log_con("deleting %ws (%d)\n",inf,DeleteFile(buf));
+        else
+            log_con("keeping  %ws\n",inf);
     }
     while(FindNextFile(hFind,&FindFileData)!=0);
-
 }
 
 unsigned int __stdcall thread_install(void *arg)
@@ -407,7 +405,7 @@ goaround:
                 driver_install(hwid,inf,&ret,&needrb);
             else
                 ret=1;
-            if(!unpacked)removeextrainfs(inf);
+            if(!unpacked&&(flags&FLAG_DELEXTRAINFS))removeextrainfs(inf);
             EnterCriticalSection(&sync);
             itembar=&manager_g->items_list[itembar_act];
 
