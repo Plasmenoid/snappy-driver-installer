@@ -315,6 +315,7 @@ void vault_loadfromres(vault_t *v,int id)
 void lang_set(int i)
 {
     //printf("%d,'%ws'\n",i,langlist[i]);
+    if(flags&FLAG_NOGUI)return;
     vault_loadfromres(&vLang,IDR_LANG);
     vault_loadfromfile(&vLang,vLang.namelist[i]);
 }
@@ -322,6 +323,7 @@ void lang_set(int i)
 void theme_set(int i)
 {
     //printf("%d,'%ws'\n",i,themelist[i]);
+    if(flags&FLAG_NOGUI)return;
     vault_loadfromres(&vTheme,IDR_THEME);
     vault_loadfromfile(&vTheme,vTheme.namelist[i]);
 
@@ -345,6 +347,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
     WIN32_FIND_DATA FindFileData;
     int i=0;
 
+    if(flags&FLAG_NOGUI)return;
     //SendMessage(hwnd,CB_ADDSTRING,0,(int)L"Default (English)");langs=1;
     langauto[0]=0;
     wcscpy(langauto2,L"Auto");
@@ -389,6 +392,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
     WIN32_FIND_DATA FindFileData;
     int i=0;
 
+    if(flags&FLAG_NOGUI)return;
     //SendMessage(hwnd,CB_ADDSTRING,0,(int)L"Classic(default)");langs=1;
     wsprintf(buf,L"%s\\%s\\*.txt",data_dir,path);
     hFind=FindFirstFile(buf,&FindFileData);

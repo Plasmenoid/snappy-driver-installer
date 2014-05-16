@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <comdef.h>
 #include <Wbemidl.h>
+#include <shobjidl.h>
 
 //for some reason CLSID_WbemLocator isn't declared in libwbemuuid.a (although it probably should be).
 const GUID CLSID_WbemLocator={0x4590F811,0x1D3A,0x11D0,{ 0x89,0x1F,0x00,0xAA,0x00,0x4B,0x2E,0x24}};
+const IID IID_ITaskbarList3 = {0xea1afb91, 0x9e28, 0x4b86, {0x90, 0xe9, 0x9e, 0x9f, 0x8a, 0x5e, 0xef, 0xaf}};
+const IID my_CLSID_TaskbarList = { 0x56fdf344, 0xfd6d, 0x11d0, { 0x95, 0x8a, 0x00, 0x60, 0x97, 0xc9, 0xa0, 0x90 } };
 
 extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_manuf,WCHAR *cs_model,int *type);
+extern "C" void ShowProgressInTaskbar(HWND hwnd,TBPFLAG flags,int complited,int total);
 
 int init=0;
 extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_manuf,WCHAR *cs_model,int *type)
@@ -187,16 +191,22 @@ extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_m
     CoUninitialize();
     return 1;
 }
-/*
-int main(int argc, char **argv)
-{
-    WCHAR model[4096];
-    WCHAR manuf[4096];
-    WCHAR product[4096];
 
-    getbaseboard(manuf,model,product);
-    printf("Manufacturer: '%S'\n",manuf);
-    printf("Model: '%S'\n",model);
-    printf("Product: '%S'\n",product);
+extern "C" void ShowProgressInTaskbar(HWND hwnd,TBPFLAG flags,int complited,int total)
+{
+    int hres;
+    ITaskbarList3 *pTL;
+
+    CoInitializeEx(0,COINIT_MULTITHREADED);
+    hres=CoCreateInstance(my_CLSID_TaskbarList,NULL,CLSCTX_ALL,IID_ITaskbarList3,(LPVOID*)&pTL);
+    if(FAILED(hres))
+    {
+        printf("FAILED to create IID_ITaskbarList3 object. Error code = 0x%X\n",hres);
+        return;
+    }
+    //printf("%d,%d\n",flags,complited);
+    pTL->SetProgressValue(hwnd,complited,total);
+    pTL->SetProgressState(hwnd,flags);
+    pTL->Release();
+    CoUninitialize();
 }
-*/

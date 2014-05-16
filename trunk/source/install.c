@@ -115,6 +115,8 @@ void updateoverall(manager_t *manager)
         manager->items_list[SLOT_EXTRACTING].percent=(int)(_processeditems*1000./_totalitems+d);
         manager->items_list[SLOT_EXTRACTING].val1=_processeditems;
         manager->items_list[SLOT_EXTRACTING].val2=_totalitems;
+        if(manager_g->items_list[SLOT_EXTRACTING].percent>0&&installmode==MODE_INSTALLING)
+            ShowProgressInTaskbar(hMain,TBPF_NORMAL,manager->items_list[SLOT_EXTRACTING].percent,1000);
     }
 }
 
@@ -472,6 +474,7 @@ goaround:
             needreboot?STR_INST_COMPLITED_RB:STR_INST_COMPLITED;
         installmode=MODE_SCANNING;
 
+        ShowProgressInTaskbar(hMain,TBPF_NOPROGRESS,0,0);
         FLASHWINFO fi;
         fi.cbSize=sizeof(FLASHWINFO);
         fi.hwnd=hMain;
@@ -485,6 +488,7 @@ goaround:
     ret_global=installed+(failed<<16);
     if(needreboot)ret_global|=0x40<<24;
     LeaveCriticalSection(&sync);
+    ShowProgressInTaskbar(hMain,TBPF_NOPROGRESS,0,0);
     PostMessage(hMain,WM_DEVICECHANGE,7,1);
     redrawfield();
 
