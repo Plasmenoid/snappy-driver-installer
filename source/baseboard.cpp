@@ -5,6 +5,8 @@
 //for some reason CLSID_WbemLocator isn't declared in libwbemuuid.a (although it probably should be).
 const GUID CLSID_WbemLocator={0x4590F811,0x1D3A,0x11D0,{ 0x89,0x1F,0x00,0xAA,0x00,0x4B,0x2E,0x24}};
 
+extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_manuf,WCHAR *cs_model,int *type);
+
 int init=0;
 extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_manuf,WCHAR *cs_model,int *type)
 {
@@ -174,9 +176,6 @@ extern "C" int getbaseboard(WCHAR *manuf,WCHAR *model,WCHAR *product,WCHAR *cs_m
                         }
                         SafeArrayDestroy(pSafeArray);
                     }
-                    VariantClear(&vtProp);
-                    pclsObj->Release();
-                    pclsObj=NULL;
             }
         }
     }
