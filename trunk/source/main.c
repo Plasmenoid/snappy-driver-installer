@@ -226,7 +226,6 @@ void settings_parse(const WCHAR *str,int ind)
         else
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else
         if(!wcscmp(pr,L"-index_hr"))     flags|=COLLECTION_PRINT_INDEX;else
-        if(!wcscmp(pr,L"-lzma"))         flags|=COLLECTION_USE_LZMA;else
         if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI|FLAG_AUTOCLOSE;else
         if(!wcscmp(pr,L"-noslowsysinfo"))flags|=FLAG_NOSLOWSYSINFO;else
         if(!wcscmp(pr,L"-autoinstall"))  flags|=FLAG_AUTOINSTALL;else
@@ -239,6 +238,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-keeptempfiles"))flags|=FLAG_KEEPTEMPFILES;else
         if(!wcscmp(pr,L"-disableinstall"))flags|=FLAG_DISABLEINSTALL;else
         if(!wcscmp(pr,L"-failsafe"))     flags|=FLAG_FAILSAFE;else
+        if(!wcscmp(pr,L"-delextrainfs")) flags|=FLAG_DELEXTRAINFS;else
         if( wcsstr(pr,L"-verbose:"))     log_verbose=_wtoi(pr+9);else
         if( wcsstr(pr,L"-ls:"))          {wcscpy(state_file,pr+4);statemode=STATEMODE_LOAD;}else
         if(!wcscmp(pr,L"-a:32"))         virtual_arch_type=32;else
@@ -406,6 +406,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         log_con("  autoinstall=%d\n",flags&FLAG_AUTOINSTALL?1:0);
         log_con("  autoclose=%d\n",flags&FLAG_AUTOCLOSE?1:0);
         log_con("  failsafe=%d\n",flags&FLAG_FAILSAFE?1:0);
+        log_con("  delextrainfs=%d\n",flags&FLAG_DELEXTRAINFS?1:0);
         log_con("  norestorepnt=%d\n",flags&FLAG_NORESTOREPOINT?1:0);
         log_con("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
         log("\n");

@@ -194,9 +194,16 @@ int YG(int y,int o){return y>=0?y:(mainy_c+y-o);}
 void box_init(img_t *img,int i)
 {
     WCHAR *filename;
-    int j;
+    int j,r;
 
-    if(img->big&&!img->iscopy)free(img->big);
+    if(img->big&&!img->iscopy)
+    {
+        r=DeleteObject(img->bitmap);
+            if(!r)log_err("ERROR in box_init(): failed DeleteObject\n");
+        r=DeleteDC(img->dc);
+            if(!r)log_err("ERROR in box_init(): failed DeleteDC\n");
+        free(img->big);
+    }
     memset(img,0,sizeof(img_t));
 
     img->index=boxindex[i];
@@ -233,7 +240,14 @@ void icon_init(img_t *img,int i)
 {
     WCHAR *filename;
 
-    if(img->big&&!img->iscopy)free(img->big);
+    if(img->big&&!img->iscopy)
+    {
+        int r;
+        r=DeleteObject(img->bitmap);
+            if(!r)log_err("ERROR in icon_init(): failed DeleteObject\n");
+        free(img->big);
+
+    }
     memset(img,0,sizeof(img_t));
 
     filename=(WCHAR *)D(i);
