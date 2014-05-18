@@ -83,7 +83,7 @@ unsigned calc_score_h(driver_t *driver,state_t *state);
 int calc_secttype(const char *s);
 int calc_decorscore(int id,state_t *state);
 int calc_markerscore(state_t *state,char *path);
-int isvalid_usb30hub(hwidmatch_t *hwidmatch,state_t *state,WCHAR *str);
+intptr_t isvalid_usb30hub(hwidmatch_t *hwidmatch,state_t *state,WCHAR *str);
 int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state);
 int calc_notebook(hwidmatch_t *hwidmatch);
 int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore);

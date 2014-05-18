@@ -309,10 +309,10 @@ int calc_markerscore(state_t *state,char *path)
     return score;
 }
 
-int isvalid_usb30hub(hwidmatch_t *hwidmatch,state_t *state,WCHAR *str)
+intptr_t isvalid_usb30hub(hwidmatch_t *hwidmatch,state_t *state,WCHAR *str)
 {
     //log_con("Intel USB3.0 HUB '%ws'\n",state->text+hwidmatch->devicematch->device->HardwareID);
-    return (int)StrStrI((WCHAR *)(state->text+hwidmatch->devicematch->device->HardwareID),str);
+    return (intptr_t)StrStrI((WCHAR *)(state->text+hwidmatch->devicematch->device->HardwareID),str);
 }
 
 int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state)

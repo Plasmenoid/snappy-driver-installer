@@ -272,14 +272,21 @@ void image_load(img_t *img,BYTE *data,int sz)
     int i;
 
     img->hasalpha=img->sx=img->sy=0;
-
+#ifdef _WIN64
+    UNREFERENCED_PARAMETER(data)
+    UNREFERENCED_PARAMETER(sz)
+    ret=0;
+#else
     ret=WebPGetInfo((PBYTE)data,sz,&img->sx,&img->sy);
+#endif
     if(!ret)
     {
         log_err("ERROR in image_load(): failed WebPGetInfo\n");
         return;
     }
+#ifndef _WIN64
     img->big=WebPDecodeBGRA((PBYTE)data,sz,&img->sx,&img->sy);
+#endif
     if(!img->big)
     {
         log_err("ERROR in image_load(): failed WebPDecodeBGRA\n");
@@ -368,12 +375,13 @@ void drawrect(HDC hdc,int x1,int y1,int x2,int y2,int color1,int color2,int w,in
 {
     HPEN newpen,oldpen;
     HBRUSH oldbrush;
-    unsigned r;
+    uintptr_t *r;
+    unsigned r32;
 
     oldbrush=(HBRUSH)SelectObject(hdc,GetStockObject(color1&0xFF000000?NULL_BRUSH:DC_BRUSH));
     if(!oldbrush)log_err("ERROR in drawrect(): failed SelectObject(GetStockObject)\n");
-    r=SetDCBrushColor(hdc,color1);
-    if(r==CLR_INVALID)log_err("ERROR in drawrect(): failed SetDCBrushColor\n");
+    r32=SetDCBrushColor(hdc,color1);
+    if(r32==CLR_INVALID)log_err("ERROR in drawrect(): failed SetDCBrushColor\n");
 
     newpen=CreatePen(w?PS_SOLID:PS_NULL,w,color2);
     if(!newpen)log_err("ERROR in drawrect(): failed CreatePen\n");
@@ -385,12 +393,12 @@ void drawrect(HDC hdc,int x1,int y1,int x2,int y2,int color1,int color2,int w,in
     else
         Rectangle(hdc,x1,y1,x2,y2);
 
-    r=(int)SelectObject(hdc,oldpen);
+    r=SelectObject(hdc,oldpen);
     if(!r)log_err("ERROR in drawrect(): failed SelectObject(oldpen)\n");
-    r=(int)SelectObject(hdc,oldbrush);
+    r=SelectObject(hdc,oldbrush);
     if(!r)log_err("ERROR in drawrect(): failed SelectObject(oldbrush)\n");
-    r=DeleteObject(newpen);
-    if(!r)log_err("ERROR in drawrect(): failed SelectObject(newpen)\n");
+    r32=DeleteObject(newpen);
+    if(!r32)log_err("ERROR in drawrect(): failed SelectObject(newpen)\n");
 }
 
 void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int id)
@@ -554,7 +562,8 @@ void canvas_free(canvas_t *canvas)
 
 void canvas_begin(canvas_t *canvas,HWND hwnd,int x,int y)
 {
-    int r;
+    uintptr_t *r;
+    unsigned r32;
 
     canvas->hwnd=hwnd;
     canvas->localDC=BeginPaint(hwnd,&canvas->ps);
@@ -566,10 +575,10 @@ void canvas_begin(canvas_t *canvas,HWND hwnd,int x,int y)
         canvas->y=y;
         if(canvas->bitmap)
         {
-            r=(int)SelectObject(canvas->hdcMem,canvas->oldbitmap);
+            r=SelectObject(canvas->hdcMem,canvas->oldbitmap);
             if(!r)log_err("ERROR in canvas_begin(): failed SelectObject(oldbitmap)\n");
-            r=DeleteObject(canvas->bitmap);
-            if(!r)log_err("ERROR in canvas_begin(): failed DeleteObject\n");
+            r32=DeleteObject(canvas->bitmap);
+            if(!r32)log_err("ERROR in canvas_begin(): failed DeleteObject\n");
         }
         canvas->bitmap=CreateCompatibleBitmap(canvas->localDC,x,y);
         if(!canvas->bitmap)log_err("ERROR in canvas_begin(): failed CreateCompatibleBitmap\n");
@@ -579,8 +588,8 @@ void canvas_begin(canvas_t *canvas,HWND hwnd,int x,int y)
     canvas->clipping=CreateRectRgnIndirect(&canvas->ps.rcPaint);
     if(!canvas->clipping)log_err("ERROR in canvas_begin(): failed BeginPaint\n");
     SetStretchBltMode(canvas->hdcMem,HALFTONE);
-    r=SelectClipRgn(canvas->hdcMem,canvas->clipping);
-    if(!r)log_err("ERROR in canvas_begin(): failed SelectClipRgn\n");
+    r32=SelectClipRgn(canvas->hdcMem,canvas->clipping);
+    if(!r32)log_err("ERROR in canvas_begin(): failed SelectClipRgn\n");
 }
 
 void canvas_end(canvas_t *canvas)

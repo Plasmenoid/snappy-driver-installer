@@ -25,7 +25,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct _entry_t
 {
     WCHAR *name;
-    int val;
+    intptr_t val;
     int init;
 }entry_t;
 
@@ -66,7 +66,7 @@ void vault_free();
 void *vault_loadfile(const WCHAR *filename,int *sz);
 int  vault_findvar(hashtable_t *t,WCHAR *str);
 int  vault_readvalue(const WCHAR *str);
-int  vault_findstr(WCHAR *str);
+intptr_t  vault_findstr(WCHAR *str);
 
 void vault_init1(vault_t *v,entry_t *entry,int num);
 void vault_free1(vault_t *v);

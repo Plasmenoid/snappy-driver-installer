@@ -21,8 +21,10 @@ extern int isLaptop;
 
 //{ enum structures
 
+#ifndef _WIN64
 #define DISPLAY_DEVICE_ACTIVE         1
 #define DISPLAY_DEVICE_ATTACHED       2
+#endif
 
 //#define STORE_PROPS
 #ifdef STORE_PROPS

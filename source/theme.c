@@ -178,7 +178,7 @@ int vault_readvalue(const WCHAR *str)
     return p?wcstol(str,0,16):_wtoi(str);
 }
 
-int vault_findstr(WCHAR *str)
+intptr_t vault_findstr(WCHAR *str)
 {
     WCHAR *b,*e;
 
@@ -188,7 +188,7 @@ int vault_findstr(WCHAR *str)
     e=wcschr(b,L'\"');
     if(!e)return 0;
     *e=0;
-    return (int)b;
+    return (intptr_t)b;
 }
 
 void vault_parse(vault_t *val,WCHAR *data)
@@ -224,7 +224,7 @@ void vault_parse(vault_t *val,WCHAR *data)
             //printf("Error: unknown var '%ws'\n",lhs);
         }else
         {
-            int v,r1,r2;
+            intptr_t v,r1,r2;
             r1=vault_findstr(rhs);
             r2=vault_findvar(&val->strs,rhs);
 
@@ -249,7 +249,7 @@ void vault_parse(vault_t *val,WCHAR *data)
                     int i;
                     for(i=0;i<l;i++)if(tmp[i]==1)tmp[i]=0;
                 }
-                v=(int)tmp;
+                v=(intptr_t)tmp;
             }
             else if(r2>=0)      // Var
                 v=val->entry[r2].val;
@@ -365,7 +365,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
             wsprintf(langauto2,L"Auto (%s)",STR(STR_LANG_NAME));
             wcscpy(langauto,buf);
         }
-        SendMessage(hwnd,CB_ADDSTRING,0,(int)STR(STR_LANG_NAME));
+        SendMessage(hwnd,CB_ADDSTRING,0,(LPARAM)STR(STR_LANG_NAME));
         wcscpy(vLang.namelist[i],buf);
         i++;
     }
@@ -374,13 +374,13 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
 
     if(i)
     {
-        SendMessage(hwnd,CB_ADDSTRING,0,(int)langauto2);
+        SendMessage(hwnd,CB_ADDSTRING,0,(LPARAM)langauto2);
         wcscpy(vLang.namelist[i],langauto);
         i++;
     }
     if(!i)
     {
-        SendMessage(hwnd,CB_ADDSTRING,0,(int)L"English");
+        SendMessage(hwnd,CB_ADDSTRING,0,(LPARAM)L"English");
         vLang.namelist[i][0]=0;
     }
 }
@@ -401,9 +401,9 @@ void theme_enum(HWND hwnd,WCHAR *path)
     if(!(FindFileData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
     {
         wsprintf(buf,L"%s\\%s\\%s",data_dir,path,FindFileData.cFileName);
-        D(THEME_NAME)=(int)L"";
+        D(THEME_NAME)=(intptr_t)L"";
         vault_loadfromfile(&vTheme,buf);
-        SendMessage(hwnd,CB_ADDSTRING,0,(int)D(THEME_NAME));
+        SendMessage(hwnd,CB_ADDSTRING,0,(LPARAM)D(THEME_NAME));
         wcscpy(vTheme.namelist[i],buf);
         i++;
     }
@@ -412,7 +412,7 @@ void theme_enum(HWND hwnd,WCHAR *path)
 
     if(!i)
     {
-        SendMessage(hwnd,CB_ADDSTRING,0,(int)L"(default)");
+        SendMessage(hwnd,CB_ADDSTRING,0,(LPARAM)L"(default)");
         vTheme.namelist[i][0]=0;
     }
 }
