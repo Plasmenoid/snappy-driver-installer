@@ -29,7 +29,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 */
-
+#ifndef _WIN64
 #include <iterator>
 
 #include "libtorrent/config.hpp"
@@ -2536,3 +2536,4 @@ extern "C" int main2(int argc, char* argv[])
 
 	return 0;
 }
+#endif

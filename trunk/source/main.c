@@ -183,7 +183,9 @@ void settings_parse(const WCHAR *str,int ind)
             statemode=STATEMODE_EXIT;
             argv1=(char **)CommandLineToArgvW(cmd,&argc);
             for(i=0;i<argc;i++)str_unicode2ansi(argv1[i]);
+#ifndef _WIN64
             ret_global=main2(argc,argv1);
+#endif
             log_con("Ret: %d\n",ret_global);
             LocalFree(argv1);
             break;
@@ -519,7 +521,7 @@ unsigned int __stdcall thread_loadall(void *arg)
                 }*/
             }
             else
-                SendMessage(hMain,WM_BUNDLEREADY,(int)&bundle[bundle_shadow],(int)&bundle[bundle_display]);
+                SendMessage(hMain,WM_BUNDLEREADY,(WPARAM)&bundle[bundle_shadow],(LPARAM)&bundle[bundle_display]);
         }
 
         bundle_lowprioirity(&bundle[bundle_shadow]);
@@ -686,8 +688,8 @@ void theme_refresh()
     RECT rect;
 
     setfont();
-    SendMessage(hTheme,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
-    SendMessage(hLang,WM_SETFONT,(int)hFont,MAKELPARAM(FALSE,0));
+    SendMessage(hTheme,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(FALSE,0));
+    SendMessage(hLang,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(FALSE,0));
 
     if(!hMain||!hField)
     {
@@ -1183,7 +1185,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_UPDATELANG:
             SendMessage(hLang,CB_RESETCONTENT,0,0);
             lang_enum(hLang,L"langs",manager_g->matcher->state->locale);
-            f=SendMessage(hLang,CB_FINDSTRINGEXACT,-1,(int)curlang);
+            f=SendMessage(hLang,CB_FINDSTRINGEXACT,-1,(LPARAM)curlang);
             if(f==CB_ERR)f=SendMessage(hLang,CB_GETCOUNT,0,0)-1;
             lang_set(f);
             SendMessage(hLang,CB_SETCURSEL,f,0);
@@ -1193,7 +1195,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_UPDATETHEME:
             SendMessage(hTheme,CB_RESETCONTENT,0,0);
             theme_enum(hTheme,L"themes");
-            f=SendMessage(hTheme,CB_FINDSTRINGEXACT,-1,(int)curtheme);
+            f=SendMessage(hTheme,CB_FINDSTRINGEXACT,-1,(LPARAM)curtheme);
             if(f==CB_ERR)
             {
                 theme_set(f);
@@ -1652,7 +1654,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 if(wp==ID_LANG)
                 {
                     i=SendMessage((HWND)lParam,CB_GETCURSEL,0,0);
-                    SendMessage((HWND)lParam,CB_GETLBTEXT,i,(int)curlang);
+                    SendMessage((HWND)lParam,CB_GETLBTEXT,i,(LPARAM)curlang);
                     lang_set(i);
                     lang_refresh();
                 }
@@ -1660,7 +1662,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 if(wp==ID_THEME)
                 {
                     i=SendMessage((HWND)lParam,CB_GETCURSEL,0,0);
-                    SendMessage((HWND)lParam,CB_GETLBTEXT,i,(int)curtheme);
+                    SendMessage((HWND)lParam,CB_GETLBTEXT,i,(LPARAM)curtheme);
                     theme_set(i);
                     theme_refresh();
                 }
@@ -1787,7 +1789,7 @@ void contextmenu2(int x,int y)
     }
 
     i=0;
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(int)hSub1,STR(STR_SYS_WINVER));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(UINT_PTR)hSub1,STR(STR_SYS_WINVER));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(arch==0?MF_CHECKED:0),ID_EMU_32,STR(STR_SYS_32));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|(arch==1?MF_CHECKED:0),ID_EMU_64,STR(STR_SYS_64));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_SEPARATOR,0,0);
@@ -1878,8 +1880,8 @@ void contextmenu(int x,int y)
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags1,ID_SCHEDULE, STR(STR_CONT_INSTALL));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags2,ID_SHOWALT,  STR(STR_CONT_SHOWALT));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_SEPARATOR,0,0);
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(int)hSub1,STR(STR_CONT_HWID_SEARCH));
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(int)hSub2,STR(STR_CONT_HWID_CLIP));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(UINT_PTR)hSub1,STR(STR_CONT_HWID_SEARCH));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(UINT_PTR)hSub2,STR(STR_CONT_HWID_CLIP));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_SEPARATOR,0,0);
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags3,ID_OPENINF,  STR(STR_CONT_OPENINF));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags3,ID_LOCATEINF,STR(STR_CONT_LOCATEINF));

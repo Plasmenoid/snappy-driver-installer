@@ -24,6 +24,12 @@
 					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
+					<Add option="-m32" />
+					<Add library="webp" />
+					<Add library="torrent" />
+					<Add library="wsock32" />
+					<Add library="ws2_32" />
+					<Add library="boost_system" />
 					<Add directory="../lib/ReleaseU" />
 				</Linker>
 			</Target>
@@ -42,7 +48,33 @@
 				</Compiler>
 				<Linker>
 					<Add option="-pg -lgmon" />
+					<Add option="-m32" />
+					<Add library="webp" />
+					<Add library="torrent" />
+					<Add library="wsock32" />
+					<Add library="ws2_32" />
+					<Add library="boost_system" />
 					<Add directory="../lib/DebugU" />
+				</Linker>
+			</Target>
+			<Target title="Win64 DebugU">
+				<Option output="../drv64_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir=".." />
+				<Option object_output="../obj/Debug64U" />
+				<Option type="1" />
+				<Option compiler="gcc_64" />
+				<Option use_console_runner="0" />
+				<Option parameters="-disableinstall -extractdir:temp1 -showconsole" />
+				<Compiler>
+					<Add option="-pg" />
+					<Add option="-g" />
+					<Add option="-m64" />
+					<Add option="-D_DEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg -lgmon" />
+					<Add option="-m64" />
+					<Add directory="../lib/Debug64U" />
 				</Linker>
 			</Target>
 		</Build>
@@ -63,7 +95,7 @@
 			<Add option="-Wmain" />
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
-			<Add option="-fno-exceptions" />
+			<Add option="-fexceptions" />
 			<Add option="-Wno-format" />
 			<Add option="-fno-builtin-log" />
 			<Add option="-I..\source\lzma" />
@@ -84,7 +116,6 @@
 		<Linker>
 			<Add option="-static-libstdc++" />
 			<Add option="-static" />
-			<Add option="-m32" />
 			<Add library="baseboard" />
 			<Add library="7z" />
 			<Add library="kernel32" />
@@ -100,15 +131,10 @@
 			<Add library="odbc32" />
 			<Add library="odbccp32" />
 			<Add library="setupapi" />
-			<Add library="webp" />
 			<Add library="msimg32" />
 			<Add library="shlwapi" />
 			<Add library="newdev" />
 			<Add library="comctl32" />
-			<Add library="torrent" />
-			<Add library="wsock32" />
-			<Add library="ws2_32" />
-			<Add library="boost_system" />
 			<Add library="wbemuuid" />
 			<Add directory="../external" />
 		</Linker>

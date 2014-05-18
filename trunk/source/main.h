@@ -22,15 +22,30 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include <commdlg.h>
 #include <setupapi.h>
+#ifdef _WIN64
+#include <cfg.h>
+#include <newdev.h>
+#else
 #include <ddk\cfgmgr32.h>
+#include <ddk\newdev.h>
+#endif
 #include <shlwapi.h>
 #include <shobjidl.h>
 #include <shellapi.h>
 #include <shlobj.h>
-#include <ddk\newdev.h>
 #include <winerror.h>
+#ifndef _WIN64
 #include <webp\decode.h>
+#endif
 #include "SRRestorePtAPI.h"
+
+#ifdef __WIN64
+#define CR_SUCCESS (0x00000000)
+#define CR_NO_SUCH_DEVICE_INTERFACE (0x00000037)
+#define CR_NO_SUCH_VALUE (0x00000025)
+#define CR_NO_SUCH_DEVNODE (0x0000000D)
+#define CR_NO_SUCH_DEVINST CR_NO_SUCH_DEVNODE
+#endif
 
 #include <stdio.h>
 #include <time.h>

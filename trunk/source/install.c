@@ -71,8 +71,10 @@ void _7z_total(long long i)
     ar_total=i;
 }
 
+#ifndef _WIN64
 #define S_OK    ((HRESULT)0x00000000L)
 #define E_ABORT ((HRESULT)0x80004004L)
+#endif
 
 int showpercent(int a)
 {
@@ -407,7 +409,6 @@ goaround:
                 driver_install(hwid,inf,&ret,&needrb);
             else
                 ret=1;
-            if(!unpacked&&(flags&FLAG_DELEXTRAINFS))removeextrainfs(inf);
             EnterCriticalSection(&sync);
             itembar=&manager_g->items_list[itembar_act];
 
@@ -432,6 +433,7 @@ goaround:
                 if(needrb)needreboot=1;
             }
         }
+        if(!unpacked&&(flags&FLAG_DELEXTRAINFS))removeextrainfs(inf);
         if(instflag&INSTALLDRIVERS)itembar->percent=0;
         itembar->checked=0;
         redrawfield();
