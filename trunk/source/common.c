@@ -215,7 +215,7 @@ int heap_memcpyz(heap_t *t,const void *mem,int sz)
     heap_expand(t,sz+1);
     memcpy((char *)t->base+t->used,mem,sz);
     t->used+=sz+1;
-    *(char *)((int)t->base+r+sz)=0;
+    *(char *)((intptr_t)t->base+r+sz)=0;
     return r;
 }
 
@@ -240,7 +240,7 @@ int heap_memcpyz_dup(heap_t *t,const void *mem,int sz)
     char *u=(char *)t->base+t->used;
     memcpy(u,mem,sz);
     t->used+=sz+1;
-    *(char *)((int)t->base+r+sz)=0;
+    *(char *)((intptr_t)t->base+r+sz)=0;
 
     if(t->dup)hash_add(t->dup,u,sz,r,HASH_MODE_INTACT);
     return r;
@@ -253,7 +253,7 @@ int heap_strtolowerz(heap_t *t,const char *s,int sz)
     heap_expand(t,sz+1);
     memcpy((char *)t->base+t->used,s,sz);
     strtolower((char *)t->base+t->used,sz);
-    *(char *)((int)t->base+r+sz)=0;
+    *(char *)((intptr_t)t->base+r+sz)=0;
     t->used+=sz+1;
     return r;
 }

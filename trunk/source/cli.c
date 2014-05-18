@@ -86,7 +86,7 @@ static void ShowHelp(HINSTANCE AhInst)
                          DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
                          DEFAULT_QUALITY,FF_DONTCARE,"Consolas");
 
-  DialogBox(AhInst ,MAKEINTRESOURCE(IDD_DIALOG1),0,ShowHelpProcedure);
+  DialogBox(AhInst ,MAKEINTRESOURCE(IDD_DIALOG1),0,(DLGPROC)ShowHelpProcedure);
   DeleteObject(CLIHelp_Font);
 }
 

@@ -57,9 +57,9 @@ void log_times()
     log("Times\n");
     log("##devicescan: %7ld (%d errors)\n",time_devicescan,error_count);
     log("##indexes:    %7ld\n",time_indexes);
-    log("##matcher:    %7ld\n",time_matcher);
-    log("##startup:    %7ld (%ld)\n",time_startup,time_startup-time_devicescan-time_indexes-time_matcher);
     log("##sysinfo:    %7ld\n",time_sysinfo);
+    log("##matcher:    %7ld\n",time_matcher);
+    log("##startup:    %7ld (%ld)\n",time_startup,time_startup-time_devicescan-time_indexes-time_matcher-time_sysinfo);
     log("##indexsave:  %7ld\n",time_indexsave);
     log("##indexprint: %7ld\n",time_indexprint);
     log("##total:      %7ld\n",time_total);

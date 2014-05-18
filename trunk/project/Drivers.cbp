@@ -142,7 +142,7 @@
 			<Add before="..\resources\delres.bat" />
 			<Add before="..\SubWCRev32.exe .. ..\source\svnrev_template.h ..\source\svnrev.h" />
 		</ExtraCommands>
-		<Unit filename="../langs/english.txt" />
+		<Unit filename="../resources/cli.txt" />
 		<Unit filename="../resources/resources.h" />
 		<Unit filename="../resources/resources.rc">
 			<Option compilerVar="WINDRES" />

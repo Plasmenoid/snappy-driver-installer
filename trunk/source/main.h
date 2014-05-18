@@ -250,6 +250,7 @@ void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam);
 // Threads
 unsigned int __stdcall thread_scandevices(void *arg);
 unsigned int __stdcall thread_loadindexes(void *arg);
+unsigned int __stdcall thread_getsysinfo(void *arg);
 unsigned int __stdcall thread_loadall(void *arg);
 
 // Bundle
@@ -260,8 +261,8 @@ void bundle_load(bundle_t *bundle);
 void bundle_lowprioirity(bundle_t *bundle);
 
 // Windows
-HWND CreateWindowM(const WCHAR *type,const WCHAR *name,HWND hwnd,int id);
-HWND CreateWindowMF(const WCHAR *type,const WCHAR *name,HWND hwnd,int id,int f);
+HWND CreateWindowM(const WCHAR *type,const WCHAR *name,HWND hwnd,HMENU id);
+HWND CreateWindowMF(const WCHAR *type,const WCHAR *name,HWND hwnd,HMENU id,DWORD f);
 void setfont();
 void redrawfield();
 void redrawmainwnd();

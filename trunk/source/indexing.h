@@ -165,7 +165,7 @@ typedef struct _data_HWID_t // 8
 #define COLLECTION_USE_LZMA          0x00000002
 #define COLLECTION_PRINT_INDEX       0x00000004
 #define FLAG_NOGUI                   0x00000010
-#define FLAG_NOSLOWSYSINFO           0x00000020
+//#define FLAG_NOSLOWSYSINFO           0x00000020
 #define FLAG_DISABLEINSTALL          0x00000040
 #define FLAG_AUTOINSTALL             0x00000080
 #define FLAG_FAILSAFE                0x00000100
