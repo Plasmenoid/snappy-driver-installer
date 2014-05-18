@@ -215,9 +215,9 @@ void removeextrainfs(WCHAR *inf)
     {
         wcscpy(buf+(s-inf),FindFileData.cFileName);
         if(!StrStrIW(inf,FindFileData.cFileName))
-            log_con("deleting %ws (%d)\n",inf,DeleteFile(buf));
+            log_con("deleting %ws (%d)\n",buf,DeleteFile(buf));
         else
-            log_con("keeping  %ws\n",inf);
+            log_con("keeping  %ws\n",buf);
     }
     while(FindNextFile(hFind,&FindFileData)!=0);
 }
