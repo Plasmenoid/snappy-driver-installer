@@ -425,7 +425,6 @@ int  state_load(state_t *state,const WCHAR *filename)
     p=heap_load(&state->text_handle,p);
 
     state_fakeOSversion(state);
-    isnotebook_a(state);
 
     free(mem);
     if(mem_unpack)free(mem_unpack);
@@ -598,7 +597,6 @@ void state_getsysinfo_fast(state_t *state)
     if(*buf)state->architecture=1;
 
     state_fakeOSversion(state);
-    isnotebook_a(state);
 }
 
 WCHAR *state_getproduct(state_t *state)
@@ -1098,6 +1096,17 @@ void isnotebook_a(state_t *state)
 
     buf=(WCHAR *)(state->text+state->monitors);
     battery=(SYSTEM_POWER_STATUS *)(state->text+state->battery);
+
+    if(state->ChassisType==3)
+    {
+        isLaptop=0;
+        return;
+    }
+    if(state->ChassisType==10)
+    {
+        isLaptop=1;
+        return;
+    }
 
     for(i=0;i<buf[0];i++)
     {

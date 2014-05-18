@@ -134,6 +134,8 @@ void manager_filter(manager_t *manager,int options)
         for(j=0;j<devicematch->num_matches;j++,itembar++)
         {
             itembar->isactive=0;
+            if(!itembar)log_con("ERROR a%d\n",j);
+            if(!itembar->hwidmatch)log_con("ERROR %d\n",itembar->index);
 
             if(itembar->checked||itembar->install_status)itembar->isactive=1;
 

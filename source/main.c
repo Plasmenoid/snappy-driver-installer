@@ -229,7 +229,6 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else
         if(!wcscmp(pr,L"-index_hr"))     flags|=COLLECTION_PRINT_INDEX;else
         if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI|FLAG_AUTOCLOSE;else
-        if(!wcscmp(pr,L"-noslowsysinfo"))flags|=FLAG_NOSLOWSYSINFO;else
         if(!wcscmp(pr,L"-autoinstall"))  flags|=FLAG_AUTOINSTALL;else
         if(!wcscmp(pr,L"-autoclose"))    flags|=FLAG_AUTOCLOSE;else
         if(!wcscmp(pr,L"-nologfile"))    flags|=FLAG_NOLOGFILE;else
@@ -491,6 +490,15 @@ unsigned int __stdcall thread_loadindexes(void *arg)
     return 0;
 }
 
+unsigned int __stdcall thread_getsysinfo(void *arg)
+{
+    bundle_t *bundle=(bundle_t *)arg;
+    state_t *state=&bundle->state;
+
+    if(statemode!=STATEMODE_LOAD)state_getsysinfo_slow(state);
+    return 0;
+}
+
 unsigned int __stdcall thread_loadall(void *arg)
 {
     bundle_t *bundle=(bundle_t *)arg;
@@ -514,11 +522,6 @@ unsigned int __stdcall thread_loadall(void *arg)
                 manager_g->matcher=&bundle[bundle_shadow].matcher;
                 manager_populate(manager_g);
                 manager_filter(manager_g,filters);
-                /*if(flags&FLAG_AUTOINSTALL)
-                {
-                    manager_selectall(manager_g);
-                    manager_install(INSTALLDRIVERS);
-                }*/
             }
             else
                 SendMessage(hMain,WM_BUNDLEREADY,(WPARAM)&bundle[bundle_shadow],(LPARAM)&bundle[bundle_display]);
@@ -568,70 +571,59 @@ void bundle_free(bundle_t *bundle)
 
 void bundle_load(bundle_t *bundle)
 {
-    HANDLE thandle[2];
+    HANDLE thandle[3];
 
     thandle[0]=(HANDLE)_beginthreadex(0,0,&thread_scandevices,bundle,0,0);
     thandle[1]=(HANDLE)_beginthreadex(0,0,&thread_loadindexes,bundle,0,0);
-    WaitForMultipleObjects(2,thandle,1,INFINITE);
+    thandle[2]=(HANDLE)_beginthreadex(0,0,&thread_getsysinfo,bundle,0,0);
+    WaitForMultipleObjects(3,thandle,1,INFINITE);
     CloseHandle_log(thandle[0],L"bundle_load",L"0");
     CloseHandle_log(thandle[1],L"bundle_load",L"1");
+    CloseHandle_log(thandle[2],L"bundle_load",L"2");
 
-    if(!(flags&FLAG_NOSLOWSYSINFO)&&statemode!=STATEMODE_LOAD)
-    {
-        state_getsysinfo_slow(&bundle->state);
-    }
+    isnotebook_a(&bundle->state);
     matcher_populate(&bundle->matcher);
     matcher_sort(&bundle->matcher);
 }
 
 void bundle_lowprioirity(bundle_t *bundle)
 {
+    WCHAR filename[BUFLEN];
     time_startup=GetTickCount()-time_startup;
 
-    log_con("lowprioirity.[");
     redrawmainwnd();
-    if(!(flags&FLAG_NOSLOWSYSINFO)&&statemode!=STATEMODE_LOAD)
-    {
-        //state_getsysinfo_slow(&bundle->state);
-        redrawmainwnd();
-        log_con("6");
-    }
 
     collection_printstates(&bundle->collection);
     state_print(&bundle->state);
     matcher_print(&bundle->matcher);
     manager_print(manager_g);
-    log_con("7");
 
     collection_save(&bundle->collection);
-    {
-        WCHAR filename[BUFLEN];
-        gen_timestamp();
-        wsprintf(filename,L"%s\\%sstate.snp",log_dir,timestamp);
-        state_save(&bundle->state,filename);
-    }
-    log_con("8");
+    gen_timestamp();
+    wsprintf(filename,L"%s\\%sstate.snp",log_dir,timestamp);
+    state_save(&bundle->state,filename);
 
     if(flags&COLLECTION_PRINT_INDEX)
     {
+        log_con("Saving humanreadable indexes...");
         collection_print(&bundle->collection);
         flags&=~COLLECTION_PRINT_INDEX;
+        log_con("DONE\n");
     }
-    log_con("9]\n");
 }
 //}
 
 //{ Windows
-HWND CreateWindowM(const WCHAR *type,const WCHAR *name,HWND hwnd,int id)
+HWND CreateWindowM(const WCHAR *type,const WCHAR *name,HWND hwnd,HMENU id)
 {
     return CreateWindow(type,name,WS_CHILD|WS_VISIBLE,
-                        0,0,0,0,hwnd,(HMENU)(id),ghInst,NULL);
+                        0,0,0,0,hwnd,id,ghInst,NULL);
 }
 
-HWND CreateWindowMF(const WCHAR *type,const WCHAR *name,HWND hwnd,int id,int f)
+HWND CreateWindowMF(const WCHAR *type,const WCHAR *name,HWND hwnd,HMENU id,DWORD f)
 {
     return CreateWindow(type,name,WS_CHILD|WS_VISIBLE|f,
-                        0,0,0,0,hwnd,(HMENU)(id),ghInst,NULL);
+                        0,0,0,0,hwnd,id,ghInst,NULL);
 }
 
 void setfont()
@@ -846,7 +838,7 @@ void gui(int nCmd)
     }
 
     if(!license)
-        DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG1),0,LicenseProcedure);
+        DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG1),0,(DLGPROC)LicenseProcedure);
 
     if(license)
     {
@@ -1153,11 +1145,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 0,0,0,0,hwnd,(HMENU)0,ghInst,0);
 
             // Lang
-            hLang=CreateWindowMF(WC_COMBOBOX,L"",hwnd,ID_LANG,CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_OVERLAPPED);
+            hLang=CreateWindowMF(WC_COMBOBOX,L"",hwnd,(HMENU)ID_LANG,CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_OVERLAPPED);
             SendMessage(hwnd,WM_UPDATELANG,0,0);
 
             // Theme
-            hTheme=CreateWindowMF(WC_COMBOBOX,L"",hwnd,ID_THEME,CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_OVERLAPPED);
+            hTheme=CreateWindowMF(WC_COMBOBOX,L"",hwnd,(HMENU)ID_THEME,CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_OVERLAPPED);
             SendMessage(hwnd,WM_UPDATETHEME,0,0);
 
             // Misc
@@ -1280,7 +1272,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             break;
 
         case WM_DROPFILES:
-		{
+        {
             WCHAR lpszFile[MAX_PATH]={0};
             UINT uFile=0;
             HDROP hDrop=(HDROP)wParam;
@@ -1313,7 +1305,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             }
             DragFinish(hDrop);
             break;
-		}
+        }
 
         case WM_WINDOWPOSCHANGING:
             {

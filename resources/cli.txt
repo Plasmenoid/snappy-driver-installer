@@ -76,7 +76,6 @@ Debug
 /showconsole    Displays console window.
 /failsafe       Disable indexing of WINDOWS\inf.
 /disableinstall Suppress driver installation and creation of a restore point.
-/noslowsysinfo  Suppress gathering information about motherboard.
 /reindex        Force reindexing of all driverpacks.
 /index_hr       Create indexes in human-readable format.
 

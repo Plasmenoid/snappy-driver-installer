@@ -427,7 +427,7 @@ void collection_save(collection_t *col)
         for(i=0;i<col->driverpack_handle.items;i++)
             if(col->driverpack_list[i].type==DRIVERPACK_TYPE_PENDING_SAVE)count++;
 
-        log_con("Saving indexes...\n");
+        log_con("Saving indexes...");
         for(i=0;i<col->driverpack_handle.items;i++)
         {
             if((flags&FLAG_KEEPUNPACKINDEX)==0&&!i)
@@ -461,7 +461,7 @@ void collection_save(collection_t *col)
         }
         manager_g->items_list[SLOT_INDEXING].isactive=0;
         manager_setpos(manager_g);
-        log_con("done\n");
+        log_con("DONE\n");
     }
 
     // Delete unused indexes

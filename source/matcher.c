@@ -906,7 +906,7 @@ char *getdrp_drvmanufacturer(hwidmatch_t *hwidmatch)
 }
 void getdrp_drvsectionAtPos(driverpack_t *drp,char *buf,int pos,int manuf_index)
 {
-    int rr=(int)drp->text+drp->manufacturer_list[manuf_index].sections;
+    intptr_t rr=(intptr_t)drp->text+drp->manufacturer_list[manuf_index].sections;
     if(pos)
     {
         char *ext=drp->text+((int *)rr)[pos];
