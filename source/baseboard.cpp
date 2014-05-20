@@ -201,7 +201,8 @@ extern "C" void ShowProgressInTaskbar(HWND hwnd,TBPFLAG flags,int complited,int 
     hres=CoCreateInstance(my_CLSID_TaskbarList,NULL,CLSCTX_ALL,IID_ITaskbarList3,(LPVOID*)&pTL);
     if(FAILED(hres))
     {
-        printf("FAILED to create IID_ITaskbarList3 object. Error code = 0x%X\n",hres);
+        CoUninitialize();
+        //printf("FAILED to create IID_ITaskbarList3 object. Error code = 0x%X\n",hres);
         return;
     }
     //printf("%d,%d\n",flags,complited);
