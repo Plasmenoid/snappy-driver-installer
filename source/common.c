@@ -74,6 +74,7 @@ const char *hashes[NUM_HASHES]= // hash_t
     "ID_DUP_LIST",    // 4
     "ID_INF_LIST",    // 5
     "ID_CAT_LIST",    // 6
+    "ID_FILES",       // 7
 };
 //}
 
