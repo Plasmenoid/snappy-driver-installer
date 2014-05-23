@@ -17,6 +17,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 #define STR_LN 4096
 #define ofst int
+//#define MERGE_FINDER
 
 typedef struct _driverpack_t driverpack_t;
 typedef struct _data_inffile_t data_inffile_t;
@@ -56,6 +57,13 @@ typedef struct _inflist_t
     HANDLE slotvacant;
     int type;
 }inflist_t;
+
+typedef struct _filedata_t
+{
+    int size;
+    unsigned crc;
+    WCHAR *str;
+}filedata_t;
 
 typedef struct _sect_data_t
 {
@@ -220,6 +228,8 @@ int  unicode2ansi(char *s,char *out,int size);
 void extracttest();
 int  encode(char *dest,int dest_sz,char *src,int src_sz);
 int  decode(char *dest,int dest_sz,char *src,int src_sz);
+void checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashtable_t *path2filename);
+void hash_clearfiles(hashtable_t *t);
 
 // Collection
 void collection_init(collection_t *col,WCHAR *driverpacks_dir,WCHAR *index_bin_dir,WCHAR *index_linear_dir,int flags);

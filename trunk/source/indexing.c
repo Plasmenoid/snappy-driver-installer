@@ -1116,6 +1116,79 @@ void driverpack_parsecat(driverpack_t *drp,WCHAR const *pathinf,WCHAR const *inf
     }
 }
 
+#ifdef MERGE_FINDER
+void checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashtable_t *path2filename)
+{
+    filedata_t *file1,*file2;
+    char bufa[BUFLEN];
+    char bufa1[BUFLEN];
+    int size=0,sizedif=0,sizeuniq=0;
+    int isfound;
+    int ismergeable=1;
+
+    //log_con("\n%ws\n%ws\n",folder1,folder2);
+
+    sprintf(bufa,"%ws",folder1);
+    file1=(filedata_t *)hash_find(path2filename,bufa,strlen(bufa),&isfound);
+    while(file1)
+    {
+
+        sprintf(bufa1,"%ws",file1->str);
+        file2=(filedata_t *)hash_find(filename2path,bufa1,strlen(bufa1),&isfound);
+        sizeuniq+=file1->size;
+        while(file2)
+        {
+            if(!wcscmp(folder2,file2->str))
+            {
+                sizeuniq-=file1->size;
+                //log_con("  %c%ws\t%d\n",file1->crc==file2->crc?'+':'-',file1->str,file1->size);
+                if(file1->crc==file2->crc)
+                    size+=file1->size;
+                else
+                {
+                    sizedif+=file1->size;
+                    ismergeable=0;
+                }
+            }
+            file2=(filedata_t *)hash_findnext(filename2path);
+        }
+
+        file1=(filedata_t *)hash_findnext(path2filename);
+    }
+    //if(ismergeable)
+    {
+        log_con("\n%ws\n%ws\n",folder1,folder2);
+        log_con("%s (%d,%d,%d)\n",ismergeable?"++++":"----",size/1024,sizedif/1024,sizeuniq/1024);
+    }
+}
+
+void hash_clearfiles(hashtable_t *t)
+{
+    hashitem_t *cur;
+    int i=0;
+
+    while(i<t->size)
+    {
+        cur=&t->items[i++];
+        while(1)
+        {
+            if(t->flags&HASH_FLAG_KEYS_ARE_POINTERS&&cur->key)
+            {
+                //if(t->id==ID_STRINGS)printf("'%s'\n",cur->key);
+                filedata_t *file1;
+                file1=(filedata_t *)cur->key;
+                //log_con("%x\n",file1);
+                //log_con("%ws\n",file1->str);
+                free(file1->str);
+            }
+
+            if(cur->next<=0)break;
+            cur=&t->items[cur->next];
+        }
+    }
+}
+#endif
+
 int driverpack_genindex(driverpack_t *drp)
 {
     CFileInStream archiveStream;
@@ -1128,8 +1201,15 @@ int driverpack_genindex(driverpack_t *drp)
     size_t tempSize=0;
     unsigned i;
 
-    WCHAR name[512];
-    WCHAR pathinf[1024];
+#ifdef MERGE_FINDER
+    hashtable_t filename2path;
+    hashtable_t path2filename;
+    hashtable_t foldercmps;
+    filedata_t *filedata;
+#endif
+
+    WCHAR name[BUFLEN];
+    WCHAR pathinf[BUFLEN];
     WCHAR *inffile;
 
     log_con("Indexing %ws\\%ws\n",drp->text+drp->drppath,drp->text+drp->drpfilename);
@@ -1148,6 +1228,12 @@ int driverpack_genindex(driverpack_t *drp)
     LookToRead_Init(&lookStream);
     CrcGenerateTable();
     SzArEx_Init(&db);
+
+#ifdef MERGE_FINDER
+    hash_init(&filename2path,ID_FILES,1024,HASH_FLAG_KEYS_ARE_POINTERS);
+    hash_init(&path2filename,ID_FILES,1024,HASH_FLAG_KEYS_ARE_POINTERS);
+    hash_init(&foldercmps,ID_FILES,1024,0);
+#endif
 
     res=SzArEx_Open(&db,&lookStream.s,&allocImp,&allocTempImp);
     if(res==SZ_OK)
@@ -1182,6 +1268,34 @@ int driverpack_genindex(driverpack_t *drp)
                 }
             }
             SzArEx_GetFileNameUtf16(&db,i,temp);
+
+#ifdef MERGE_FINDER
+            {
+                char bufa[BUFLEN];
+                WCHAR *filename=(WCHAR *)temp;
+                while(wcschr(filename,L'/'))filename=wcschr(filename,L'/')+1;
+                filename[-1]=0;
+                //log_con("%8d,%ws\n",f->Size,temp);
+
+                filedata=malloc(sizeof(filedata_t));
+                filedata->crc=f->Crc;
+                filedata->size=f->Size;
+                filedata->str=malloc(wcslen(temp)*2+2);
+                wcscpy(filedata->str,temp);
+                sprintf(bufa,"%ws",filename);
+                hash_add(&filename2path,bufa,strlen(bufa),(int)filedata,HASH_MODE_ADD);
+                //log_con("%8d,%08X,[%s],%ws\n",filedata->size,filedata->crc,bufa,filedata->str);
+
+                filedata=malloc(sizeof(filedata_t));
+                filedata->crc=f->Crc;
+                filedata->size=f->Size;
+                filedata->str=malloc(wcslen(filename)*2+2);
+                wcscpy(filedata->str,filename);
+                sprintf(bufa,"%ws",temp);
+                hash_add(&path2filename,bufa,strlen(bufa),(int)filedata,HASH_MODE_ADD);
+                //log_con("%8d,%08X,%ws,[%s]\n",filedata->size,filedata->crc,filedata->str,bufa);
+            }
+#endif
 
             if(_wcsicmp((WCHAR *)temp+wcslen((WCHAR *)temp)-4,L".inf")==0)
             {
@@ -1230,11 +1344,57 @@ int driverpack_genindex(driverpack_t *drp)
                 driverpack_parsecat(drp,pathinf,inffile,(char *)(outBuffer+offset),outSizeProcessed);
             }
         }
+#ifdef MERGE_FINDER
+        for(i=0;i<db.db.NumFiles;i++)
+        {
+            char bufa[BUFLEN];
+            char bufa1[BUFLEN];
+            int isfound;
+            SzArEx_GetFileNameUtf16(&db,i,temp);
+            const CSzFileItem *f=db.db.Files+i;
+
+            WCHAR *filename=(WCHAR *)temp;
+            while(wcschr(filename,L'/'))filename=wcschr(filename,L'/')+1;
+            filename[-1]=0;
+
+            //log_con("%ws,%ws\n",temp,filename);
+            sprintf(bufa,"%ws",filename);
+            filedata=(filedata_t *)hash_find(&filename2path,bufa,strlen(bufa),&isfound);
+            while(filedata)
+            {
+                sprintf(bufa1,"%ws - %ws",temp,filedata->str);
+                hash_find(&foldercmps,bufa1,strlen(bufa1),&isfound);
+
+                if(f->Crc==filedata->crc&&wcscmp(temp,filedata->str)&&!isfound)
+                {
+                    checkfolders(temp,filedata->str,&filename2path,&path2filename);
+                    //log_con("  %ws\n",filedata->str);
+                }
+
+                sprintf(bufa1,"%ws - %ws",temp,filedata->str);
+                hash_add(&foldercmps,bufa1,strlen(bufa1),1,HASH_MODE_INTACT);
+
+                sprintf(bufa1,"%ws - %ws",filedata->str,temp);
+                hash_add(&foldercmps,bufa1,strlen(bufa1),1,HASH_MODE_INTACT);
+
+                filedata=(filedata_t *)hash_findnext(&filename2path);
+            }
+        }
+#endif
+
         IAlloc_Free(&allocImp,outBuffer);
     }
     SzArEx_Free(&db,&allocImp);
     SzFree(NULL,temp);
     File_Close(&archiveStream.file);
+
+#ifdef MERGE_FINDER
+    hash_clearfiles(&filename2path);
+    hash_clearfiles(&path2filename);
+    hash_free(&filename2path);
+    hash_free(&path2filename);
+    hash_free(&foldercmps);
+#endif
 
     driverpack_indexinf_async(drp,drp->col,L"",L"",0,0);
     return 1;
