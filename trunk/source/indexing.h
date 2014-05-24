@@ -17,7 +17,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 #define STR_LN 4096
 #define ofst int
-//#define MERGE_FINDER
+#define MERGE_FINDER
 
 typedef struct _driverpack_t driverpack_t;
 typedef struct _data_inffile_t data_inffile_t;
@@ -228,8 +228,9 @@ int  unicode2ansi(char *s,char *out,int size);
 void extracttest();
 int  encode(char *dest,int dest_sz,char *src,int src_sz);
 int  decode(char *dest,int dest_sz,char *src,int src_sz);
-void checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashtable_t *path2filename);
+int  checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashtable_t *path2filename,int sub);
 void hash_clearfiles(hashtable_t *t);
+WCHAR *finddrp(WCHAR *s);
 
 // Collection
 void collection_init(collection_t *col,WCHAR *driverpacks_dir,WCHAR *index_bin_dir,WCHAR *index_linear_dir,int flags);
@@ -237,6 +238,7 @@ void collection_free(collection_t *col);
 void collection_save(collection_t *col);
 void collection_load(collection_t *col);
 void collection_print(collection_t *col);
+WCHAR *collection_finddrp(collection_t *col,WCHAR *s);
 void collection_scanfolder(collection_t *col,const WCHAR *path);
 int  collection_scanfolder_count(collection_t *col,const WCHAR *path);
 

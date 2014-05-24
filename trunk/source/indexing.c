@@ -384,6 +384,12 @@ int decode(char *dest,int dest_sz,char *src,int src_sz)
     Lzma86_Decode((Byte *)dest,(SizeT *)&dest_sz,(const Byte *)src,(SizeT *)&src_sz);
     return dest_sz;
 }
+
+WCHAR *finddrp(WCHAR *s)
+{
+    return collection_finddrp(manager_g->matcher->col,s);
+}
+
 //}
 
 //{ Collection
@@ -590,18 +596,33 @@ void collection_printstates(collection_t *col)
 {
     int i,sum=0;
     driverpack_t *drp;
-    CHAR *s;
+    WCHAR *s;
 
     if((log_verbose&LOG_VERBOSE_DRP)==0)return;
     log("Driverpacks\n");
     for(i=0;i<col->driverpack_handle.items;i++)
     {
         drp=&col->driverpack_list[i];
-        s=drp->text;
-        log("  %6d  %ws\\%ws\n",drp->HWID_list_handle.items,s+drp->drppath,drp->text+drp->drpfilename);
+        s=(WCHAR *)drp->text;
+        log("  %6d  %ws\\%ws\n",drp->HWID_list_handle.items,s+drp->drppath,s+drp->drpfilename);
         sum+=drp->HWID_list_handle.items;
     }
     log("  Sum: %d\n\n",sum);
+}
+
+WCHAR *collection_finddrp(collection_t *col,WCHAR *fnd)
+{
+    int i;
+    driverpack_t *drp;
+    WCHAR *s;
+
+    for(i=0;i<col->driverpack_handle.items;i++)
+    {
+        drp=&col->driverpack_list[i];
+        s=(WCHAR *)(drp->text+drp->drpfilename);
+        if(StrStrIW(s,fnd))return s;
+    }
+    return 0;
 }
 
 void collection_scanfolder(collection_t *col,const WCHAR *path)
@@ -1117,7 +1138,7 @@ void driverpack_parsecat(driverpack_t *drp,WCHAR const *pathinf,WCHAR const *inf
 }
 
 #ifdef MERGE_FINDER
-void checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashtable_t *path2filename)
+int checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashtable_t *path2filename,int sub)
 {
     filedata_t *file1,*file2;
     char bufa[BUFLEN];
@@ -1135,13 +1156,17 @@ void checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hasht
 
         sprintf(bufa1,"%ws",file1->str);
         file2=(filedata_t *)hash_find(filename2path,bufa1,strlen(bufa1),&isfound);
+        //log_con("  [%ws]\n",file1->str);
+
         sizeuniq+=file1->size;
         while(file2)
         {
             if(!wcscmp(folder2,file2->str))
             {
                 sizeuniq-=file1->size;
-                //log_con("  %c%ws\t%d\n",file1->crc==file2->crc?'+':'-',file1->str,file1->size);
+                if(sub&&file1->crc!=file2->crc)
+                    log_con("  %c%ws\t%d\n",file1->crc==file2->crc?'+':'-',file1->str,file1->size);
+
                 if(file1->crc==file2->crc)
                     size+=file1->size;
                 else
@@ -1155,11 +1180,31 @@ void checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hasht
 
         file1=(filedata_t *)hash_findnext(path2filename);
     }
-    //if(ismergeable)
+    if(ismergeable&&sub==0)
     {
-        log_con("\n%ws\n%ws\n",folder1,folder2);
-        log_con("%s (%d,%d,%d)\n",ismergeable?"++++":"----",size/1024,sizedif/1024,sizeuniq/1024);
+        WCHAR folder1d[BUFLEN],folder2d[BUFLEN];
+        WCHAR *folder1a=folder1d,*folder2a=folder2d;
+        wcscpy(folder1a,folder1);
+        wcscpy(folder2a,folder2);
+        while(wcschr(folder1a,L'/'))folder1a=wcschr(folder1a,L'/')+1;
+        while(wcschr(folder2a,L'/'))folder2a=wcschr(folder2a,L'/')+1;
+        folder1a[-1]=0;folder2a[-1]=0;
+
+
+        log_con("\nrem %ws\nrem %ws\n",folder1,folder2);
+        log_con("rem %s (%d,%d,%d)\n",ismergeable?"++++":"----",size/1024,sizedif/1024,sizeuniq/1024);
+        int val=checkfolders(folder1d,folder2d,filename2path,path2filename,1);
+        log_con("rem %d\n",val);
+
+        folder1a=folder1d;folder2a=folder2d;
+        while(wcschr(folder1a,L'/'))*wcschr(folder1a,L'/')=L'\\';
+        while(wcschr(folder2a,L'/'))*wcschr(folder2a,L'/')=L'\\';
+        log_con("xcopy /S /I /Y /H %ws %ws\n",folder1d,folder1d);
+        log_con("xcopy /S /I /Y /H %ws %ws\n",folder2d,folder2d);
+        log_con("rd /S /Q %ws\nrd /S /Q %ws\n",folder1d,folder2d);
     }
+    if(ismergeable&&!size)return 1;
+    return ismergeable?size:0;
 }
 
 void hash_clearfiles(hashtable_t *t)
@@ -1367,7 +1412,7 @@ int driverpack_genindex(driverpack_t *drp)
 
                 if(f->Crc==filedata->crc&&wcscmp(temp,filedata->str)&&!isfound)
                 {
-                    checkfolders(temp,filedata->str,&filename2path,&path2filename);
+                    checkfolders(temp,filedata->str,&filename2path,&path2filename,0);
                     //log_con("  %ws\n",filedata->str);
                 }
 

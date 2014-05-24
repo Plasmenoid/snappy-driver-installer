@@ -9,7 +9,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 ReleaseU">
-				<Option output="../drv" prefix_auto="1" extension_auto="1" />
+				<Option output="../SDI_R" prefix_auto="1" extension_auto="1" />
 				<Option working_dir=".." />
 				<Option object_output="../obj/ReleaseU" />
 				<Option type="1" />
@@ -34,7 +34,7 @@
 				</Linker>
 			</Target>
 			<Target title="Win32 DebugU">
-				<Option output="../drv_d" prefix_auto="1" extension_auto="1" />
+				<Option output="../SDI_RD" prefix_auto="1" extension_auto="1" />
 				<Option working_dir=".." />
 				<Option object_output="../obj/DebugU" />
 				<Option type="1" />
@@ -58,7 +58,7 @@
 				</Linker>
 			</Target>
 			<Target title="Win64 DebugU">
-				<Option output="../drv64_d" prefix_auto="1" extension_auto="1" />
+				<Option output="../SDI64_RD" prefix_auto="1" extension_auto="1" />
 				<Option working_dir=".." />
 				<Option object_output="../obj/Debug64U" />
 				<Option type="1" />
@@ -237,6 +237,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../source/themelist.h" />
+		<Unit filename="../source/update.cpp">
+			<Option compiler="gcc" use="1" buildCommand="$compiler $options $includes -c $file -o $object -DBOOST_ALL_NO_LIB -DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_HASH_MAP_BUCKETS=1021 -DBOOST_ASIO_SEPARATE_COMPILATION -DBOOST_EXCEPTION_DISABLE -DBOOST_MULTI_INDEX_DISABLE_SERIALIZATION -DBOOST_SYSTEM_STATIC_LINK=1 -DTORRENT_DISABLE_GEO_IP -DTORRENT_NO_DEPRECATE -DTORRENT_PRODUCTION_ASSERTS=1 -DTORRENT_RELEASE_ASSERTS=1 -DTORRENT_USE_I2P=0 -DTORRENT_USE_ICONV=0 -DTORRENT_USE_IPV6=0 -DTORRENT_USE_TOMMATH" />
+		</Unit>
+		<Unit filename="../source/update.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
