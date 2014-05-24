@@ -76,13 +76,13 @@
 				<Option type="2" />
 				<Option compiler="gcc_64" />
 				<Compiler>
-					<Add option="-pg" />
-					<Add option="-g" />
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
 					<Add option="-m64" />
 					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Linker>
-					<Add option="-pg -lgmon" />
 					<Add library="kernel32" />
 					<Add library="user32" />
 					<Add library="gdi32" />

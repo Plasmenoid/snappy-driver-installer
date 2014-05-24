@@ -594,6 +594,7 @@ void bundle_lowprioirity(bundle_t *bundle)
     redrawmainwnd();
 
     collection_printstates(&bundle->collection);
+    collection_finddrp(&bundle->collection,L"");
     state_print(&bundle->state);
     matcher_print(&bundle->matcher);
     manager_print(manager_g);
@@ -1481,7 +1482,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 if(j>=0)panel_draw_inv(&panels[j]);
                 panel_draw_inv(&panels[panel_lasti/256]);
             }
-            if(j>=0)panel_lasti=i+j*256;
+            if(j>=0)panel_lasti=i+j*256;else panel_lasti=0;
             break;
 
         case WM_LBUTTONUP:
@@ -1489,7 +1490,8 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             i=panels_hitscan(x,y,&j);
             if(i<0)break;
             if(i<4&&j==0)
-                RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
+                DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),0,(DLGPROC)UpdateProcedure);
+                //RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
             else
             //log_con("%d,%d\n",j,i);
             if(panels[j].items[i].type==TYPE_CHECKBOX||TYPE_BUTTON)
