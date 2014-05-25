@@ -835,6 +835,10 @@ WCHAR *getdrp_packname(hwidmatch_t *hwidmatch)
     driverpack_t *drp=hwidmatch->drp;
     return (WCHAR*)(drp->text+drp->drpfilename);
 }
+int getdrp_packontorrent(hwidmatch_t *hwidmatch)
+{
+    return hwidmatch->drp->type==DRIVERPACK_TYPE_UPDATE;
+}
 
 //inffile
 char *getdrp_infpath(hwidmatch_t *hwidmatch)

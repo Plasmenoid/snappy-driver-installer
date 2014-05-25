@@ -17,7 +17,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 #define STR_LN 4096
 #define ofst int
-#define MERGE_FINDER
+//#define MERGE_FINDER
 
 typedef struct _driverpack_t driverpack_t;
 typedef struct _data_inffile_t data_inffile_t;
@@ -98,7 +98,8 @@ typedef struct _version_t
 
 #define DRIVERPACK_TYPE_PENDING_SAVE    0
 #define DRIVERPACK_TYPE_INDEXED         1
-#define DRIVERPACK_TYPE_DIR             2
+#define DRIVERPACK_TYPE_UPDATE          2
+#define DRIVERPACK_TYPE_EMPTY           3
 
 //{ Indexing strucures
 typedef struct _driverpack_t
@@ -236,6 +237,7 @@ WCHAR *finddrp(WCHAR *s);
 void collection_init(collection_t *col,WCHAR *driverpacks_dir,WCHAR *index_bin_dir,WCHAR *index_linear_dir,int flags);
 void collection_free(collection_t *col);
 void collection_save(collection_t *col);
+void collection_updatedindexes(collection_t *col);
 void collection_load(collection_t *col);
 void collection_print(collection_t *col);
 WCHAR *collection_finddrp(collection_t *col,WCHAR *s);

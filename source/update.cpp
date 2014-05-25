@@ -24,13 +24,19 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 extern "C"
 {
 #define _WIN32_IE 0x0300
+#define BUFLEN              4096
+
 #include <commctrl.h>
 #include <Shlwapi.h>
 #include "resources.h"
 #include "common.h"
 #include "indexing.h"
+#include "theme.h"
+#include "update.h"
 #include "svnrev.h"
 void log_con(CHAR const *format,...);
+int  manager_drplive(WCHAR *s);
+extern CRITICAL_SECTION sync;
 
 
 typedef struct _driverpack_update_t
@@ -45,11 +51,13 @@ typedef struct _driverpack_update_t
 int drp_num;
 driverpack_update_t drp_list[128];
 
+char bff[4096];
+WCHAR bffw[4096];
 int getver(const char *ptr)
 {
-    char bufa[4096],*s=bufa;
+    char *s=bff;
 
-    strcpy(bufa,ptr);
+    strcpy(bff,ptr);
     while(*s)
     {
         if(*s=='_'&&s[1]>='0'&&s[1]<='9')
@@ -62,15 +70,15 @@ int getver(const char *ptr)
 
 int getcurver(const char *ptr)
 {
-    WCHAR buf[4096],*s=buf;
+    WCHAR *s=bffw;
 
-    wsprintf(buf,L"%S",ptr);
+    wsprintf(bffw,L"%S",ptr);
     while(*s)
     {
         if(*s=='_'&&s[1]>='0'&&s[1]<='9')
         {
             *s=0;
-            s=finddrp(buf);
+            s=finddrp(bffw);
             if(!s)return 0;
             //log_con("%s,%ws\n",ptr,s);
             while(*s)
@@ -81,15 +89,35 @@ int getcurver(const char *ptr)
                 s++;
             }
             return 0;
-//            log_con("%ws,%ws\n",buf);
         }
         s++;
     }
     return 0;
 }
 
+void updatelang(HWND hwnd)
+{
+    LVCOLUMN lvc;
+    int i;
+
+    SetWindowText(hwnd,STR(STR_UPD_TITLE));
+    SetWindowText(GetDlgItem(hwnd,IDCHECKALL),STR(STR_UPD_BTN_ALL));
+    SetWindowText(GetDlgItem(hwnd,IDUNCHECKALL),STR(STR_UPD_BTN_NONE));
+    SetWindowText(GetDlgItem(hwnd,IDCHECKTHISPC),STR(STR_UPD_BTN_THISPC));
+    SetWindowText(GetDlgItem(hwnd,IDOK),STR(STR_UPD_BTN_OK));
+    SetWindowText(GetDlgItem(hwnd,IDCANCEL),STR(STR_UPD_BTN_CANCEL));
+    SetWindowText(GetDlgItem(hwnd,IDACCEPT),STR(STR_UPD_BTN_ACCEPT));
+    SetWindowText(GetDlgItem(hwnd,IDTOTALSIZE),STR(STR_UPD_TOTALSIZE));
+
+    lvc.mask=LVCF_TEXT;
+    for(i=0;i<6;i++)
+    {
+        lvc.pszText=(WCHAR *)STR(STR_UPD_COL_NAME+i);
+        ListView_SetColumn(GetDlgItem(hwnd,IDLIST),i,&lvc);
+    }
 }
 
+}
 using namespace libtorrent;
 void populatelist(HWND hList)
 {
@@ -124,6 +152,7 @@ void populatelist(HWND hList)
                 newver=atol(StrStrIA(filename,"sdi_R")+5);
         }
     }
+    EnterCriticalSection(&sync);
 
     lvI.mask      = LVIF_TEXT|LVIF_STATE;
     lvI.stateMask = 0;
@@ -151,13 +180,16 @@ void populatelist(HWND hList)
         filename=fe.path.c_str()+20;
         if(StrStrIA(filename,".7z"))
         {
-            int oldver,newver;
+            int oldver;
             lvI.iItem=drp_num+1;
 
             lvI.pszText=drp_list[drp_num].name;
             wsprintf(lvI.pszText,L"%S",filename);
             int sz=fe.size/1024/1024;
             if(!sz)sz=1;
+            newver=2;
+            oldver=1;
+
             newver=getver(filename);
             oldver=getcurver(filename);
 
@@ -172,12 +204,14 @@ void populatelist(HWND hList)
                 ListView_SetItemText(hList,drp_num+1,3,buf);
                 wsprintf(buf,L"%d",oldver);
                 ListView_SetItemText(hList,drp_num+1,4,buf);
-                wsprintf(buf,L"%ws",L"No");
+                wsprintf(buf,L"%S",filename);
+                wsprintf(buf,L"%ws",STR(STR_UPD_YES+manager_drplive(buf)));
                 ListView_SetItemText(hList,drp_num+1,5,buf);
                 drp_num++;
             }
         }
     }
+    LeaveCriticalSection(&sync);
     log_con("Start\n");
     s.listen_on(std::make_pair(59442,59443), ec);
     if (ec)
@@ -193,24 +227,16 @@ void populatelist(HWND hList)
 extern "C"
 {
 
-WCHAR *text1[]=
-{
-    L"Driverpack",
-    L"Size",
-    L"%",
-    L"New",
-    L"Current",
-    L"For this PC?",
-};
 int cxn[]=
 {
-    190,
-    50,
-    50,
+    199,
+    60,
+    40,
     70,
     70,
     90,
 };
+
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
@@ -222,23 +248,22 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
         case WM_INITDIALOG:
             {
                 hList=GetDlgItem(hwnd,IDLIST);
-                ListView_SetExtendedListViewStyle(hList,
-                                    LVS_EX_CHECKBOXES);
+                ListView_SetExtendedListViewStyle(hList,LVS_EX_CHECKBOXES);
                 LVCOLUMN lvc;
 
-                lvc.mask=LVCF_FMT|LVCF_WIDTH|LVCF_TEXT|LVCF_SUBITEM;
-                lvc.iSubItem = 0;
-                lvc.fmt = LVCFMT_LEFT;
+                lvc.mask=LVCF_FMT|LVCF_WIDTH|LVCF_SUBITEM|LVCF_TEXT;
                 for(i=0;i<6;i++)
                 {
-                    lvc.pszText=text1[i];
+                    lvc.pszText=(WCHAR *)L"";
                     lvc.cx=cxn[i];
                     lvc.iSubItem = i;
                     lvc.fmt = i?LVCFMT_RIGHT:LVCFMT_LEFT;
                     ListView_InsertColumn(hList, i, &lvc);
                 }
-                ListView_SetCheckState(hList,2,1);
+
+                //ListView_SetCheckState(hList,2,1);
                 populatelist(hList);
+                updatelang(hwnd);
             }
             return TRUE;
 

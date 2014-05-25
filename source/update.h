@@ -16,3 +16,9 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
+int getver(const char *ptr);
+int getcurver(const char *ptr);
+void updatelang(HWND hwnd);
+void populatelist(HWND hList);
+
+
