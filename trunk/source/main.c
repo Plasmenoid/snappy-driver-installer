@@ -1492,9 +1492,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(i<0)break;
             if(i<4&&j==0)
             {
+#ifndef _WIN64
                 if(ctrl_down)
                     DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),0,(DLGPROC)UpdateProcedure);
                 else
+#endif
                     RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
             }
             else
