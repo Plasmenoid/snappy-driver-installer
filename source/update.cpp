@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _WIN64
 
 #include "libtorrent/config.hpp"
 #include "libtorrent/entry.hpp"
@@ -290,3 +291,4 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
 }
 
 }
+#endif
