@@ -489,7 +489,7 @@ void collection_save(collection_t *col)
                 driverpack_getindexfilename(&col->driverpack_list[i],col->index_bin_dir,L"bin",buf2);
                 if(!wcscmp(buf2,buf3))break;
             }
-            if(i==col->driverpack_handle.items)
+            if(i==col->driverpack_handle.items&&!StrStrIW(buf3,L"\\_"))
             {
                 printf("Deleting %ws\n",buf3);
                 _wremove(buf3);
@@ -533,6 +533,31 @@ int collection_scanfolder_count(collection_t *col,const WCHAR *path)
     return cnt;
 }
 
+void collection_updatedindexes(collection_t *col)
+{
+    HANDLE hFind = INVALID_HANDLE_VALUE;
+    WIN32_FIND_DATA FindFileData;
+    WCHAR buf[BUFLEN];
+    WCHAR filename[BUFLEN];
+    driverpack_t *drp;
+
+    wsprintf(buf,L"%ws\\_*.*",col->index_bin_dir);
+    hFind=FindFirstFile(buf,&FindFileData);
+
+    while(FindNextFile(hFind,&FindFileData)!=0)
+    {
+        wsprintf(filename,L"%ws",FindFileData.cFileName);
+        wcscpy(filename+wcslen(FindFileData.cFileName)-3,L"7z");
+
+        int index=heap_allocitem_i(&col->driverpack_handle);
+
+        drp=&col->driverpack_list[index];
+        driverpack_init(drp,col->driverpack_dir,filename,col);
+        driverpack_loadindex(drp);
+    }
+    FindClose(hFind);
+}
+
 void collection_load(collection_t *col)
 {
     driverpack_t *unpacked_drp;
@@ -560,6 +585,7 @@ void collection_load(collection_t *col)
     drp_count=collection_scanfolder_count(col,col->driverpack_dir);
     drp_cur=0;
     collection_scanfolder(col,col->driverpack_dir);
+    collection_updatedindexes(col);
     manager_g->items_list[SLOT_INDEXING].isactive=0;
     if(col->driverpack_handle.items<=1&&(flags&FLAG_DPINSTMODE)==0)
         itembar_settext(manager_g,SLOT_NODRIVERS,L"",0);
@@ -835,6 +861,7 @@ int driverpack_loadindex(driverpack_t *drp)
 
     driverpack_getindexfilename(drp,drp->col->index_bin_dir,L"bin",filename);
     f=_wfopen(filename,L"rb");
+    drp->type=DRIVERPACK_TYPE_EMPTY;
     if(!f)return 0;
 
     fseek(f,0,SEEK_END);
@@ -872,7 +899,7 @@ int driverpack_loadindex(driverpack_t *drp)
     if(mem_unpack)free(mem_unpack);
     fclose(f);
 
-    drp->type=DRIVERPACK_TYPE_INDEXED;
+    drp->type=StrStrIW(filename,L"\\_")?DRIVERPACK_TYPE_UPDATE:DRIVERPACK_TYPE_INDEXED;
     return 1;
 }
 

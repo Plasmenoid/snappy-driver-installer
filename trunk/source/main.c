@@ -669,6 +669,7 @@ void lang_refresh()
         return;
     }
     redrawmainwnd();
+    redrawfield();
 
     POINT p;
     GetCursorPos(&p);
@@ -1490,8 +1491,12 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             i=panels_hitscan(x,y,&j);
             if(i<0)break;
             if(i<4&&j==0)
-                DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),0,(DLGPROC)UpdateProcedure);
-                //RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
+            {
+                if(ctrl_down)
+                    DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),0,(DLGPROC)UpdateProcedure);
+                else
+                    RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
+            }
             else
             //log_con("%d,%d\n",j,i);
             if(panels[j].items[i].type==TYPE_CHECKBOX||TYPE_BUTTON)
@@ -1964,6 +1969,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
                 else if(installmode==MODE_NONE)
                     manager_clear(manager_g);
             }
+
             if(floating_itembar>=0&&(i==1||i==0))
             {
                 manager_toggle(manager_g,floating_itembar);

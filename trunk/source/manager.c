@@ -84,6 +84,24 @@ void manager_sorta(matcher_t *m,int *v)
     //for(i=0;i<num;i++)v[i]=i;
 }
 
+int  manager_drplive(WCHAR *s)
+{
+    itembar_t *itembar;
+    int k,needle=0;
+
+    itembar=&manager_g->items_list[RES_SLOTS];
+    for(k=RES_SLOTS;k<manager_g->items_handle.items;k++,itembar++)
+        if(itembar->hwidmatch&&StrStrIW(getdrp_packname(itembar->hwidmatch),s))
+    {
+        if(itembar->isactive)
+        {
+            if(getdrp_packontorrent(itembar->hwidmatch))return 0;// Yes
+        }
+        needle=1;
+    }
+    return needle?1:1; // No/Unknown
+}
+
 void manager_populate(manager_t *manager)
 {
     matcher_t *matcher=manager->matcher;
@@ -162,7 +180,8 @@ void manager_filter(manager_t *manager,int options)
             if((!o1||!cnt[NUM_STATUS])&&(options&FILTER_SHOW_MISSING)&&itembar->hwidmatch->status&STATUS_MISSING)
             {
                 itembar->isactive=1;
-                cnt[NUM_STATUS]++;
+                if(!getdrp_packontorrent(itembar->hwidmatch))
+                    cnt[NUM_STATUS]++;
             }
 
 
@@ -180,12 +199,17 @@ void manager_filter(manager_t *manager,int options)
                    &&(options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&(options&FILTER_SHOW_INVALID)==0
                    &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0)continue;
 
-                cnt[k]++;
-                cnt[NUM_STATUS]++;
+                if(!getdrp_packontorrent(itembar->hwidmatch))
+                {
+                    cnt[k]++;
+                    cnt[NUM_STATUS]++;
+                }
                 itembar->isactive=1;
             }
 
-            if(o1&&itembar->hwidmatch->status&STATUS_CURRENT)cnt[NUM_STATUS]++;
+            if(!getdrp_packontorrent(itembar->hwidmatch))
+                if(o1&&itembar->hwidmatch->status&STATUS_CURRENT)
+                    cnt[NUM_STATUS]++;
         }
         if(!devicematch->num_matches)
         {
@@ -243,29 +267,6 @@ void manager_print(manager_t *manager)
 
     log("}manager_print[%d]\n\n",act);
 }
-
-/*void manager_sort(manager_t *manager)
-{
-    itembar_t *itembar1,*itembar2,t;
-    int i,j;
-
-    if(installmode)return;
-
-    itembar1=&manager->items_list[RES_SLOTS];
-    for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar1++)if(itembar1->hwidmatch)
-    {
-        itembar2=&manager->items_list[i+1];
-        for(j=i+1;j<manager->items_handle.items;j++,itembar2++)if(itembar2->hwidmatch)
-        if(wcscmp(getdrp_packname(itembar1->hwidmatch),getdrp_packname(itembar2->hwidmatch))>0)
-        {
-            memcpy(&t,itembar1,sizeof(itembar_t));
-            memcpy(itembar1,itembar2,sizeof(itembar_t));
-            memcpy(itembar2,&t,sizeof(itembar_t));
-        }
-    }
-    manager_setpos(manager);
-}*/
-//}
 
 //{ User interaction
 void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
@@ -546,6 +547,7 @@ void str_status(WCHAR *buf,itembar_t *itembar)
         {
             wcscat(buf,STR(STR_STATUS_NOTSIGNED));
         }
+        if(getdrp_packontorrent(itembar->hwidmatch))wcscat(buf,STR(STR_UPD_WEBSTATUS));
     }
     else
     //if(devicematch)

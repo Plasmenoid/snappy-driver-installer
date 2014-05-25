@@ -116,6 +116,7 @@ void matcher_print(matcher_t *matcher);
 //driverpack
 WCHAR *getdrp_packpath(hwidmatch_t *hwidmatch);
 WCHAR *getdrp_packname(hwidmatch_t *hwidmatch);
+int   getdrp_packontorrent(hwidmatch_t *hwidmatch);
 //inffile
 char *getdrp_infpath(hwidmatch_t *hwidmatch);
 char *getdrp_infname(hwidmatch_t *hwidmatch);
