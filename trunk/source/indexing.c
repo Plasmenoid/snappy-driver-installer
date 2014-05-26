@@ -861,7 +861,7 @@ int driverpack_loadindex(driverpack_t *drp)
 
     driverpack_getindexfilename(drp,drp->col->index_bin_dir,L"bin",filename);
     f=_wfopen(filename,L"rb");
-    drp->type=DRIVERPACK_TYPE_EMPTY;
+//    drp->type=DRIVERPACK_TYPE_EMPTY;
     if(!f)return 0;
 
     fseek(f,0,SEEK_END);

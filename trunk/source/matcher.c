@@ -385,10 +385,10 @@ int isMissing(device_t *device,driver_t *driver,state_t *state)
     if(driver)
     {
         if(!_wcsicmp((WCHAR*)(state->text+driver->MatchingDeviceId),L"PCI\\CC_0300"))return 1;
-        if(device->problem)return 1;
+        if(device->problem&&device->HardwareID)return 1;
     }else
     {
-        if(device->problem)return 1;
+        if(device->problem&&device->HardwareID)return 1;
     }
     return 0;
 }
@@ -730,7 +730,7 @@ void matcher_populate(matcher_t *matcher)
             else
             {
                 if(devicematch->device->problem)
-                    devicematch->status=STATUS_NF_MISSING;
+                    devicematch->status=devicematch->device->HardwareID?STATUS_NF_MISSING:STATUS_NF_STANDARD;
                 else
                     devicematch->status=STATUS_NF_STANDARD;
             }

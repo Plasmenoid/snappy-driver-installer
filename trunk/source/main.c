@@ -451,6 +451,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 
     virusmonitor_stop();
     time_total=GetTickCount()-time_total;
+    update_stop();
     log_times();
     log_stop();
     //signal(SIGSEGV,SIG_DFL);

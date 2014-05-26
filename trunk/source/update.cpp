@@ -24,7 +24,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 extern "C"
 {
-#define _WIN32_IE 0x0300
+#define _WIN32_IE 0x0400
 #define BUFLEN              4096
 
 #include <commctrl.h>
@@ -39,23 +39,11 @@ void log_con(CHAR const *format,...);
 int  manager_drplive(WCHAR *s);
 extern CRITICAL_SECTION sync;
 
+int totalsize=0,numfiles;
 
-typedef struct _driverpack_update_t
-{
-    WCHAR name[4096];
-    int index;
-    int needed;
-    int oldver,newver;
-    int percent;
-}driverpack_update_t;
-
-int drp_num;
-driverpack_update_t drp_list[128];
-
-char bff[4096];
-WCHAR bffw[4096];
 int getver(const char *ptr)
 {
+    char bff[4096];
     char *s=bff;
 
     strcpy(bff,ptr);
@@ -71,6 +59,7 @@ int getver(const char *ptr)
 
 int getcurver(const char *ptr)
 {
+    WCHAR bffw[4096];
     WCHAR *s=bffw;
 
     wsprintf(bffw,L"%S",ptr);
@@ -81,7 +70,6 @@ int getcurver(const char *ptr)
             *s=0;
             s=finddrp(bffw);
             if(!s)return 0;
-            //log_con("%s,%ws\n",ptr,s);
             while(*s)
             {
                 if(*s==L'_'&&s[1]>=L'0'&&s[1]<=L'9')
@@ -99,7 +87,10 @@ int getcurver(const char *ptr)
 void updatelang(HWND hwnd)
 {
     LVCOLUMN lvc;
+    WCHAR buf[BUFLEN];
     int i;
+
+    wsprintf(buf,STR(STR_UPD_TOTALSIZE),totalsize);
 
     SetWindowText(hwnd,STR(STR_UPD_TITLE));
     SetWindowText(GetDlgItem(hwnd,IDCHECKALL),STR(STR_UPD_BTN_ALL));
@@ -108,7 +99,7 @@ void updatelang(HWND hwnd)
     SetWindowText(GetDlgItem(hwnd,IDOK),STR(STR_UPD_BTN_OK));
     SetWindowText(GetDlgItem(hwnd,IDCANCEL),STR(STR_UPD_BTN_CANCEL));
     SetWindowText(GetDlgItem(hwnd,IDACCEPT),STR(STR_UPD_BTN_ACCEPT));
-    SetWindowText(GetDlgItem(hwnd,IDTOTALSIZE),STR(STR_UPD_TOTALSIZE));
+    SetWindowText(GetDlgItem(hwnd,IDTOTALSIZE),buf);
 
     lvc.mask=LVCF_TEXT;
     for(i=0;i<6;i++)
@@ -120,34 +111,33 @@ void updatelang(HWND hwnd)
 
 }
 using namespace libtorrent;
+session *sessionhandle=0;
+torrent_handle updatehandle;
+add_torrent_params params;
+
 void populatelist(HWND hList)
 {
-    session s;
-    add_torrent_params p;
     error_code ec;
-    torrent_handle th;
     file_entry fe;
     LVITEM lvI;
     int i;
     int basesize=0;
     const char *filename;
-    WCHAR buf[4096];
+    WCHAR buf[128];
     int newver=0;
 
-    p.save_path="./update";
-    p.ti=new torrent_info("samdrivers.torrent",ec);
-    log_con("Listen %d\n",s.is_listening());
-    th=s.add_torrent(p,ec);
-    th.set_priority(0);
+    params.save_path="./update";
+    params.ti=new torrent_info("samdrivers.torrent",ec);
 
-    for(i=0;i<p.ti->num_files();i++)
+    numfiles=params.ti->num_files();
+    for(i=0;i<numfiles;i++)
     {
-        fe=p.ti->file_at(i);
+        fe=params.ti->file_at(i);
         filename=fe.path.c_str();
         if(!StrStrIA(filename,"drivers\\"))
         {
             basesize+=fe.size;
-            th.file_priority(1,2);
+            //updatehandle.file_priority(1,2);
             //log_con("%.0f %s\n",fe.size/1024./1024.,filename);
             if(StrStrIA(filename,"sdi_R"))
                 newver=atol(StrStrIA(filename,"sdi_R")+5);
@@ -155,16 +145,17 @@ void populatelist(HWND hList)
     }
     EnterCriticalSection(&sync);
 
-    lvI.mask      = LVIF_TEXT|LVIF_STATE;
-    lvI.stateMask = 0;
-    lvI.iSubItem  = 0;
-    lvI.state     = 0;
-    lvI.iItem     = 0;
+    lvI.mask      =LVIF_TEXT|LVIF_STATE|LVIF_PARAM;
+    lvI.stateMask =0;
+    lvI.iSubItem  =0;
+    lvI.state     =0;
+    lvI.iItem     =0;
+    lvI.lParam    =-1;
     //if(newver>SVN_REV)
     {
-        wsprintf(lvI.pszText,L"Base");
-        ListView_InsertItem(hList, &lvI);
-        wsprintf(buf,L"%d MB",basesize/1024/1024);
+        lvI.pszText=(WCHAR *)STR(STR_UPD_BASEFILES);
+        ListView_InsertItem(hList,&lvI);
+        wsprintf(buf,L"%d %s",basesize/1024/1024,STR(STR_UPD_MB));
         ListView_SetItemText(hList,0,1,buf);
         wsprintf(buf,L"%d%%",0);
         ListView_SetItemText(hList,0,2,buf);
@@ -172,58 +163,118 @@ void populatelist(HWND hList)
         ListView_SetItemText(hList,0,3,buf);
         wsprintf(buf,L" SDI_R%d",SVN_REV);
         ListView_SetItemText(hList,0,4,buf);
+        ListView_SetItemText(hList,0,5,(WCHAR *)STR(STR_UPD_YES));
     }
 
-    drp_num=0;
-    for(i=0;i<p.ti->num_files();i++)
+    for(i=0;i<numfiles;i++)
     {
-        fe=p.ti->file_at(i);
+        fe=params.ti->file_at(i);
         filename=fe.path.c_str()+20;
         if(StrStrIA(filename,".7z"))
         {
             int oldver;
-            lvI.iItem=drp_num+1;
 
-            lvI.pszText=drp_list[drp_num].name;
-            wsprintf(lvI.pszText,L"%S",filename);
+            wsprintf(buf,L"%S",filename);
+            lvI.pszText=buf;
             int sz=fe.size/1024/1024;
             if(!sz)sz=1;
-            newver=2;
-            oldver=1;
 
             newver=getver(filename);
             oldver=getcurver(filename);
 
             if(newver>oldver)
             {
-                ListView_InsertItem(hList,&lvI);
-                wsprintf(buf,L"%d MB",sz);
-                ListView_SetItemText(hList,drp_num+1,1,buf);
+                lvI.lParam=i;
+                int j=ListView_InsertItem(hList,&lvI);
+                wsprintf(buf,L"%d %s",sz,STR(STR_UPD_MB));
+                ListView_SetItemText(hList,j,1,buf);
                 wsprintf(buf,L"%d%%",0);
-                ListView_SetItemText(hList,drp_num+1,2,buf);
+                ListView_SetItemText(hList,j,2,buf);
                 wsprintf(buf,L"%d",newver);
-                ListView_SetItemText(hList,drp_num+1,3,buf);
+                ListView_SetItemText(hList,j,3,buf);
                 wsprintf(buf,L"%d",oldver);
-                ListView_SetItemText(hList,drp_num+1,4,buf);
+                ListView_SetItemText(hList,j,4,buf);
                 wsprintf(buf,L"%S",filename);
                 wsprintf(buf,L"%ws",STR(STR_UPD_YES+manager_drplive(buf)));
-                ListView_SetItemText(hList,drp_num+1,5,buf);
-                drp_num++;
+                ListView_SetItemText(hList,j,5,buf);
             }
         }
     }
     LeaveCriticalSection(&sync);
-    log_con("Start\n");
-    s.listen_on(std::make_pair(59442,59443), ec);
-    if (ec)
-    {
-        log_con("failed to open listen socket: %s\n", ec.message().c_str());
-    }
-
-    //Sleep(20000);
-    log_con("Finish %d\n",(int)s.status().total_download);
 }
 
+void update_start()
+{
+    error_code ec;
+
+    if(!sessionhandle)
+    {
+        sessionhandle=new session();
+        log_con("Listen %d\n",sessionhandle->is_listening());
+        updatehandle=sessionhandle->add_torrent(params,ec);
+
+        //sessionhandle.listen_on(std::make_pair(59442,59443), ec);
+        if (ec)
+        {
+            log_con("failed to open listen socket: %s\n", ec.message().c_str());
+        }
+        log_con("Start update\n");
+    }
+    log_con("Downloaded %d\n",(int)sessionhandle->status().total_download);
+}
+
+void update_stop()
+{
+    if(sessionhandle)
+    {
+        log_con("Finish %d\n",(int)sessionhandle->status().total_download);
+        if(sessionhandle)delete sessionhandle;
+        Sleep(2000);
+    }
+}
+
+void updatestatus(HWND hList)
+{
+    WCHAR buf[BUFLEN];
+    int i;
+
+    totalsize=0;
+    for(i=0;i<ListView_GetItemCount(hList);i++)
+    if(ListView_GetCheckState(hList,i))
+    {
+        ListView_GetItemText(hList,i,1,buf,32);
+        totalsize+=_wtoi(buf);
+    }
+    updatelang(GetParent(hList));
+}
+
+void updatepriorities(HWND hList)
+{
+    char filelist[BUFLEN];
+    int i;
+    LVITEM item;
+
+    log_con("Accept,%d\n",numfiles);
+    item.mask=LVIF_PARAM;
+    memset(filelist,0,BUFLEN);
+    for(i=0;i<ListView_GetItemCount(hList);i++)
+    {
+        item.iItem=i;
+        ListView_GetItem(hList,&item);
+        if(item.lParam>=0)
+        {
+            filelist[item.lParam]=1;
+            log_con("%5d,%5d,%5d\n",i,item.lParam,ListView_GetCheckState(hList,i));
+        }
+    }
+    for(i=0;i<numfiles;i++)
+    if(!filelist[i])
+    {
+
+        log_con("A %5d\n",i);
+    }
+
+}
 
 extern "C"
 {
@@ -232,7 +283,7 @@ int cxn[]=
 {
     199,
     60,
-    40,
+    44,
     70,
     70,
     90,
@@ -241,32 +292,47 @@ int cxn[]=
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
+    LVCOLUMN lvc;
+    //LPNMITEMACTIVATE lpnmitem;
     HWND hList;
+    WCHAR buf[32];
     int i;
 
+    hList=GetDlgItem(hwnd,IDLIST);
     switch(Message)
     {
         case WM_INITDIALOG:
             {
-                hList=GetDlgItem(hwnd,IDLIST);
-                ListView_SetExtendedListViewStyle(hList,LVS_EX_CHECKBOXES);
-                LVCOLUMN lvc;
+                ListView_SetExtendedListViewStyle(hList,LVS_EX_CHECKBOXES|LVS_EX_FULLROWSELECT);
 
                 lvc.mask=LVCF_FMT|LVCF_WIDTH|LVCF_SUBITEM|LVCF_TEXT;
+                lvc.pszText=(WCHAR *)L"";
                 for(i=0;i<6;i++)
                 {
-                    lvc.pszText=(WCHAR *)L"";
                     lvc.cx=cxn[i];
-                    lvc.iSubItem = i;
-                    lvc.fmt = i?LVCFMT_RIGHT:LVCFMT_LEFT;
-                    ListView_InsertColumn(hList, i, &lvc);
+                    lvc.iSubItem=i;
+                    lvc.fmt=i?LVCFMT_RIGHT:LVCFMT_LEFT;
+                    ListView_InsertColumn(hList,i,&lvc);
                 }
 
-                //ListView_SetCheckState(hList,2,1);
                 populatelist(hList);
                 updatelang(hwnd);
+                update_start();
             }
             return TRUE;
+
+        case WM_NOTIFY:
+            if(((LPNMHDR)lParam)->code==LVN_ITEMCHANGED)
+            {
+                updatestatus(hList);
+                /*lpnmitem = (LPNMITEMACTIVATE) lParam;
+                i=ListView_GetCheckState(hList,lpnmitem->iItem);
+                //log_con("%d,%d,%d\n",lpnmitem->iSubItem,lpnmitem->uOldState,lpnmitem->uNewState);
+                i^=1;
+                ListView_SetCheckState(hList,lpnmitem->iItem,i);*/
+                return TRUE;
+            }
+            break;
 
         case WM_COMMAND:
             switch(LOWORD(wParam))
@@ -275,8 +341,28 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                     EndDialog(hwnd,IDOK);
                     return TRUE;
 
+                case IDACCEPT:
+                    updatepriorities(hList);
+                    return TRUE;
+
                 case IDCANCEL:
                     EndDialog(hwnd,IDCANCEL);
+                    return TRUE;
+
+                case IDCHECKALL:
+                case IDUNCHECKALL:
+                    for(i=0;i<ListView_GetItemCount(hList);i++)
+                        ListView_SetCheckState(hList,i,LOWORD(wParam)==IDCHECKALL?1:0);
+                    updatestatus(hList);
+                    return TRUE;
+
+                case IDCHECKTHISPC:
+                    for(i=0;i<ListView_GetItemCount(hList);i++)
+                    {
+                        ListView_GetItemText(hList,i,5,buf,32);
+                        ListView_SetCheckState(hList,i,StrStrIW(buf,STR(STR_UPD_YES))?1:0);
+                    }
+                    updatestatus(hList);
                     return TRUE;
 
                 default:
@@ -292,3 +378,4 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
 
 }
 #endif
+
