@@ -1,4 +1,4 @@
-/*
+/*update_stop();
 This file is part of Snappy Driver Installer.
 
 Snappy Driver Installer is free software: you can redistribute it and/or modify
@@ -21,4 +21,7 @@ int getcurver(const char *ptr);
 void updatelang(HWND hwnd);
 void populatelist(HWND hList);
 
-
+void update_start();
+void update_stop();
+void updatestatus(HWND hList);
+void updatepriorities(HWND hList);
