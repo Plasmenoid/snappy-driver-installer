@@ -545,12 +545,12 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
     if(lParam&2)
     {
         GetWindowText(hwnd,buf,BUFLEN);
-        log("Window %06X,%06X '%ws'\n",hwnd,GetParent(hwnd),buf);
+        log_file("Window %06X,%06X '%ws'\n",hwnd,GetParent(hwnd),buf);
         GetClassName(hwnd,buf,BUFLEN);
-        log("Class: '%ws'\n",buf);
+        log_file("Class: '%ws'\n",buf);
         RealGetWindowClass(hwnd,buf,BUFLEN);
-        log("RealClass: '%ws'\n",buf);
-        log("\n");
+        log_file("RealClass: '%ws'\n",buf);
+        log_file("\n");
     }
 
     if((lParam&1)==1)
@@ -558,9 +558,9 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
         calcwnddata(&w,hwnd);
         if(lParam&2)
         {
-            log("* MainWindow (%d,%d) (%d,%d)\n",w.wnd_wx,w.wnd_wy,w.cln_wx,w.cln_wy);
-            log("* Child (%d,%d,%d,%d)\n",w.btn_x,w.btn_y,w.btn_wx,w.btn_wy);
-            log("\n");
+            log_file("* MainWindow (%d,%d) (%d,%d)\n",w.wnd_wx,w.wnd_wy,w.cln_wx,w.cln_wy);
+            log_file("* Child (%d,%d,%d,%d)\n",w.btn_x,w.btn_y,w.btn_wx,w.btn_wy);
+            log_file("\n");
         }
 
         if((lParam&2)==0)for(i=0;i<NUM_CLICKDATA;i++)

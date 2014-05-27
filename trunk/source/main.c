@@ -174,23 +174,6 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-showdrpnames")) flags|=FLAG_SHOWDRPNAMES;else
         if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
         if(!wcscmp(pr,L"-showconsole"))  flags|=FLAG_SHOWCONSOLE;else
-        if(!wcscmp(pr,L"-torrent"))
-        {
-            WCHAR cmd[BUFLEN];
-            char **argv1;
-            wsprintf(cmd,L"torrent.exe %s",wcsstr(GetCommandLineW(),L"-torrent")+9);
-            log_con("\nExecuting '%ws'\n",cmd);
-            statemode=STATEMODE_EXIT;
-            argv1=(char **)CommandLineToArgvW(cmd,&argc);
-            for(i=0;i<argc;i++)str_unicode2ansi(argv1[i]);
-#ifndef _WIN64
-            ret_global=main2(argc,argv1);
-#endif
-            log_con("Ret: %d\n",ret_global);
-            LocalFree(argv1);
-            break;
-        }
-        else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
@@ -410,11 +393,11 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         log_con("  delextrainfs=%d\n",flags&FLAG_DELEXTRAINFS?1:0);
         log_con("  norestorepnt=%d\n",flags&FLAG_NORESTOREPOINT?1:0);
         log_con("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
-        log("\n");
+        log_con("\n");
         if(*state_file&&statemode)log_con("Virtual system system config '%ws'\n",state_file);
         if(virtual_arch_type)log_con("Virtual Windows version: %d-bit\n",virtual_arch_type);
         if(virtual_os_version)log_con("Virtual Windows version: %d.%d\n",virtual_os_version/10,virtual_os_version%10);
-        log("\n");
+        log_con("\n");
     }
     mkdir_r(drp_dir);
     mkdir_r(index_dir);
@@ -451,7 +434,9 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 
     virusmonitor_stop();
     time_total=GetTickCount()-time_total;
+#ifndef _WIN64
     update_stop();
+#endif
     log_times();
     log_stop();
     //signal(SIGSEGV,SIG_DFL);
@@ -671,6 +656,7 @@ void lang_refresh()
     }
     redrawmainwnd();
     redrawfield();
+    InvalidateRect(hPopup,0,0);
 
     POINT p;
     GetCursorPos(&p);
@@ -2039,6 +2025,8 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
                     drawpopup(instflag&INSTALLDRIVERS?STR_HINT_STOPINST:STR_HINT_STOPEXTR,FLOATING_TOOLTIP,x,y,hField);
                 else if(itembar_i==SLOT_RESTORE_POINT)
                     drawpopup(STR_RESTOREPOINT_H,FLOATING_TOOLTIP,x,y,hField);
+                else if(itembar_i==SLOT_NOUPDATES)
+                    drawpopup(-1,FLOATING_DOWNLOAD,x,y,hField);
                 else if(i==0&&itembar_i>=RES_SLOTS)
                     drawpopup(STR_HINT_DRIVER,FLOATING_TOOLTIP,x,y,hField);
                 else
@@ -2128,6 +2116,11 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
                 case FLOATING_ABOUT:
                     SelectObject(canvasPopup.hdcMem,hFont);
                     popup_about(canvasPopup.hdcMem);
+                    break;
+
+                case FLOATING_DOWNLOAD:
+                    SelectObject(canvasPopup.hdcMem,hFont);
+                    popup_download(canvasPopup.hdcMem);
                     break;
 
                 default:

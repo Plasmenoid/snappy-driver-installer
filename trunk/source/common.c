@@ -115,7 +115,7 @@ void heap_init(heap_t *t,int id,void **mem,int sz, int itemsize)
 {
     t->id=id;
     if(!sz)sz=heapsz[id];
-    //log("initsize %s: %d\n",heaps[t->id],sz);
+    //log_file("initsize %s: %d\n",heaps[t->id],sz);
     t->base=malloc(sz);
     if(!t->base)log_err("No mem %d\n",sz);
     t->membck=mem;
@@ -131,7 +131,7 @@ void heap_init(heap_t *t,int id,void **mem,int sz, int itemsize)
 void heap_free(heap_t *t)
 {
     if(t->base)free(t->base);
-    //log("heap[%s] wasted %d bytes of RAM\n",heaps[t->id],t->allocated-t->used);
+    //log_file("heap[%s] wasted %d bytes of RAM\n",heaps[t->id],t->allocated-t->used);
     if(t->dup)
     {
         hash_free(t->dup);
@@ -419,16 +419,16 @@ void hash_free(hashtable_t *t)
 
 void hash_stats(hashtable_t *t)
 {
-    log("Hash stats\n");
-    log("  Space\n");
-    log("    Size: %4d/%4d\t\t[%3.0f%%]\n",t->used_1,t->size,(double)t->used_1/t->size*100);
-    log("    Deep: %4d\n",t->max_deep);
-    log("    Itms: %d[%d]/%d\n",t->items_handle.used,t->items_handle.items,t->items_handle.allocated);
-    log("    Strs: %d[%d]/%d\n",t->strs_handle.used,t->strs_handle.items,t->strs_handle.allocated);
-    log("  Perfomance\n");
-    log("    Hits: %4d/%4d\t\t[%3.0f%%]\n",t->search_all-t->search_miss,t->search_all,
+    log_file("Hash stats\n");
+    log_file("  Space\n");
+    log_file("    Size: %4d/%4d\t\t[%3.0f%%]\n",t->used_1,t->size,(double)t->used_1/t->size*100);
+    log_file("    Deep: %4d\n",t->max_deep);
+    log_file("    Itms: %d[%d]/%d\n",t->items_handle.used,t->items_handle.items,t->items_handle.allocated);
+    log_file("    Strs: %d[%d]/%d\n",t->strs_handle.used,t->strs_handle.items,t->strs_handle.allocated);
+    log_file("  Perfomance\n");
+    log_file("    Hits: %4d/%4d\t\t[%3.0f%%]\n",t->search_all-t->search_miss,t->search_all,
         (double)(t->search_all-t->search_miss)/t->search_all*100);
-    log("    Cmps: %4d/%4d\t\t(%3.0f%%)\n\n",t->cmp_all-t->cmp_miss,t->cmp_all,
+    log_file("    Cmps: %4d/%4d\t\t(%3.0f%%)\n\n",t->cmp_all-t->cmp_miss,t->cmp_all,
         (t->cmp_all-t->cmp_miss)/(double)t->cmp_all*100);
 }
 
@@ -463,7 +463,7 @@ void hash_add(hashtable_t *t,const char *s,int s_sz,int key,int mode)
     int curi;
     int previ=-1;
     int cur_deep=0;
-    //if(key==0)log("*** zero added (%s)%.*s***\n",hashes[t->id],s_sz,s);
+    //if(key==0)log_file("*** zero added (%s)%.*s***\n",hashes[t->id],s_sz,s);
     if(t->flags&HASH_FLAG_STR_TO_LOWER)
     {
         memcpy(buf,s,s_sz);
@@ -493,7 +493,7 @@ void hash_add(hashtable_t *t,const char *s,int s_sz,int key,int mode)
                 break;
 
              default:
-                log("hash_add(): invalid mode\n");
+                log_file("hash_add(): invalid mode\n");
         }
         previ=curi;
     }

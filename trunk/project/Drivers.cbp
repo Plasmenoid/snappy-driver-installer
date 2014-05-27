@@ -151,9 +151,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../source/cli.h" />
-		<Unit filename="../source/client_test.cpp">
-			<Option compiler="gcc" use="1" buildCommand="$compiler $options $includes -c $file -o $object -DBOOST_ALL_NO_LIB -DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_HASH_MAP_BUCKETS=1021 -DBOOST_ASIO_SEPARATE_COMPILATION -DBOOST_EXCEPTION_DISABLE -DBOOST_MULTI_INDEX_DISABLE_SERIALIZATION -DBOOST_SYSTEM_STATIC_LINK=1 -DTORRENT_DISABLE_GEO_IP -DTORRENT_NO_DEPRECATE -DTORRENT_PRODUCTION_ASSERTS=1 -DTORRENT_RELEASE_ASSERTS=1 -DTORRENT_USE_I2P=0 -DTORRENT_USE_ICONV=0 -DTORRENT_USE_IPV6=0 -DTORRENT_USE_TOMMATH" />
-		</Unit>
 		<Unit filename="../source/common.c">
 			<Option compilerVar="CC" />
 		</Unit>

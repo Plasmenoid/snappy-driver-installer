@@ -58,7 +58,7 @@ void log_times();
 void gen_timestamp();
 void log_start(WCHAR *log_dir);
 void log_stop();
-void log(CHAR const *format,...);
+void log_file(CHAR const *format,...);
 void log_err(CHAR const *format,...);
 void log_con(CHAR const *format,...);
 void log_nul(CHAR const *format,...);

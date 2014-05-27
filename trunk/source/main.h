@@ -102,6 +102,7 @@ typedef WINBOOL (__cdecl *WINAPI5t_SRSetRestorePointW)(PRESTOREPOINTINFOW pResto
 #define FLOATING_CMPDRIVER  3
 #define FLOATING_DRIVERLST  4
 #define FLOATING_ABOUT      5
+#define FLOATING_DOWNLOAD   6
 
 // Left panel types
 #define TYPE_GROUP          1

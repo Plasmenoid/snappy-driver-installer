@@ -54,16 +54,16 @@ long
 void log_times()
 {
     if((log_verbose&LOG_VERBOSE_TIMES)==0)return;
-    log("Times\n");
-    log("##devicescan: %7ld (%d errors)\n",time_devicescan,error_count);
-    log("##indexes:    %7ld\n",time_indexes);
-    log("##sysinfo:    %7ld\n",time_sysinfo);
-    log("##matcher:    %7ld\n",time_matcher);
-    log("##startup:    %7ld (%ld)\n",time_startup,time_startup-time_devicescan-time_indexes-time_matcher-time_sysinfo);
-    log("##indexsave:  %7ld\n",time_indexsave);
-    log("##indexprint: %7ld\n",time_indexprint);
-    log("##total:      %7ld\n",time_total);
-    log("##test:       %7ld\n",time_test);
+    log_file("Times\n");
+    log_file("##devicescan: %7ld (%d errors)\n",time_devicescan,error_count);
+    log_file("##indexes:    %7ld\n",time_indexes);
+    log_file("##sysinfo:    %7ld\n",time_sysinfo);
+    log_file("##matcher:    %7ld\n",time_matcher);
+    log_file("##startup:    %7ld (%ld)\n",time_startup,time_startup-time_devicescan-time_indexes-time_matcher-time_sysinfo);
+    log_file("##indexsave:  %7ld\n",time_indexsave);
+    log_file("##indexprint: %7ld\n",time_indexprint);
+    log_file("##total:      %7ld\n",time_total);
+    log_file("##test:       %7ld\n",time_test);
 }
 
 void gen_timestamp()
@@ -119,18 +119,18 @@ void log_start(WCHAR *log_dir)
         mkdir_r(log_dir);
         logfile=_wfopen(filename,L"wb");
     }
-    log("{start logging\n");
-    log("%s\n\n",SVN_REV_STR);
+    log_file("{start logging\n");
+    log_file("%s\n\n",SVN_REV_STR);
 }
 
 void log_stop()
 {
     if(!logfile)return;
-    log("}stop logging");
+    log_file("}stop logging");
     fclose(logfile);
 }
 
-void log(CHAR const *format,...)
+void log_file(CHAR const *format,...)
 {
     CHAR buffer[1024*16];
     CHAR *ptr=buffer;
