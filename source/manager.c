@@ -226,6 +226,7 @@ void manager_filter(manager_t *manager,int options)
         if(itembar->isactive&&itembar->hwidmatch)i++;else itembar->checked=0;
 
     manager->items_list[SLOT_NOUPDATES].isactive=(i==0&&statemode==0)?1:0;
+    manager->items_list[SLOT_NOUPDATES].isactive=1;
 
     manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==
         STATEMODE_LOAD||i==0||(flags&FLAG_NORESTOREPOINT)?0:1;
@@ -242,7 +243,7 @@ void manager_print(manager_t *manager)
     int limits[7];
 
     if((log_verbose&LOG_VERBOSE_MANAGER)==0)return;
-    log("{manager_print\n");
+    log_file("{manager_print\n");
     memset(limits,0,sizeof(limits));
 
     itembar=&manager->items_list[RES_SLOTS];
@@ -254,18 +255,18 @@ void manager_print(manager_t *manager)
     for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
         if(itembar->isactive)
         {
-            log("$%04d|",k);
+            log_file("$%04d|",k);
             if(itembar->hwidmatch)
                 hwidmatch_print(itembar->hwidmatch,limits);
             else
-                log("'%ws'\n",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
+                log_file("'%ws'\n",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
             act++;
         }else
         {
-//            log("$%04d|^^ %d,%d\n",k,itembar->devicematch->num_matches,(itembar->hwidmatch)?itembar->hwidmatch->status:-1);
+//            log_file("$%04d|^^ %d,%d\n",k,itembar->devicematch->num_matches,(itembar->hwidmatch)?itembar->hwidmatch->status:-1);
         }
 
-    log("}manager_print[%d]\n\n",act);
+    log_file("}manager_print[%d]\n\n",act);
 }
 
 //{ User interaction
@@ -1748,6 +1749,94 @@ void popup_sysinfo(manager_t *manager,HDC hdcMem)
     td.y+=td.wy;
     TextOutF(&td,D(POPUP_CMP_BETTER_COLOR),STR(STR_SYSINF_MISC));td.x=p1;
     td.maxsz-=95;
+    popup_resize((td.maxsz+95+p0+p1),td.y+D(POPUP_OFSY));
+}
+
+void format_size(WCHAR *buf,long long val,int isspeed)
+{
+#ifndef _WIN64
+    if(val<(1<<10))swprintf(buf,L"%d %s",    (int)val,STR(STR_UPD_BYTES));else
+    if(val<(1<<20))swprintf(buf,L"%.03f %s",(double)val/(1<<10),STR(STR_UPD_BYTES+1));else
+    if(val<(1<<30))swprintf(buf,L"%.03f %s",(double)val/(1<<20),STR(STR_UPD_BYTES+2));else
+    if(val<((long long)1<<40))swprintf(buf,L"%.03f %s",(double)val/(1<<30),STR(STR_UPD_BYTES+3));
+#else
+    buf[0]=0;
+#endif
+    if(isspeed)wcscat(buf,STR(STR_UPD_SEC));
+}
+
+void format_time(WCHAR *buf,long long val)
+{
+    long long days,hours,mins,secs;
+
+    secs=val/1000;
+    mins=secs/60;
+    hours=mins/60;
+    days=hours/24;
+
+    secs%=60;
+    mins%=60;
+    hours%=24;
+
+    wcscpy(buf,L"\x221E");
+    if(secs) wsprintf(buf,L"%d %s",(int)secs,STR(STR_UPD_TSEC));
+    if(mins) wsprintf(buf,L"%d %s %d %s",(int)mins,STR(STR_UPD_TMIN),(int)secs,STR(STR_UPD_TSEC));
+    if(hours)wsprintf(buf,L"%d %s %d %s",(int)hours,STR(STR_UPD_THOUR),(int)mins,STR(STR_UPD_TMIN));
+    if(days) wsprintf(buf,L"%d %s %d %s",(int)days,STR(STR_UPD_TDAY),(int)hours,STR(STR_UPD_THOUR));
+}
+
+void popup_download(HDC hdcMem)
+{
+    textdata_t td;
+    torrent_status_t t;
+    int p0=D(POPUP_OFSX),p1=D(POPUP_OFSX)+10;
+    int per=0;
+    WCHAR num1[BUFLEN],num2[BUFLEN];
+
+
+    td.col=D(POPUP_TEXT_COLOR);
+    td.y=D(POPUP_OFSY);
+    td.wy=D(POPUP_WY);
+    td.hdcMem=hdcMem;
+    td.maxsz=0;
+    td.x=p0;
+
+#ifndef _WIN64
+    update_getstatus(&t);
+
+    format_size(num1,t.downloaded,0);
+    format_size(num2,t.downloadsize,0);
+    if(t.downloadsize)per=t.downloaded*100/t.downloadsize;
+    TextOutSF(&td,STR(STR_DWN_DOWNLOADED),STR(STR_DWN_DOWNLOADED_F),num1,num2,per);
+    format_size(num1,t.uploaded,0);
+    TextOutSF(&td,STR(STR_DWN_UPLOADED),num1);
+    format_time(num1,t.remaining);
+    TextOutSF(&td,STR(STR_DWN_ELAPSED),num1);
+    format_time(num1,t.remaining);
+    TextOutSF(&td,STR(STR_DWN_REMAINING),num1);
+
+    td.y+=td.wy;
+    if(t.status)
+        TextOutSF(&td,STR(STR_DWN_STATUS),L"%s",t.status);
+    if(*t.error)
+    {
+        td.col=D(POPUP_CMP_INVALID_COLOR);
+        TextOutSF(&td,STR(STR_DWN_ERROR),L"%s",t.error);
+        td.col=D(POPUP_TEXT_COLOR);
+    }
+    format_size(num1,t.downloadspeed,1);
+    TextOutSF(&td,STR(STR_DWN_DOWNLOADSPEED),num1);
+    format_size(num1,t.uploadspeed,1);
+    TextOutSF(&td,STR(STR_DWN_UPLOADSPEED),num1);
+
+    td.y+=td.wy;
+    TextOutSF(&td,STR(STR_DWN_SEEDS),STR(STR_DWN_SEEDS_F),t.seedsconnected,t.seedstotal);
+    TextOutSF(&td,STR(STR_DWN_PEERS),STR(STR_DWN_SEEDS_F),t.peersconnected,t.peerstotal);
+    format_size(num1,t.wasted,0);
+    format_size(num2,t.wastedhashfailes,0);
+    TextOutSF(&td,STR(STR_DWN_WASTED),STR(STR_DWN_WASTED_F),num1,num2);
+
+#endif
     popup_resize((td.maxsz+95+p0+p1),td.y+D(POPUP_OFSY));
 }
 //}

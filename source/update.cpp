@@ -22,6 +22,18 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "libtorrent/bencode.hpp"
 #include "libtorrent/session.hpp"
 
+using namespace libtorrent;
+
+session *sessionhandle=0;
+torrent_handle updatehandle;
+add_torrent_params params;
+
+add_torrent_params p11;
+session_settings settings;
+dht_settings dht;
+
+int totalsize=0,numfiles;
+
 extern "C"
 {
 #define _WIN32_IE 0x0400
@@ -38,12 +50,12 @@ extern "C"
 void log_con(CHAR const *format,...);
 int  manager_drplive(WCHAR *s);
 extern CRITICAL_SECTION sync;
+int yes1(libtorrent::torrent_status const&);
 
-int totalsize=0,numfiles;
 
 int getver(const char *ptr)
 {
-    char bff[4096];
+    char bff[BUFLEN];
     char *s=bff;
 
     strcpy(bff,ptr);
@@ -59,7 +71,7 @@ int getver(const char *ptr)
 
 int getcurver(const char *ptr)
 {
-    WCHAR bffw[4096];
+    WCHAR bffw[BUFLEN];
     WCHAR *s=bffw;
 
     wsprintf(bffw,L"%S",ptr);
@@ -110,10 +122,6 @@ void updatelang(HWND hwnd)
 }
 
 }
-using namespace libtorrent;
-session *sessionhandle=0;
-torrent_handle updatehandle;
-add_torrent_params params;
 
 void populatelist(HWND hList)
 {
@@ -126,7 +134,7 @@ void populatelist(HWND hList)
     WCHAR buf[128];
     int newver=0;
 
-    params.save_path="./update";
+    params.save_path="update";
     params.ti=new torrent_info("samdrivers.torrent",ec);
 
     numfiles=params.ti->num_files();
@@ -203,24 +211,104 @@ void populatelist(HWND hList)
     LeaveCriticalSection(&sync);
 }
 
+
+int yes1(libtorrent::torrent_status const&){return true;}
+
 void update_start()
 {
     error_code ec;
 
     if(!sessionhandle)
     {
-        sessionhandle=new session();
-        log_con("Listen %d\n",sessionhandle->is_listening());
-        updatehandle=sessionhandle->add_torrent(params,ec);
+        sessionhandle=new session(fingerprint("LT",LIBTORRENT_VERSION_MAJOR,LIBTORRENT_VERSION_MINOR,0,0));
 
-        //sessionhandle.listen_on(std::make_pair(59442,59443), ec);
+        sessionhandle->start_lsd();
+        sessionhandle->start_upnp();
+        sessionhandle->start_natpmp();
+
+        sessionhandle->listen_on(std::make_pair(6881,6881),ec);
+        if(ec)
+        {
+            log_con("failed to open listen socket: %s\n",ec.message().c_str());
+        }
+        log_con("Listen %d,%d\n",sessionhandle->is_listening(),sessionhandle->listen_port());
+
+        dht.privacy_lookups=true;
+        sessionhandle->set_dht_settings(dht);
+        settings.use_dht_as_fallback = false;
+        sessionhandle->add_dht_router(std::make_pair(std::string("router.bittorrent.com"),6881));
+        sessionhandle->add_dht_router(std::make_pair(std::string("router.utorrent.com"),6881));
+        sessionhandle->add_dht_router(std::make_pair(std::string("router.bitcomet.com"),6881));
+        sessionhandle->start_dht();
+
+        settings.user_agent = "SDI/" LIBTORRENT_VERSION;
+        settings.choking_algorithm = session_settings::auto_expand_choker;
+        settings.disk_cache_algorithm = session_settings::avoid_readback;
+        settings.volatile_read_cache = false;
+        sessionhandle->set_settings(settings);
+
+        //updatehandle=sessionhandle->add_torrent(params,ec);
+
+        p11.save_path = "update";
+        p11.ti = new torrent_info("kick.torrent", ec);
+        p11.flags=0;
         if (ec)
         {
-            log_con("failed to open listen socket: %s\n", ec.message().c_str());
+            log_con("%s\n", ec.message().c_str());
+            //return 1;
         }
+        updatehandle=sessionhandle->add_torrent(p11, ec);
+
+
         log_con("Start update\n");
+        sessionhandle->resume();
+        updatehandle.resume();
     }
-    log_con("Downloaded %d\n",(int)sessionhandle->status().total_download);
+}
+
+void update_getstatus(torrent_status_t *t)
+{
+    std::vector<torrent_status> temp;
+
+    memset(t,0,sizeof(torrent_status_t));
+    if(sessionhandle==0)
+    {
+        wcscpy(t->error,STR(STR_DWN_ERRSES));
+        return;
+    }
+    sessionhandle->get_torrent_status(&temp,&yes1,0);
+
+    if(temp.empty())
+    {
+        wcscpy(t->error,STR(STR_DWN_ERRTOR));
+        return;
+    }
+    torrent_status& st=temp[0];
+
+    t->downloaded=st.total_wanted_done;
+    t->downloadsize=st.total_wanted;
+    t->uploaded=st.total_payload_upload;
+
+    t->elapsed=13;
+    t->status=(WCHAR *)STR(STR_TR_ST0+(int)st.state);
+
+    wcscpy(t->error,L"");
+
+    t->uploadspeed=st.upload_payload_rate;
+    t->downloadspeed=st.download_payload_rate;
+
+    t->seedstotal=st.list_seeds;
+    t->peerstotal=st.list_peers;
+    t->seedsconnected=st.num_seeds;
+    t->peersconnected=st.num_peers;
+
+    t->wasted=st.total_redundant_bytes;
+    t->wastedhashfailes=st.total_failed_bytes;
+
+    if(t->downloadspeed)
+    {
+        t->remaining=(t->downloadsize-t->downloaded)/t->downloadspeed*1000;
+    }
 }
 
 void update_stop()

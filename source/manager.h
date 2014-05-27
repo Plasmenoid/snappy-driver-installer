@@ -147,6 +147,8 @@ void TextOutF(textdata_t *td,int col,WCHAR *format,...);
 void TextOutSF(textdata_t *td,WCHAR *str,WCHAR *format,...);
 
 // Popup
+void format_size(WCHAR *buf,long long val,int isspeed);
+void format_time(WCHAR *buf,long long val);
 void popup_resize(int x,int y);
 void popup_driverline(hwidmatch_t *hwidmatch,int *limits,HDC hdcMem,int ln,int mode,int index);
 void popup_driverlist(manager_t *manager,HDC hdcMem,RECT rect,int i);
@@ -155,3 +157,4 @@ int  isvalidcat(hwidmatch_t *hwidmatch,state_t *state);
 void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int i);
 void popup_about(HDC hdcMem);
 void popup_sysinfo(manager_t *manager,HDC hdcMem);
+void popup_download(HDC hdcMem);

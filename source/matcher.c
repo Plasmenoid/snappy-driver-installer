@@ -259,7 +259,7 @@ int calc_secttype(const char *s)
         if((p=strchr(p+1,'.')))
             if((p=strchr(p+1,'.')))*p=0;
     for(i=0;i<NUM_DECS;i++)if(!strcmpi(buf,nts[i]))return i;
-//log("'%s'\n",buf);
+//log_file("'%s'\n",buf);
     return -1;
 }
 
@@ -375,7 +375,7 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
        StrStrIA(getdrp_infpath(hwidmatch),"L\\R\\"))
         if(!isvalid_ver(hwidmatch,state))return 0;
 
-    //log("Sc:%d\n\n",curscore);
+    //log_file("Sc:%d\n\n",curscore);
     return isvalidcat(hwidmatch,state)?2:1;
 }
 
@@ -570,26 +570,26 @@ void hwidmatch_print(hwidmatch_t *hwidmatch,int *limits)
     version_t *v;
 
     v=getdrp_drvversion(hwidmatch);
-    log("  %d |",               hwidmatch->altsectscore);
-    log(" %08X |",              hwidmatch->score);
-    log(" %2d.%02d.%4d |",      v->d,v->m,v->y);
-    log(" %3d |",               hwidmatch->decorscore);
-    log(" %d |",                hwidmatch->markerscore);
-    log(" %3X |",               hwidmatch->status);
+    log_file("  %d |",               hwidmatch->altsectscore);
+    log_file(" %08X |",              hwidmatch->score);
+    log_file(" %2d.%02d.%4d |",      v->d,v->m,v->y);
+    log_file(" %3d |",               hwidmatch->decorscore);
+    log_file(" %d |",                hwidmatch->markerscore);
+    log_file(" %3X |",               hwidmatch->status);
                                 getdrp_drvsection(hwidmatch,buf);
-    log(" %-*s |",limits[0],buf);
+    log_file(" %-*s |",limits[0],buf);
 
     sprintf(buf,"%ws\\%ws",       getdrp_packpath(hwidmatch),getdrp_packname(hwidmatch));
-    log(" %-*s |",limits[1],buf);
-    log(" %8X% |",              getdrp_infcrc(hwidmatch));
+    log_file(" %-*s |",limits[1],buf);
+    log_file(" %8X% |",              getdrp_infcrc(hwidmatch));
     sprintf(buf,"%s%s",         getdrp_infpath(hwidmatch),getdrp_infname(hwidmatch));
-    log(" %-*s |",limits[2],buf);
-    log(" %-*s |",limits[3],    getdrp_drvmanufacturer(hwidmatch));
+    log_file(" %-*s |",limits[2],buf);
+    log_file(" %-*s |",limits[3],    getdrp_drvmanufacturer(hwidmatch));
     sprintf(buf,"%d.%d.%d.%d",  v->v1,v->v2,v->v3,v->v4);
-    log(" %*s |",limits[4],buf);
-    log(" %-*s |",limits[5],    getdrp_drvHWID(hwidmatch));
-    log(" %-*s",limits[6],      getdrp_drvdesc(hwidmatch));
-    log("\n");
+    log_file(" %*s |",limits[4],buf);
+    log_file(" %-*s |",limits[5],    getdrp_drvHWID(hwidmatch));
+    log_file(" %-*s",limits[6],      getdrp_drvdesc(hwidmatch));
+    log_file("\n");
 }
 
 int hwidmatch_cmp(hwidmatch_t *match1,hwidmatch_t *match2)
@@ -797,17 +797,17 @@ void matcher_print(matcher_t *matcher)
     int i,j;
 
     if((log_verbose&LOG_VERBOSE_MATCHER)==0)return;
-    log("\n{matcher_print[devices=%d,hwids=%d]\n",matcher->devicematch_handle.items,matcher->hwidmatch_handle.items);
+    log_file("\n{matcher_print[devices=%d,hwids=%d]\n",matcher->devicematch_handle.items,matcher->hwidmatch_handle.items);
     devicematch=matcher->devicematch_list;
     for(i=0;i<matcher->devicematch_handle.items;i++,devicematch++)
     {
         cur_device=devicematch->device;
         device_print(cur_device,matcher->state);
-        log("DriverInfo\n");
+        log_file("DriverInfo\n");
         if(devicematch->driver)
             driver_print(devicematch->driver,matcher->state);
         else
-            log("##NoDriver\n");
+            log_file("##NoDriver\n");
 
         memset(limits,0,sizeof(limits));
         hwidmatch=&matcher->hwidmatch_list[devicematch->start_matches];
@@ -817,9 +817,9 @@ void matcher_print(matcher_t *matcher)
         hwidmatch=&matcher->hwidmatch_list[devicematch->start_matches];
         for(j=0;j<matcher->devicematch_list[i].num_matches;j++,hwidmatch++)
             hwidmatch_print(hwidmatch,limits);
-        log("\n");
+        log_file("\n");
     }
-    log("}matcher_print\n\n");
+    log_file("}matcher_print\n\n");
 }
 //}
 
