@@ -70,5 +70,5 @@ int canWrite(const WCHAR *path);
 void CALLBACK viruscheck(LPTSTR szFile,DWORD action,LPARAM lParam);
 void virusmonitor_start();
 void virusmonitor_stop();
-void CloseHandle_log(HANDLE h,WCHAR *func,WCHAR *obj);
+void CloseHandle_log(HANDLE h,const WCHAR *func,const WCHAR *obj);
 void UnregisterClass_log(LPCTSTR lpClassName,HINSTANCE hInstance,WCHAR *func,WCHAR *obj);

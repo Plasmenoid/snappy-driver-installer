@@ -37,13 +37,14 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #define SLOT_VIRUS_RECYCLER 2
 #define SLOT_VIRUS_HIDDEN   3
 #define SLOT_NODRIVERS      4
-#define SLOT_NOUPDATES      5
-#define SLOT_DPRDIR         6
-#define SLOT_SNAPSHOT       7
-#define SLOT_INDEXING       8
-#define SLOT_EXTRACTING     9
-#define SLOT_RESTORE_POINT 10
-#define RES_SLOTS          11
+#define SLOT_DOWNLOAD       5
+#define SLOT_NOUPDATES      6
+#define SLOT_DPRDIR         7
+#define SLOT_SNAPSHOT       8
+#define SLOT_INDEXING       9
+#define SLOT_EXTRACTING    10
+#define SLOT_RESTORE_POINT 11
+#define RES_SLOTS          12
 
 #define NUM_STATUS 6
 typedef struct _status_t

@@ -79,9 +79,9 @@ int floating_x=1,floating_y=1;
 int horiz_sh=0;
 int scrollvisible=0;
 
-int exitflag=0;
 int ret_global=0;
-HANDLE event;
+volatile int deviceupdate_exitflag=0;
+HANDLE deviceupdate_event;
 
 // Settings
 WCHAR drp_dir   [BUFLEN]=L"drivers";
@@ -410,18 +410,29 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 
     bundle_prep(&bundle[bundle_display]);
 
-    event=CreateEvent(0,0,0,0);
+    deviceupdate_event=CreateEvent(0,0,0,0);
     thr=(HANDLE)_beginthreadex(0,0,&thread_loadall,&bundle[0],0,0);
+
+    downloadmangar_event=CreateEvent(0,0,0,0);
+    thandle_download=(HANDLE)_beginthreadex(0,0,&thread_download,0,0,0);
+
     mon_drp=monitor_start(drp_dir,FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,drp_callback);
     virusmonitor_start();
     viruscheck(L"",0,0);
     if(!(flags&FLAG_NOGUI)||flags&FLAG_AUTOINSTALL)gui(nCmd);
-    exitflag=1;
-    SetEvent(event);
     if(mon_drp)monitor_stop(mon_drp);
+
+    deviceupdate_exitflag=1;
+    SetEvent(deviceupdate_event);
     WaitForSingleObject(thr,INFINITE);
     CloseHandle_log(thr,L"WinMain",L"thr");
-    CloseHandle_log(event,L"WinMain",L"event");
+    CloseHandle_log(deviceupdate_event,L"WinMain",L"event");
+
+    downloadmangar_exitflag=1;
+    SetEvent(downloadmangar_event);
+    WaitForSingleObject(thandle_download,INFINITE);
+    CloseHandle_log(thandle_download,L"downloadmanager",L"thr");
+    CloseHandle_log(downloadmangar_event,L"downloadmanager",L"event");
 
     bundle_free(&bundle[0]);
     bundle_free(&bundle[1]);
@@ -499,7 +510,7 @@ unsigned int __stdcall thread_loadall(void *arg)
         bundle_prep(&bundle[bundle_shadow]);
         bundle_load(&bundle[bundle_shadow]);
 
-        if(WaitForSingleObject(event,0)==WAIT_OBJECT_0)cancel_update=1;
+        if(WaitForSingleObject(deviceupdate_event,0)==WAIT_OBJECT_0)cancel_update=1;
 
         if(!cancel_update)
         {
@@ -526,10 +537,10 @@ unsigned int __stdcall thread_loadall(void *arg)
         //printf("%d\n",)
         bundle_free(&bundle[bundle_shadow]);
         bundle_init(&bundle[bundle_shadow]);
-        if(cancel_update)SetEvent(event);
-        WaitForSingleObject(event,INFINITE);
+        if(cancel_update)SetEvent(deviceupdate_event);
+        WaitForSingleObject(deviceupdate_event,INFINITE);
         //printf("%ld\n",GetTickCount()-t);
-    }while(!exitflag);
+    }while(!deviceupdate_exitflag);
     DeleteCriticalSection(&sync);
     return 0;
 }
@@ -585,6 +596,7 @@ void bundle_lowprioirity(bundle_t *bundle)
     matcher_print(&bundle->matcher);
     manager_print(manager_g);
 
+    SetEvent(downloadmangar_event);
     collection_save(&bundle->collection);
     gen_timestamp();
     wsprintf(filename,L"%s\\%sstate.snp",log_dir,timestamp);
@@ -657,6 +669,7 @@ void lang_refresh()
     redrawmainwnd();
     redrawfield();
     InvalidateRect(hPopup,0,0);
+    updatelang();
 
     POINT p;
     GetCursorPos(&p);
@@ -1400,7 +1413,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             else
                 instflag&=~RESTOREPOS;
 
-            SetEvent(event);
+            SetEvent(deviceupdate_event);
             break;
 
         case WM_SIZE:
@@ -1479,11 +1492,6 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(i<0)break;
             if(i<4&&j==0)
             {
-#ifndef _WIN64
-                if(ctrl_down)
-                    DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),0,(DLGPROC)UpdateProcedure);
-                else
-#endif
                     RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
             }
             else
@@ -1958,6 +1966,12 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
                 else if(installmode==MODE_NONE)
                     manager_clear(manager_g);
             }
+            if(floating_itembar==SLOT_DOWNLOAD)
+            {
+#ifndef _WIN64
+                DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),0,(DLGPROC)UpdateProcedure);
+#endif
+            }
 
             if(floating_itembar>=0&&(i==1||i==0))
             {
@@ -2025,7 +2039,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
                     drawpopup(instflag&INSTALLDRIVERS?STR_HINT_STOPINST:STR_HINT_STOPEXTR,FLOATING_TOOLTIP,x,y,hField);
                 else if(itembar_i==SLOT_RESTORE_POINT)
                     drawpopup(STR_RESTOREPOINT_H,FLOATING_TOOLTIP,x,y,hField);
-                else if(itembar_i==SLOT_NOUPDATES)
+                else if(itembar_i==SLOT_DOWNLOAD)
                     drawpopup(-1,FLOATING_DOWNLOAD,x,y,hField);
                 else if(i==0&&itembar_i>=RES_SLOTS)
                     drawpopup(STR_HINT_DRIVER,FLOATING_TOOLTIP,x,y,hField);
