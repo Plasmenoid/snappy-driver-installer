@@ -16,6 +16,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "main.h"
+#include "device.h"
 
 //{ Global vars
 long long ar_total,ar_proceed;

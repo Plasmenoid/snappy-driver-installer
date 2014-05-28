@@ -1,4 +1,4 @@
-/*update_stop();
+/*
 This file is part of Snappy Driver Installer.
 
 Snappy Driver Installer is free software: you can redistribute it and/or modify
@@ -29,12 +29,17 @@ typedef struct _torrent_status_t
     int wasted,wastedhashfailes;
 }torrent_status_t;
 
+
+extern volatile int downloadmangar_exitflag;
+extern HANDLE downloadmangar_event;
+extern HANDLE thandle_download;
+
 // Dialog
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
 int getver(const char *ptr);
 int getcurver(const char *ptr);
-void updatelang(HWND hwnd);
-void populatelist(HWND hList);
+void updatelang();
+int  populatelist(HWND hList);
 
 // Update
 void update_start();
@@ -42,3 +47,5 @@ void update_stop();
 void updatestatus(HWND hList);
 void updatepriorities(HWND hList);
 void update_getstatus(torrent_status_t *t);
+
+unsigned int __stdcall thread_download(void *arg);

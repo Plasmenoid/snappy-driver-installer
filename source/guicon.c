@@ -262,7 +262,7 @@ DWORD RunSilent(WCHAR* file,WCHAR* cmd,int show,int wait)
     return ret;
 }
 
-void CloseHandle_log(HANDLE h,WCHAR *func,WCHAR *obj)
+void CloseHandle_log(HANDLE h,const WCHAR *func,const WCHAR *obj)
 {
     if(!CloseHandle(h))
         log_err("ERROR in %ws(): failed CloseHandle(%ws)\n",func,obj);

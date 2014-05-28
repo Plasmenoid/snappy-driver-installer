@@ -226,7 +226,6 @@ void manager_filter(manager_t *manager,int options)
         if(itembar->isactive&&itembar->hwidmatch)i++;else itembar->checked=0;
 
     manager->items_list[SLOT_NOUPDATES].isactive=(i==0&&statemode==0)?1:0;
-    manager->items_list[SLOT_NOUPDATES].isactive=1;
 
     manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==
         STATEMODE_LOAD||i==0||(flags&FLAG_NORESTOREPOINT)?0:1;
@@ -576,6 +575,7 @@ int box_status(int index)
         case SLOT_SNAPSHOT:
             return BOX_DRVITEM_IF;
 
+        case SLOT_DOWNLOAD:
         case SLOT_NOUPDATES:
             return manager_g->items_handle.items>RES_SLOTS?BOX_NOUPDATES:BOX_DRVITEM_IF;
 
@@ -916,6 +916,14 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
             wsprintf(bufw,L"%s",STR(manager->items_handle.items>RES_SLOTS?STR_NOUPDATES:STR_INITIALIZING));
             SetTextColor(hdc,D(boxindex[box_status(index)]+14));
             TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y)/2,bufw,wcslen(bufw));
+            break;
+
+        case SLOT_DOWNLOAD:
+            if(itembar->val1>>8)
+                wsprintf(bufw,STR(itembar->val1&0xFF?STR_UPD_AVAIL3:STR_UPD_AVAIL1),itembar->val1>>8,itembar->val1&0xFF);
+            else
+                wsprintf(bufw,STR(STR_UPD_AVAIL2),itembar->val1&0xFF);
+            drawbutton(hdc,x,pos,index,bufw,STR(STR_UPD_START));
             break;
 
         case SLOT_SNAPSHOT:
