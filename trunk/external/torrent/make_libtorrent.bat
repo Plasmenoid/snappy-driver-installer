@@ -29,6 +29,9 @@ echo %GCC_PATH% /mingw > %GCC_PATH%\msys\1.0\etc\fstab
 :skipprepwebp
 
 rem Build bjam.exe
+xcopy asio\wspiapi.h %GCC_PATH%\include\wspiapi.h /Y
+xcopy asio\socket_types.hpp "%BOOST_ROOT%\boost\asio\detail\socket_types.hpp" /Y
+
 if /I exist "%BOOST_ROOT%\bjam.exe" (echo Skipping Build bjam.exe & goto skipbuildbjam)
 cd "%BOOST_ROOT%"
 call bootstrap.bat mingw

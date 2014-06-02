@@ -155,6 +155,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../source/common.h" />
+		<Unit filename="../source/device.h" />
 		<Unit filename="../source/draw.c">
 			<Option compilerVar="CC" />
 		</Unit>
