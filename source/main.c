@@ -174,6 +174,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-showdrpnames")) flags|=FLAG_SHOWDRPNAMES;else
         if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
         if(!wcscmp(pr,L"-showconsole"))  flags|=FLAG_SHOWCONSOLE;else
+        if(!wcscmp(pr,L"-checkupdates"))  flags|=FLAG_CHECKUPDATES;else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
@@ -391,6 +392,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         log_con("  autoclose=%d\n",flags&FLAG_AUTOCLOSE?1:0);
         log_con("  failsafe=%d\n",flags&FLAG_FAILSAFE?1:0);
         log_con("  delextrainfs=%d\n",flags&FLAG_DELEXTRAINFS?1:0);
+        log_con("  checkupdates=%d\n",flags&FLAG_CHECKUPDATES?1:0);
         log_con("  norestorepnt=%d\n",flags&FLAG_NORESTOREPOINT?1:0);
         log_con("  disableinstall=%d\n",flags&FLAG_DISABLEINSTALL?1:0);
         log_con("\n");
@@ -413,8 +415,11 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     deviceupdate_event=CreateEvent(0,0,0,0);
     thr=(HANDLE)_beginthreadex(0,0,&thread_loadall,&bundle[0],0,0);
 
-    downloadmangar_event=CreateEvent(0,0,0,0);
-    thandle_download=(HANDLE)_beginthreadex(0,0,&thread_download,0,0,0);
+    if(flags&FLAG_CHECKUPDATES)
+    {
+        downloadmangar_event=CreateEvent(0,0,0,0);
+        thandle_download=(HANDLE)_beginthreadex(0,0,&thread_download,0,0,0);
+    }
 
     mon_drp=monitor_start(drp_dir,FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,drp_callback);
     virusmonitor_start();
@@ -428,11 +433,14 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     CloseHandle_log(thr,L"WinMain",L"thr");
     CloseHandle_log(deviceupdate_event,L"WinMain",L"event");
 
-    downloadmangar_exitflag=1;
-    SetEvent(downloadmangar_event);
-    WaitForSingleObject(thandle_download,INFINITE);
-    CloseHandle_log(thandle_download,L"downloadmanager",L"thr");
-    CloseHandle_log(downloadmangar_event,L"downloadmanager",L"event");
+    if(flags&FLAG_CHECKUPDATES)
+    {
+        downloadmangar_exitflag=1;
+        SetEvent(downloadmangar_event);
+        WaitForSingleObject(thandle_download,INFINITE);
+        CloseHandle_log(thandle_download,L"downloadmanager",L"thr");
+        CloseHandle_log(downloadmangar_event,L"downloadmanager",L"event");
+    }
 
     bundle_free(&bundle[0]);
     bundle_free(&bundle[1]);

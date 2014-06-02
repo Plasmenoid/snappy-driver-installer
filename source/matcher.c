@@ -305,8 +305,10 @@ int calc_markerscore(state_t *state,char *path)
         }
     }
 
-    if(curmaj>=0&&curmin>=0&&majver>=curmaj&&minver>=curmin)score+=2;
-    if(curarch>=0&&curarch==arch)score+=4;
+    if(curmaj>=0&&curmin>=0&&majver>=curmaj&&minver>=curmin)score+=2+8;
+    if(curmaj<0&&score)score+=2;
+    if(curarch>=0&&curarch==arch)score+=4+16;
+    if(curarch<0&&score)score+=4;
     return score;
 }
 
@@ -375,6 +377,9 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
        StrStrIA(getdrp_infpath(hwidmatch),"L\\Realtek\\")||
        StrStrIA(getdrp_infpath(hwidmatch),"L\\R\\"))
         if(!isvalid_ver(hwidmatch,state))return 0;
+
+    if(StrStrIA(getdrp_infpath(hwidmatch),"matchmarker\\"))
+        if((calc_markerscore(state,getdrp_infpath(hwidmatch))&7)!=7)return 0;
 
     //log_file("Sc:%d\n\n",curscore);
     return isvalidcat(hwidmatch,state)?2:1;

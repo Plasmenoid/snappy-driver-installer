@@ -630,7 +630,7 @@ void collection_printstates(collection_t *col)
     {
         drp=&col->driverpack_list[i];
         s=(WCHAR *)drp->text;
-        log_file("  %6d  %ws\\%ws\n",drp->HWID_list_handle.items,s+drp->drppath,s+drp->drpfilename);
+        log_file("  %6d  %ws\\%ws\n",drp->HWID_list_handle.items,s+drp->drppath,(WCHAR *)(drp->text+drp->drpfilename));
         sum+=drp->HWID_list_handle.items;
     }
     log_file("  Sum: %d\n\n",sum);
