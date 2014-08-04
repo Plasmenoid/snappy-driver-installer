@@ -33,11 +33,11 @@ extern "C"
 
 session *sessionhandle=0;
 torrent_handle updatehandle;
-add_torrent_params params;
 
 volatile int downloadmangar_exitflag=0;
 HANDLE downloadmangar_event;
 HANDLE thandle_download;
+long long torrenttime=0;
 
 //add_torrent_params p11;
 session_settings settings;
@@ -164,14 +164,22 @@ int populatelist(HWND hList)
     int newver=0;
     int ret=0;
 
-    params.save_path="update";
-    params.ti=new torrent_info(TORRENT_URL,ec);
-    params.flags=0;
+    time_chkupdate=GetTickCount();
 
-    numfiles=params.ti->num_files();
+    update_start();
+    //Sleep(2000);
+
+    boost::intrusive_ptr<torrent_info const> ti;
+    std::vector<size_type> file_progress;
+    ti=updatehandle.torrent_file();
+    updatehandle.file_progress(file_progress);
+
+    //numfiles=updatehandle.torrent_file()->num_files();
+    //log_con("Num:%d\n",ti->num_files());
+    numfiles=ti->num_files();
     for(i=0;i<numfiles;i++)
     {
-        fe=params.ti->file_at(i);
+        fe=ti->file_at(i);
         filename=fe.path.c_str();
         if(!StrStrIA(filename,"drivers\\"))
         {
@@ -205,7 +213,7 @@ int populatelist(HWND hList)
 
     for(i=0;i<numfiles;i++)
     {
-        fe=params.ti->file_at(i);
+        fe=ti->file_at(i);
         filename=fe.path.c_str()+20;
         if(StrStrIA(filename,".7z"))
         {
@@ -226,7 +234,7 @@ int populatelist(HWND hList)
                 int j=ListView_InsertItem(hList,&lvI);
                 wsprintf(buf,L"%d %s",sz,STR(STR_UPD_MB));
                 ListView_SetItemText(hList,j,1,buf);
-                wsprintf(buf,L"%d%%",0);
+                wsprintf(buf,L"%d%%",file_progress[i]*1000/ti->file_at(i).size);
                 ListView_SetItemText(hList,j,2,buf);
                 wsprintf(buf,L"%d",newver);
                 ListView_SetItemText(hList,j,3,buf);
@@ -238,6 +246,7 @@ int populatelist(HWND hList)
             }
         }
     }
+    time_chkupdate=GetTickCount()-time_chkupdate;
     return ret;
 }
 
@@ -246,6 +255,7 @@ int yes1(libtorrent::torrent_status const&){return true;}
 void update_start()
 {
     error_code ec;
+    add_torrent_params params;
 
     if(!sessionhandle)
     {
@@ -279,6 +289,10 @@ void update_start()
         settings.volatile_read_cache = false;
         sessionhandle->set_settings(settings);
 
+        params.save_path="update";
+        params.ti=new torrent_info(TORRENT_URL,ec);
+        params.flags=0;
+        //log_con("(%s)\n","http://dl.dropboxusercontent.com/s/j8ut11k7x5vmtfk/SamDrivers.torrent");
         updatehandle=sessionhandle->add_torrent(params,ec);
 
         /*p11.save_path = "update";
@@ -293,10 +307,12 @@ void update_start()
 
 
         log_con("Start update\n");
+        torrenttime=GetTickCount();
         downloadtread_a=1;
         SetEvent(downloadmangar_event);
         //sessionhandle->pause();
-        //updatehandle.resume();
+        updatehandle.resume();
+        Sleep(5000);
     }
 }
 
@@ -339,6 +355,7 @@ void update_getstatus(torrent_status_t *t)
     t->wasted=st.total_redundant_bytes;
     t->wastedhashfailes=st.total_failed_bytes;
 
+    if(torrenttime)t->elapsed=GetTickCount()-torrenttime;
     if(t->downloadspeed)
     {
         t->remaining=(t->downloadsize-t->downloaded)/t->downloadspeed*1000;
@@ -398,6 +415,33 @@ void updatepriorities(HWND hList)
 
 }
 
+void updatecheckboxes(HWND hList)
+{
+    char filelist[BUFLEN];
+    int i;
+    LVITEM item;
+
+    item.mask=LVIF_PARAM;
+    memset(filelist,0,BUFLEN);
+    for(i=0;i<ListView_GetItemCount(hList);i++)
+    {
+        item.iItem=i;
+        ListView_GetItem(hList,&item);
+        if(item.lParam>=0)
+        {
+            filelist[item.lParam]=1;
+            //updatehandle.file_priority(item.lParam,ListView_GetCheckState(hList,i)?1:0);
+            ListView_SetCheckState(hList,i,updatehandle.file_priority(item.lParam));
+        }
+    }
+    /*for(i=0;i<numfiles;i++)
+    if(!filelist[i])
+    {
+        updatehandle.file_priority(i,ListView_GetCheckState(hList,0)?2:0);
+    }*/
+
+}
+
 int cxn[]=
 {
     199,
@@ -438,6 +482,7 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                 populatelist(hList);
                 updatelang();
                 update_start();
+                updatecheckboxes(hList);
             }
             return TRUE;
 

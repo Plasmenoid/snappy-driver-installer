@@ -438,8 +438,8 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         downloadmangar_exitflag=1;
         SetEvent(downloadmangar_event);
         WaitForSingleObject(thandle_download,INFINITE);
-        CloseHandle_log(thandle_download,L"downloadmanager",L"thr");
-        CloseHandle_log(downloadmangar_event,L"downloadmanager",L"event");
+        CloseHandle_log(thandle_download,L"thandle_download",L"thr");
+        CloseHandle_log(downloadmangar_event,L"downloadmangar_event",L"event");
     }
 
     bundle_free(&bundle[0]);

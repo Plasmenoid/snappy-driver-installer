@@ -43,6 +43,7 @@ long
     time_startup=0,
     time_indexes=0,
     time_devicescan=0,
+    time_chkupdate=0,
     time_indexsave=0,
     time_indexprint=0,
     time_sysinfo=0,
@@ -59,6 +60,7 @@ void log_times()
     log_file("##indexes:    %7ld\n",time_indexes);
     log_file("##sysinfo:    %7ld\n",time_sysinfo);
     log_file("##matcher:    %7ld\n",time_matcher);
+    log_file("##chkupdate:  %7ld\n",time_chkupdate);
     log_file("##startup:    %7ld (%ld)\n",time_startup,time_startup-time_devicescan-time_indexes-time_matcher-time_sysinfo);
     log_file("##indexsave:  %7ld\n",time_indexsave);
     log_file("##indexprint: %7ld\n",time_indexprint);

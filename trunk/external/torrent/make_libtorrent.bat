@@ -62,3 +62,4 @@ echo.
 echo Everything is done
 
 :EOF
+pause

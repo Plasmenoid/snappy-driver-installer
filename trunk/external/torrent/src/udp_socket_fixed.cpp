@@ -704,10 +704,13 @@ void udp_socket::set_buf_size(int s)
 		close();
 	}
 
+	error_code ignore_errors;
 	// set the internal buffer sizes as well
-	m_ipv4_sock.set_option(boost::asio::socket_base::receive_buffer_size(m_buf_size));
+	m_ipv4_sock.set_option(boost::asio::socket_base::receive_buffer_size(m_buf_size)
+		, ignore_errors);
 #if TORRENT_USE_IPV6
-	m_ipv6_sock.set_option(boost::asio::socket_base::receive_buffer_size(m_buf_size));
+	m_ipv6_sock.set_option(boost::asio::socket_base::receive_buffer_size(m_buf_size)
+		, ignore_errors);
 #endif
 }
 
@@ -921,9 +924,15 @@ void udp_socket::on_connect(int ticket)
 		return;
 	}
 
-
 	if (m_abort) return;
 	if (is_closed()) return;
+
+	if (m_connection_ticket != -1)
+	{
+		// there's already an outstanding connect. Cancel it.
+		m_socks5_sock.close();
+		m_connection_ticket = -1;
+	}
 
 #if defined TORRENT_ASIO_DEBUGGING
 	add_outstanding_async("udp_socket::on_connected");
@@ -937,10 +946,10 @@ void udp_socket::on_connect(int ticket)
 	++m_outstanding_connect;
 #endif
 	m_socks5_sock.async_connect(tcp::endpoint(m_proxy_addr.address(), m_proxy_addr.port())
-		, boost::bind(&udp_socket::on_connected, this, _1));
+		, boost::bind(&udp_socket::on_connected, this, _1, ticket));
 }
 
-void udp_socket::on_connected(error_code const& e)
+void udp_socket::on_connected(error_code const& e, int ticket)
 {
 #if defined TORRENT_ASIO_DEBUGGING
 	complete_async("udp_socket::on_connected");
@@ -959,15 +968,13 @@ void udp_socket::on_connected(error_code const& e)
 	CHECK_MAGIC;
 
 	TORRENT_ASSERT(is_single_thread());
-	if (m_connection_ticket >= 0)
+	if (m_cc.done(ticket))
 	{
-		if (m_cc.done(m_connection_ticket))
+		// if the tickets mismatch, another connection attempt
+		// was initiated while waiting for this one to complete.
+		if (ticket == m_connection_ticket)
 			m_connection_ticket = -1;
 	}
-
-	if (m_abort) return;
-
-	if (e == asio::error::operation_aborted) return;
 
 	// we just called done, which means on_timeout
 	// won't be called. Decrement the outstanding
@@ -984,6 +991,14 @@ void udp_socket::on_connected(error_code const& e)
 		+ m_outstanding_resolve
 		+ m_outstanding_connect_queue
 		+ m_outstanding_socks);
+
+	if (e == asio::error::operation_aborted) return;
+
+	// if ticket != m_connection_ticket, it means m_connection_ticket
+	// will not have been reset, and it means we are still waiting
+	// for a connection attempt.
+	if (m_connection_ticket != -1) return;
+
 	if (m_abort) return;
 
 	if (e)
