@@ -35,6 +35,7 @@ extern long
     time_startup,
     time_indexes,
     time_devicescan,
+    time_chkupdate,
     time_indexsave,
     time_indexprint,
     time_sysinfo,
