@@ -276,6 +276,7 @@ void settings_save()
     if(flags&FLAG_NOFEATURESCORE)fwprintf(f,L"-nofeaturescore ");
     if(flags&FLAG_SHOWDRPNAMES)fwprintf(f,L"-showdrpnames ");
     if(flags&FLAG_SHOWCONSOLE)fwprintf(f,L"-showconsole ");
+    if(flags&FLAG_CHECKUPDATES)fwprintf(f,L"-checkupdates ");
     fclose(f);
 }
 
@@ -604,7 +605,7 @@ void bundle_lowprioirity(bundle_t *bundle)
     matcher_print(&bundle->matcher);
     manager_print(manager_g);
 
-    SetEvent(downloadmangar_event);
+    if(flags&FLAG_CHECKUPDATES)SetEvent(downloadmangar_event);
     collection_save(&bundle->collection);
     gen_timestamp();
     wsprintf(filename,L"%s\\%sstate.snp",log_dir,timestamp);

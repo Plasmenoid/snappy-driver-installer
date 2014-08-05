@@ -22,7 +22,8 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "libtorrent/bencode.hpp"
 #include "libtorrent/session.hpp"
 
-#define TORRENT_URL "samdrivers.torrent"
+#define TORRENT_URL "SDI_209_14_7.torrent"
+#define SMOOTHING_FACTOR 0.005
 using namespace libtorrent;
 
 extern "C"
@@ -39,13 +40,14 @@ HANDLE downloadmangar_event;
 HANDLE thandle_download;
 long long torrenttime=0;
 
-//add_torrent_params p11;
 session_settings settings;
 dht_settings dht;
 
 int totalsize=0,numfiles;
 HWND hUpdate=0;
-volatile int downloadtread_a=0;
+int /*downloadtread_a=0,*/finisheddownloading=0;
+int averageSpeed;
+torrent_status_t torrentstatus;
 
 int yes1(libtorrent::torrent_status const&);
 
@@ -121,12 +123,34 @@ void updatelang()
 
 //}
 
+void update_movefiles()
+{
+    file_entry fe;
+    int i;
+    boost::intrusive_ptr<torrent_info const> ti;
+    std::vector<size_type> file_progress;
+    ti=updatehandle.torrent_file();
+    updatehandle.file_progress(file_progress);
+
+    for(i=0;i<numfiles;i++)
+    if(file_progress[i]==1000)
+    {
+        fe=ti->file_at(i);
+        log_con("$ '%ws'\n",fe.path.c_str()+21);
+
+    }
+    //"copy *.* 1\_*.*"
+}
+
 unsigned int __stdcall thread_download(void *arg)
 {
     int r=0;
     log_con("{thread_download\n");
 
     WaitForSingleObject(downloadmangar_event,INFINITE);
+    if(downloadmangar_exitflag)return 0;
+
+    update_start();
     r=populatelist(0);
     log_con("Latest version: R%d\nUpdated driverpacks available: %d\n",r>>8,r&0xFF);
     if(r)
@@ -141,11 +165,18 @@ unsigned int __stdcall thread_download(void *arg)
         WaitForSingleObject(downloadmangar_event,INFINITE);
         if(downloadmangar_exitflag)break;
 
-        while(sessionhandle&&downloadtread_a)
+        while(sessionhandle)
         {
+            update_getstatus(&torrentstatus);
             InvalidateRect(hPopup,0,0);
             Sleep(500);
             if(downloadmangar_exitflag)break;
+            if(finisheddownloading)
+            {
+                log_con("finished^^^^\n");
+                update_movefiles();
+                break;
+            }
         }
     }
     log_con("}thread_download\n");
@@ -166,7 +197,6 @@ int populatelist(HWND hList)
 
     time_chkupdate=GetTickCount();
 
-    update_start();
     //Sleep(2000);
 
     boost::intrusive_ptr<torrent_info const> ti;
@@ -187,6 +217,7 @@ int populatelist(HWND hList)
             if(StrStrIA(filename,"sdi_R"))
                 newver=atol(StrStrIA(filename,"sdi_R")+5);
         }
+        //if(!hList)updatehandle.file_priority(i,0);
     }
 
     lvI.mask      =LVIF_TEXT|LVIF_STATE|LVIF_PARAM;
@@ -195,8 +226,8 @@ int populatelist(HWND hList)
     lvI.state     =0;
     lvI.iItem     =0;
     lvI.lParam    =-1;
-    if(/*newver>SVN_REV&&*/1)ret+=newver<<8;
-    if(/*newver>SVN_REV&&*/hList)
+    if(newver>SVN_REV)ret+=newver<<8;
+    if(newver>SVN_REV&&hList)
     {
         lvI.pszText=(WCHAR *)STR(STR_UPD_BASEFILES);
         ListView_InsertItem(hList,&lvI);
@@ -214,7 +245,7 @@ int populatelist(HWND hList)
     for(i=0;i<numfiles;i++)
     {
         fe=ti->file_at(i);
-        filename=fe.path.c_str()+20;
+        filename=fe.path.c_str()+21;
         if(StrStrIA(filename,".7z"))
         {
             int oldver;
@@ -234,7 +265,7 @@ int populatelist(HWND hList)
                 int j=ListView_InsertItem(hList,&lvI);
                 wsprintf(buf,L"%d %s",sz,STR(STR_UPD_MB));
                 ListView_SetItemText(hList,j,1,buf);
-                wsprintf(buf,L"%d%%",file_progress[i]*1000/ti->file_at(i).size);
+                wsprintf(buf,L"%d%%",file_progress[i]*100/ti->file_at(i).size);
                 ListView_SetItemText(hList,j,2,buf);
                 wsprintf(buf,L"%d",newver);
                 ListView_SetItemText(hList,j,3,buf);
@@ -259,13 +290,15 @@ void update_start()
 
     if(!sessionhandle)
     {
-        sessionhandle=new session(/*fingerprint("LT",LIBTORRENT_VERSION_MAJOR,LIBTORRENT_VERSION_MINOR,0,0)*/);
-        //sessionhandle=new session(fingerprint("UT",3,4,0,0));
+        //RunSilent(L"cmd",L" /c rd /s /q update",SW_HIDE,1);
+
+        sessionhandle=new session();
 
         sessionhandle->start_lsd();
         sessionhandle->start_upnp();
         sessionhandle->start_natpmp();
         int port=50171;
+        //port=0;
 
         sessionhandle->listen_on(std::make_pair(port,port),ec);
         if(ec)
@@ -292,27 +325,10 @@ void update_start()
         params.save_path="update";
         params.ti=new torrent_info(TORRENT_URL,ec);
         params.flags=0;
-        //log_con("(%s)\n","http://dl.dropboxusercontent.com/s/j8ut11k7x5vmtfk/SamDrivers.torrent");
+        sessionhandle->pause();
         updatehandle=sessionhandle->add_torrent(params,ec);
 
-        /*p11.save_path = "update";
-        p11.ti = new torrent_info("kick.torrent", ec);
-        p11.flags=0;
-        if (ec)
-        {
-            log_con("%s\n", ec.message().c_str());
-            //return 1;
-        }*/
-        //updatehandle=sessionhandle->add_torrent(p11, ec);
-
-
         log_con("Start update\n");
-        torrenttime=GetTickCount();
-        downloadtread_a=1;
-        SetEvent(downloadmangar_event);
-        //sessionhandle->pause();
-        updatehandle.resume();
-        Sleep(5000);
     }
 }
 
@@ -341,6 +357,8 @@ void update_getstatus(torrent_status_t *t)
 
     t->elapsed=13;
     t->status=(WCHAR *)STR(STR_TR_ST0+(int)st.state);
+    if(sessionhandle->is_paused())t->status=(WCHAR *)STR(STR_TR_ST4);
+    finisheddownloading=st.is_finished;
 
     wcscpy(t->error,L"");
 
@@ -358,19 +376,24 @@ void update_getstatus(torrent_status_t *t)
     if(torrenttime)t->elapsed=GetTickCount()-torrenttime;
     if(t->downloadspeed)
     {
-        t->remaining=(t->downloadsize-t->downloaded)/t->downloadspeed*1000;
+        averageSpeed=SMOOTHING_FACTOR*t->downloadspeed+(1-SMOOTHING_FACTOR)*averageSpeed;
+        t->remaining=(t->downloadsize-t->downloaded)/averageSpeed*1000;
     }
+
+    t->sessionpaused=st.auto_managed;
+    t->torrentpaused=st.paused;
+
+    manager_g->items_list[SLOT_DOWNLOAD].percent=torrentstatus.downloaded*1000/torrentstatus.downloadsize;
+    redrawfield();
 }
 
 void update_stop()
 {
     if(sessionhandle)
     {
-        downloadtread_a=0;
         log_con("Finish %d\n",(int)sessionhandle->status().total_download);
         if(sessionhandle)delete sessionhandle;
         sessionhandle=0;
-        Sleep(2000);
     }
 }
 
@@ -412,7 +435,11 @@ void updatepriorities(HWND hList)
     {
         updatehandle.file_priority(i,ListView_GetCheckState(hList,0)?2:0);
     }
-
+    sessionhandle->resume();
+    finisheddownloading=0;
+    torrenttime=GetTickCount();
+    //updatehandle.resume();
+    SetEvent(downloadmangar_event);
 }
 
 void updatecheckboxes(HWND hList)
@@ -434,12 +461,14 @@ void updatecheckboxes(HWND hList)
             ListView_SetCheckState(hList,i,updatehandle.file_priority(item.lParam));
         }
     }
-    /*for(i=0;i<numfiles;i++)
-    if(!filelist[i])
-    {
-        updatehandle.file_priority(i,ListView_GetCheckState(hList,0)?2:0);
-    }*/
 
+    ListView_SetCheckState(hList,0,0);
+    for(i=0;i<numfiles;i++)
+    if(updatehandle.file_priority(i)==2)
+    {
+        ListView_SetCheckState(hList,0,1);
+        break;
+    }
 }
 
 int cxn[]=
@@ -481,7 +510,6 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                 hUpdate=hwnd;
                 populatelist(hList);
                 updatelang();
-                update_start();
                 updatecheckboxes(hList);
             }
             return TRUE;
