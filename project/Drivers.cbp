@@ -15,7 +15,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option parameters="-disableinstall -extractdir:temp1 -showconsole" />
+				<Option parameters="-disableinstall -extractdir:temp1 -showconsole -checkupdates" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-fexpensive-optimizations" />

@@ -1810,7 +1810,8 @@ void popup_download(HDC hdcMem)
     td.x=p0;
 
 #ifndef _WIN64
-    update_getstatus(&t);
+    //update_getstatus(&t);
+    t=torrentstatus;
 
     format_size(num1,t.downloaded,0);
     format_size(num2,t.downloadsize,0);
@@ -1818,7 +1819,7 @@ void popup_download(HDC hdcMem)
     TextOutSF(&td,STR(STR_DWN_DOWNLOADED),STR(STR_DWN_DOWNLOADED_F),num1,num2,per);
     format_size(num1,t.uploaded,0);
     TextOutSF(&td,STR(STR_DWN_UPLOADED),num1);
-    format_time(num1,t.remaining);
+    format_time(num1,t.elapsed);
     TextOutSF(&td,STR(STR_DWN_ELAPSED),num1);
     format_time(num1,t.remaining);
     TextOutSF(&td,STR(STR_DWN_REMAINING),num1);
@@ -1844,6 +1845,7 @@ void popup_download(HDC hdcMem)
     format_size(num2,t.wastedhashfailes,0);
     TextOutSF(&td,STR(STR_DWN_WASTED),STR(STR_DWN_WASTED_F),num1,num2);
 
+    TextOutSF(&td,L"Paused",L"%d,%d",t.sessionpaused,t.torrentpaused);
 #endif
     popup_resize((td.maxsz+95+p0+p1),td.y+D(POPUP_OFSY));
 }

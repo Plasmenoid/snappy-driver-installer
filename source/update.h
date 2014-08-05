@@ -27,12 +27,15 @@ typedef struct _torrent_status_t
     int seedstotal,seedsconnected;
     int peerstotal,peersconnected;
     int wasted,wastedhashfailes;
+
+    int sessionpaused,torrentpaused;
 }torrent_status_t;
 
 
 extern volatile int downloadmangar_exitflag;
 extern HANDLE downloadmangar_event;
 extern HANDLE thandle_download;
+extern torrent_status_t torrentstatus;
 
 // Dialog
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
