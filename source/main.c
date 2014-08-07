@@ -416,11 +416,13 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     deviceupdate_event=CreateEvent(0,0,0,0);
     thr=(HANDLE)_beginthreadex(0,0,&thread_loadall,&bundle[0],0,0);
 
+    #ifndef _WIN64
     if(flags&FLAG_CHECKUPDATES)
     {
         downloadmangar_event=CreateEvent(0,0,0,0);
         thandle_download=(HANDLE)_beginthreadex(0,0,&thread_download,0,0,0);
     }
+    #endif
 
     mon_drp=monitor_start(drp_dir,FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,drp_callback);
     virusmonitor_start();
@@ -434,6 +436,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     CloseHandle_log(thr,L"WinMain",L"thr");
     CloseHandle_log(deviceupdate_event,L"WinMain",L"event");
 
+    #ifndef _WIN64
     if(flags&FLAG_CHECKUPDATES)
     {
         downloadmangar_exitflag=1;
@@ -442,6 +445,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         CloseHandle_log(thandle_download,L"thandle_download",L"thr");
         CloseHandle_log(downloadmangar_event,L"downloadmangar_event",L"event");
     }
+    #endif
 
     bundle_free(&bundle[0]);
     bundle_free(&bundle[1]);
@@ -605,7 +609,9 @@ void bundle_lowprioirity(bundle_t *bundle)
     matcher_print(&bundle->matcher);
     manager_print(manager_g);
 
-    if(flags&FLAG_CHECKUPDATES)SetEvent(downloadmangar_event);
+#ifndef _WIN64
+    if(flags&FLAG_CHECKUPDATES&&!time_chkupdate)SetEvent(downloadmangar_event);
+#endif
     collection_save(&bundle->collection);
     gen_timestamp();
     wsprintf(filename,L"%s\\%sstate.snp",log_dir,timestamp);
@@ -678,7 +684,9 @@ void lang_refresh()
     redrawmainwnd();
     redrawfield();
     InvalidateRect(hPopup,0,0);
+#ifndef _WIN64
     updatelang();
+#endif
 
     POINT p;
     GetCursorPos(&p);
@@ -1982,7 +1990,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
 #endif
             }
 
-            if(floating_itembar>=0&&(i==1||i==0))
+            if(floating_itembar>=0&&(i==1||i==0||i==3))
             {
                 manager_toggle(manager_g,floating_itembar);
                 if(wParam&MK_SHIFT&&installmode==MODE_NONE)
@@ -2001,7 +2009,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
 
         case WM_RBUTTONDOWN:
             manager_hitscan(manager_g,x,y,&floating_itembar,&i);
-            if(floating_itembar>=0&&i==0)
+            if(floating_itembar>=0&&(i==0||i==3))
                 contextmenu(x,y);
             break;
 
