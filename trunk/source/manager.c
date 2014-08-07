@@ -269,6 +269,11 @@ void manager_print(manager_t *manager)
 }
 
 //{ User interaction
+// Zones:
+// 0 button
+// 1 checkbox
+// 2 downarrow
+// 3 text
 void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
 {
     itembar_t *itembar;
@@ -299,6 +304,8 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
             if(x-ofs>0)*r=i;
             if(x-ofs>0&&x-ofs<D(ITEM_CHECKBOX_SIZE)&&y>0&&y<D(ITEM_CHECKBOX_SIZE))*zone=1;
             if(x>wx-50&&!ofs)*zone=expertmode?2:2;
+            if(!*zone&&(x-ofs<D(ITEM_CHECKBOX_SIZE)))*zone=3;
+            if(!*zone&&(x>240+190))*zone=3;
             return;
         }
     }

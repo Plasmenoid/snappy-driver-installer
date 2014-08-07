@@ -45,7 +45,7 @@ dht_settings dht;
 
 int totalsize=0,numfiles;
 HWND hUpdate=0;
-int /*downloadtread_a=0,*/finisheddownloading=0;
+int finisheddownloading=0;
 int averageSpeed;
 torrent_status_t torrentstatus;
 
@@ -129,41 +129,52 @@ void update_movefiles()
     int i;
     boost::intrusive_ptr<torrent_info const> ti;
     std::vector<size_type> file_progress;
+    const char *filename;
+    WCHAR buf1[BUFLEN];
+    WCHAR buf2[BUFLEN];
+    WCHAR buf3[BUFLEN],*p;
+
     ti=updatehandle.torrent_file();
     updatehandle.file_progress(file_progress);
 
     for(i=0;i<numfiles;i++)
-    if(file_progress[i]==1000)
+    if(file_progress[i]==ti->file_at(i).size)
     {
         fe=ti->file_at(i);
-        log_con("$ '%ws'\n",fe.path.c_str()+21);
-
+        filename=strchr(fe.path.c_str(),'\\')+1;
+        wsprintf(buf1,L"update\\%S",fe.path.c_str());
+        wsprintf(buf2,L"res\\%S",filename);
+        wsprintf(buf3,L"%s",buf2);
+        p=wcsstr(buf2,L"indexes\\SDI\\");
+        if(p)p[12]=L'_';
+        p=buf3;
+        while(wcschr(p,L'\\'))p=wcschr(p,L'\\')+1;
+        *--p=0;
+        //log_con("Complited '%s' [%ws][%ws]{%ws}\n",filename,buf1,buf2,buf3);
+        mkdir_r(buf3);
+        CopyFile(buf1,buf2,0);
+        //MoveFile(buf1,buf2);
     }
     //"copy *.* 1\_*.*"
 }
 
 unsigned int __stdcall thread_download(void *arg)
 {
-    int r=0;
+    UNREFERENCED_PARAMETER(arg)
+
     log_con("{thread_download\n");
 
     WaitForSingleObject(downloadmangar_event,INFINITE);
     if(downloadmangar_exitflag)return 0;
 
     update_start();
-    r=populatelist(0);
-    log_con("Latest version: R%d\nUpdated driverpacks available: %d\n",r>>8,r&0xFF);
-    if(r)
-    {
-        manager_g->items_list[SLOT_DOWNLOAD].isactive=1;
-        manager_setpos(manager_g);
-        manager_g->items_list[SLOT_DOWNLOAD].val1=r;
-    }
+    populatelist(0);
 
     while(!downloadmangar_exitflag)
     {
         WaitForSingleObject(downloadmangar_event,INFINITE);
         if(downloadmangar_exitflag)break;
+        log_con("{torrent_start\n");
 
         while(sessionhandle)
         {
@@ -173,11 +184,14 @@ unsigned int __stdcall thread_download(void *arg)
             if(downloadmangar_exitflag)break;
             if(finisheddownloading)
             {
-                log_con("finished^^^^\n");
+                log_con("-torrent_finished\n");
                 update_movefiles();
+                populatelist(0);
                 break;
             }
         }
+        sessionhandle->pause();
+        log_con("}torrent_stop\n");
     }
     log_con("}thread_download\n");
     return 0;
@@ -189,7 +203,7 @@ int populatelist(HWND hList)
     file_entry fe;
     LVITEM lvI;
     int i;
-    int basesize=0;
+    int basesize=0,basedownloaded=0;
     const char *filename;
     WCHAR buf[128];
     int newver=0;
@@ -197,15 +211,11 @@ int populatelist(HWND hList)
 
     time_chkupdate=GetTickCount();
 
-    //Sleep(2000);
-
     boost::intrusive_ptr<torrent_info const> ti;
     std::vector<size_type> file_progress;
     ti=updatehandle.torrent_file();
     updatehandle.file_progress(file_progress);
 
-    //numfiles=updatehandle.torrent_file()->num_files();
-    //log_con("Num:%d\n",ti->num_files());
     numfiles=ti->num_files();
     for(i=0;i<numfiles;i++)
     {
@@ -214,10 +224,11 @@ int populatelist(HWND hList)
         if(!StrStrIA(filename,"drivers\\"))
         {
             basesize+=fe.size;
+            basedownloaded+=file_progress[i];
+            //log_con("%3d %s\n",(int)(file_progress[i]*100/fe.size),filename);
             if(StrStrIA(filename,"sdi_R"))
                 newver=atol(StrStrIA(filename,"sdi_R")+5);
         }
-        //if(!hList)updatehandle.file_priority(i,0);
     }
 
     lvI.mask      =LVIF_TEXT|LVIF_STATE|LVIF_PARAM;
@@ -233,7 +244,7 @@ int populatelist(HWND hList)
         ListView_InsertItem(hList,&lvI);
         wsprintf(buf,L"%d %s",basesize/1024/1024,STR(STR_UPD_MB));
         ListView_SetItemText(hList,0,1,buf);
-        wsprintf(buf,L"%d%%",0);
+        wsprintf(buf,L"%d%%",basedownloaded*100/basesize);
         ListView_SetItemText(hList,0,2,buf);
         wsprintf(buf,L" SDI_R%d",newver);
         ListView_SetItemText(hList,0,3,buf);
@@ -245,13 +256,13 @@ int populatelist(HWND hList)
     for(i=0;i<numfiles;i++)
     {
         fe=ti->file_at(i);
-        filename=fe.path.c_str()+21;
+        filename=strchr(fe.path.c_str(),'\\')+1;
         if(StrStrIA(filename,".7z"))
         {
             int oldver;
 
             wsprintf(buf,L"%S",filename);
-            lvI.pszText=buf;
+            lvI.pszText=buf+8;
             int sz=fe.size/1024/1024;
             if(!sz)sz=1;
 
@@ -278,6 +289,11 @@ int populatelist(HWND hList)
         }
     }
     time_chkupdate=GetTickCount()-time_chkupdate;
+
+    log_con("Latest version: R%d\nUpdated driverpacks available: %d\n",ret>>8,ret&0xFF);
+    manager_g->items_list[SLOT_DOWNLOAD].isactive=ret?1:0;
+    manager_setpos(manager_g);
+    manager_g->items_list[SLOT_DOWNLOAD].val1=ret;
     return ret;
 }
 
@@ -414,32 +430,41 @@ void updatestatus(HWND hList)
 
 void updatepriorities(HWND hList)
 {
-    char filelist[BUFLEN];
     int i;
     LVITEM item;
 
+    for(i=0;i<numfiles;i++)
+    if(StrStrIA(updatehandle.torrent_file()->file_at(i).path.c_str(),"drivers\\"))
+    {
+        updatehandle.file_priority(i,0);
+    }
+    else
+    {
+        updatehandle.file_priority(i,ListView_GetCheckState(hList,0)?2:0);
+        if(ListView_GetCheckState(hList,0))
+            log_con("Needs %s\n",updatehandle.torrent_file()->file_at(i).path.c_str());
+    }
+
     item.mask=LVIF_PARAM;
-    memset(filelist,0,BUFLEN);
     for(i=0;i<ListView_GetItemCount(hList);i++)
     {
         item.iItem=i;
         ListView_GetItem(hList,&item);
-        if(item.lParam>=0)
+        if(item.lParam>=0&&ListView_GetCheckState(hList,i))
         {
-            filelist[item.lParam]=1;
-            updatehandle.file_priority(item.lParam,ListView_GetCheckState(hList,i)?1:0);
+            updatehandle.file_priority(item.lParam,1);
+            log_con("Needs %s\n",updatehandle.torrent_file()->file_at(i).path.c_str());
         }
     }
-    for(i=0;i<numfiles;i++)
-    if(!filelist[i])
+
+    if(sessionhandle->is_paused())
     {
-        updatehandle.file_priority(i,ListView_GetCheckState(hList,0)?2:0);
+        log_con("Event\n");
+        SetEvent(downloadmangar_event);
     }
     sessionhandle->resume();
     finisheddownloading=0;
     torrenttime=GetTickCount();
-    //updatehandle.resume();
-    SetEvent(downloadmangar_event);
 }
 
 void updatecheckboxes(HWND hList)
@@ -457,7 +482,6 @@ void updatecheckboxes(HWND hList)
         if(item.lParam>=0)
         {
             filelist[item.lParam]=1;
-            //updatehandle.file_priority(item.lParam,ListView_GetCheckState(hList,i)?1:0);
             ListView_SetCheckState(hList,i,updatehandle.file_priority(item.lParam));
         }
     }
@@ -485,7 +509,6 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
 {
     UNREFERENCED_PARAMETER(lParam);
     LVCOLUMN lvc;
-    //LPNMITEMACTIVATE lpnmitem;
     HWND hList;
     WCHAR buf[32];
     int i;
@@ -518,11 +541,6 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
             if(((LPNMHDR)lParam)->code==LVN_ITEMCHANGED)
             {
                 updatestatus(hList);
-                /*lpnmitem = (LPNMITEMACTIVATE) lParam;
-                i=ListView_GetCheckState(hList,lpnmitem->iItem);
-                //log_con("%d,%d,%d\n",lpnmitem->iSubItem,lpnmitem->uOldState,lpnmitem->uNewState);
-                i^=1;
-                ListView_SetCheckState(hList,lpnmitem->iItem,i);*/
                 return TRUE;
             }
             break;
@@ -573,4 +591,3 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
 }
 
 #endif
-
