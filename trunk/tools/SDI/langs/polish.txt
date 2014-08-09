@@ -279,7 +279,7 @@ STR_UPD_AVAIL1          = "Dostêpne s¹ aktualizacje: SDI R%d"
 STR_UPD_AVAIL2          = "Dostêpne s¹ aktualizacje: %d pakiety ze sterownikami"
 STR_UPD_AVAIL3          = "Dostêpne s¹ aktualizacje: SDI R%d i %d pakiety ze sterownikami"
 STR_UPD_START           = "(Kliknij tutaj, aby rozpocz¹æ pobieranie)"
-STR_UPD_PROGRES         = "Pobrano %s z %s (%d)"
+STR_UPD_PROGRES         = "Pobrano %s z %s (%d%%)"
 STR_UPD_MODIFY          = "(Kliknij tutaj, aby wybraæ aktualizacje)"
 
 STR_DWN_DOWNLOADED      = "Pobrano"

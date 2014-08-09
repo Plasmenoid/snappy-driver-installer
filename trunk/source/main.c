@@ -610,7 +610,8 @@ void bundle_lowprioirity(bundle_t *bundle)
     manager_print(manager_g);
 
 #ifndef _WIN64
-    if(flags&FLAG_CHECKUPDATES&&!time_chkupdate)SetEvent(downloadmangar_event);
+    if(flags&FLAG_CHECKUPDATES&&!time_chkupdate&&canWrite(L"update"))
+        SetEvent(downloadmangar_event);
 #endif
     collection_save(&bundle->collection);
     gen_timestamp();
@@ -685,7 +686,7 @@ void lang_refresh()
     redrawfield();
     InvalidateRect(hPopup,0,0);
 #ifndef _WIN64
-    updatelang();
+    upddlg_updatelang();
 #endif
 
     POINT p;
@@ -1987,6 +1988,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             {
 #ifndef _WIN64
                 DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),0,(DLGPROC)UpdateProcedure);
+                break;
 #endif
             }
 
