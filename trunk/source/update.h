@@ -50,5 +50,6 @@ int  upddlg_populatelist(HWND hList);
 void update_start();
 void update_stop();
 void update_getstatus(torrent_status_t *t);
+void delolddrp(const char *ptr);
 void update_movefiles();
 unsigned int __stdcall thread_download(void *arg);

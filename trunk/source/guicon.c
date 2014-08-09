@@ -237,7 +237,7 @@ void print_error(int r,const WCHAR *s)
     error_count++;
 }
 
-DWORD RunSilent(WCHAR* file,WCHAR* cmd,int show,int wait)
+DWORD RunSilent(const WCHAR* file,const WCHAR* cmd,int show,int wait)
 {
     DWORD ret;
 

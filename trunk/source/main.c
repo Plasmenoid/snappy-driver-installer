@@ -419,7 +419,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     #ifndef _WIN64
     if(flags&FLAG_CHECKUPDATES)
     {
-        downloadmangar_event=CreateEvent(0,0,0,0);
+        downloadmangar_event=CreateEvent(0,1,0,0);
         thandle_download=(HANDLE)_beginthreadex(0,0,&thread_download,0,0,0);
     }
     #endif
@@ -604,14 +604,17 @@ void bundle_lowprioirity(bundle_t *bundle)
     redrawmainwnd();
 
     collection_printstates(&bundle->collection);
-    collection_finddrp(&bundle->collection,L"");
+    //collection_finddrp(&bundle->collection,L"");
     state_print(&bundle->state);
     matcher_print(&bundle->matcher);
     manager_print(manager_g);
 
 #ifndef _WIN64
     if(flags&FLAG_CHECKUPDATES&&!time_chkupdate&&canWrite(L"update"))
+    {
+        log_con("Event 1\n");
         SetEvent(downloadmangar_event);
+    }
 #endif
     collection_save(&bundle->collection);
     gen_timestamp();
