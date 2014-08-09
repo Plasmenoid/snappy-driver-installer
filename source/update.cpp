@@ -22,7 +22,8 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "libtorrent/bencode.hpp"
 #include "libtorrent/session.hpp"
 
-#define TORRENT_URL "SDI_209_14_7.torrent"
+#define TORRENT_URL "http://driveroff.net/SDI_209_14_7.torrent"
+//#define TORRENT_URL "http://driveroff.net/SDI_210_14_8.torrent"
 #define SMOOTHING_FACTOR 0.005
 using namespace libtorrent;
 
@@ -31,6 +32,16 @@ extern "C"
 #define _WIN32_IE 0x0400
 #include "main.h"
 }
+
+int cxn[]=
+{
+    199,
+    60,
+    44,
+    70,
+    70,
+    90,
+};
 
 session *sessionhandle=0;
 torrent_handle updatehandle;
@@ -51,7 +62,7 @@ torrent_status_t torrentstatus;
 
 int yes1(libtorrent::torrent_status const&);
 
-int getver(const char *ptr)
+int getnewver(const char *ptr)
 {
     char bff[BUFLEN];
     char *s=bff;
@@ -94,7 +105,7 @@ int getcurver(const char *ptr)
     return 0;
 }
 
-void updatelang()
+void upddlg_updatelang()
 {
     LVCOLUMN lvc;
     WCHAR buf[BUFLEN];
@@ -155,7 +166,6 @@ void update_movefiles()
         CopyFile(buf1,buf2,0);
         //MoveFile(buf1,buf2);
     }
-    //"copy *.* 1\_*.*"
 }
 
 unsigned int __stdcall thread_download(void *arg)
@@ -168,7 +178,8 @@ unsigned int __stdcall thread_download(void *arg)
     if(downloadmangar_exitflag)return 0;
 
     update_start();
-    populatelist(0);
+    update_getstatus(&torrentstatus);
+    upddlg_populatelist(0);
 
     while(!downloadmangar_exitflag)
     {
@@ -186,7 +197,7 @@ unsigned int __stdcall thread_download(void *arg)
             {
                 log_con("-torrent_finished\n");
                 update_movefiles();
-                populatelist(0);
+                upddlg_populatelist(0);
                 break;
             }
         }
@@ -197,37 +208,47 @@ unsigned int __stdcall thread_download(void *arg)
     return 0;
 }
 
-int populatelist(HWND hList)
+int upddlg_populatelist(HWND hList)
 {
     error_code ec;
     file_entry fe;
     LVITEM lvI;
     int i;
     int basesize=0,basedownloaded=0;
-    const char *filename;
-    WCHAR buf[128];
+    const char *filename,*filenamefull;
+    WCHAR buf[BUFLEN];
     int newver=0;
     int ret=0;
+    int missingindexes=0;
 
     time_chkupdate=GetTickCount();
 
     boost::intrusive_ptr<torrent_info const> ti;
     std::vector<size_type> file_progress;
     ti=updatehandle.torrent_file();
+    numfiles=0;
+    if(!ti)return 0;
     updatehandle.file_progress(file_progress);
 
     numfiles=ti->num_files();
     for(i=0;i<numfiles;i++)
     {
         fe=ti->file_at(i);
-        filename=fe.path.c_str();
-        if(!StrStrIA(filename,"drivers\\"))
+        filenamefull=fe.path.c_str();
+        if(!StrStrIA(filenamefull,"drivers\\"))
         {
             basesize+=fe.size;
             basedownloaded+=file_progress[i];
-            //log_con("%3d %s\n",(int)(file_progress[i]*100/fe.size),filename);
-            if(StrStrIA(filename,"sdi_R"))
-                newver=atol(StrStrIA(filename,"sdi_R")+5);
+            //log_con("%3d %s\n",(int)(file_progress[i]*100/fe.size),filenamefull);
+            if(StrStrIA(filenamefull,"sdi_R"))
+                newver=atol(StrStrIA(filenamefull,"sdi_R")+5);
+        }
+        if(StrStrIA(filenamefull,"indexes\\"))
+        {
+            wsprintf(buf,L"%S",filenamefull);
+            *wcsstr(buf,L"DP_")=L'_';
+            log_con("%d '%ws'\n",PathFileExists(buf),buf);
+            if(!PathFileExists(buf))missingindexes=1;
         }
     }
 
@@ -238,7 +259,7 @@ int populatelist(HWND hList)
     lvI.iItem     =0;
     lvI.lParam    =-1;
     if(newver>SVN_REV)ret+=newver<<8;
-    if(newver>SVN_REV&&hList)
+    if((newver>SVN_REV||missingindexes)&&hList)
     {
         lvI.pszText=(WCHAR *)STR(STR_UPD_BASEFILES);
         ListView_InsertItem(hList,&lvI);
@@ -256,17 +277,20 @@ int populatelist(HWND hList)
     for(i=0;i<numfiles;i++)
     {
         fe=ti->file_at(i);
-        filename=strchr(fe.path.c_str(),'\\')+1;
-        if(StrStrIA(filename,".7z"))
+        filenamefull=strchr(fe.path.c_str(),'\\')+1;
+        filename=strchr(filenamefull,'\\')+1;
+        if(!filename)filename=filenamefull;
+
+        if(StrStrIA(filenamefull,".7z"))
         {
             int oldver;
 
             wsprintf(buf,L"%S",filename);
-            lvI.pszText=buf+8;
+            lvI.pszText=buf;
             int sz=fe.size/1024/1024;
             if(!sz)sz=1;
 
-            newver=getver(filename);
+            newver=getnewver(filenamefull);
             oldver=getcurver(filename);
 
             if(newver>oldver)ret++;
@@ -302,12 +326,11 @@ int yes1(libtorrent::torrent_status const&){return true;}
 void update_start()
 {
     error_code ec;
+    int i;
     add_torrent_params params;
 
     if(!sessionhandle)
     {
-        //RunSilent(L"cmd",L" /c rd /s /q update",SW_HIDE,1);
-
         sessionhandle=new session();
 
         sessionhandle->start_lsd();
@@ -339,12 +362,30 @@ void update_start()
         sessionhandle->set_settings(settings);
 
         params.save_path="update";
-        params.ti=new torrent_info(TORRENT_URL,ec);
+        params.url=TORRENT_URL;
+        if(ec)
+        {
+            log_con("failed to init torrentinfo: %s\n",ec.message().c_str());
+        }
         params.flags=0;
-        sessionhandle->pause();
         updatehandle=sessionhandle->add_torrent(params,ec);
-
-        log_con("Start update\n");
+        if(ec)
+        {
+            log_con("failed to add torrent: %s\n",ec.message().c_str());
+        }
+        sessionhandle->pause();
+        log_con("Waiting for torrent");
+        for(i=0;i<50;i++)
+        {
+            log_con(".");
+            if(updatehandle.torrent_file())
+            {
+                log_con("done\n");
+                break;
+            }
+            Sleep(100);
+        }
+        log_con("\nStart update\n");
     }
 }
 
@@ -396,10 +437,11 @@ void update_getstatus(torrent_status_t *t)
         t->remaining=(t->downloadsize-t->downloaded)/averageSpeed*1000;
     }
 
-    t->sessionpaused=st.auto_managed;
+    t->sessionpaused=sessionhandle->is_paused();
     t->torrentpaused=st.paused;
 
-    manager_g->items_list[SLOT_DOWNLOAD].percent=torrentstatus.downloaded*1000/torrentstatus.downloadsize;
+    if(torrentstatus.downloadsize)
+        manager_g->items_list[SLOT_DOWNLOAD].percent=torrentstatus.downloaded*1000/torrentstatus.downloadsize;
     redrawfield();
 }
 
@@ -413,7 +455,7 @@ void update_stop()
     }
 }
 
-void updatestatus(HWND hList)
+void upddlg_calctotalsize(HWND hList)
 {
     WCHAR buf[BUFLEN];
     int i;
@@ -425,10 +467,9 @@ void updatestatus(HWND hList)
         ListView_GetItemText(hList,i,1,buf,32);
         totalsize+=_wtoi(buf);
     }
-    updatelang();
 }
 
-void updatepriorities(HWND hList)
+void upddlg_setpriorities(HWND hList)
 {
     int i;
     LVITEM item;
@@ -467,12 +508,13 @@ void updatepriorities(HWND hList)
     torrenttime=GetTickCount();
 }
 
-void updatecheckboxes(HWND hList)
+void upddlg_setcheckboxes(HWND hList)
 {
     char filelist[BUFLEN];
     int i;
     LVITEM item;
 
+    if(torrentstatus.sessionpaused)return;
     item.mask=LVIF_PARAM;
     memset(filelist,0,BUFLEN);
     for(i=0;i<ListView_GetItemCount(hList);i++)
@@ -494,16 +536,6 @@ void updatecheckboxes(HWND hList)
         break;
     }
 }
-
-int cxn[]=
-{
-    199,
-    60,
-    44,
-    70,
-    70,
-    90,
-};
 
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam)
 {
@@ -531,16 +563,17 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                 }
 
                 hUpdate=hwnd;
-                populatelist(hList);
-                updatelang();
-                updatecheckboxes(hList);
+                upddlg_populatelist(hList);
+                upddlg_updatelang();
+                upddlg_setcheckboxes(hList);
             }
             return TRUE;
 
         case WM_NOTIFY:
             if(((LPNMHDR)lParam)->code==LVN_ITEMCHANGED)
             {
-                updatestatus(hList);
+                upddlg_calctotalsize(hList);
+                upddlg_updatelang();
                 return TRUE;
             }
             break;
@@ -550,12 +583,12 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
             {
                 case IDOK:
                     hUpdate=0;
-                    updatepriorities(hList);
+                    upddlg_setpriorities(hList);
                     EndDialog(hwnd,IDOK);
                     return TRUE;
 
                 case IDACCEPT:
-                    updatepriorities(hList);
+                    upddlg_setpriorities(hList);
                     return TRUE;
 
                 case IDCANCEL:
@@ -567,7 +600,6 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                 case IDUNCHECKALL:
                     for(i=0;i<ListView_GetItemCount(hList);i++)
                         ListView_SetCheckState(hList,i,LOWORD(wParam)==IDCHECKALL?1:0);
-                    updatestatus(hList);
                     return TRUE;
 
                 case IDCHECKTHISPC:
@@ -576,7 +608,6 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                         ListView_GetItemText(hList,i,5,buf,32);
                         ListView_SetCheckState(hList,i,StrStrIW(buf,STR(STR_UPD_YES))?1:0);
                     }
-                    updatestatus(hList);
                     return TRUE;
 
                 default:

@@ -31,26 +31,24 @@ typedef struct _torrent_status_t
     int sessionpaused,torrentpaused;
 }torrent_status_t;
 
-
 extern volatile int downloadmangar_exitflag;
 extern HANDLE downloadmangar_event;
 extern HANDLE thandle_download;
 extern torrent_status_t torrentstatus;
 
 // Dialog
+void upddlg_updatelang();
+void upddlg_setcheckboxes(HWND hList);
+void upddlg_setpriorities(HWND hList);
+void upddlg_calctotalsize(HWND hList);
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
-int getver(const char *ptr);
-int getcurver(const char *ptr);
-void updatelang();
-int  populatelist(HWND hList);
-void updatecheckboxes(HWND hList);
+int  getnewver(const char *ptr);
+int  getcurver(const char *ptr);
+int  upddlg_populatelist(HWND hList);
 
 // Update
 void update_start();
 void update_stop();
-void updatestatus(HWND hList);
-void updatepriorities(HWND hList);
 void update_getstatus(torrent_status_t *t);
 void update_movefiles();
-
 unsigned int __stdcall thread_download(void *arg);

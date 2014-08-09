@@ -91,7 +91,7 @@ int  manager_drplive(WCHAR *s)
 
     itembar=&manager_g->items_list[RES_SLOTS];
     for(k=RES_SLOTS;k<manager_g->items_handle.items;k++,itembar++)
-        if(itembar->hwidmatch&&StrStrIW(getdrp_packname(itembar->hwidmatch),s))
+    if(itembar->hwidmatch&&StrStrIW(getdrp_packname(itembar->hwidmatch),s))
     {
         if(itembar->isactive)
         {
@@ -930,7 +930,26 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
                 wsprintf(bufw,STR(itembar->val1&0xFF?STR_UPD_AVAIL3:STR_UPD_AVAIL1),itembar->val1>>8,itembar->val1&0xFF);
             else
                 wsprintf(bufw,STR(STR_UPD_AVAIL2),itembar->val1&0xFF);
-            drawbutton(hdc,x,pos,index,bufw,STR(STR_UPD_START));
+
+#ifndef _WIN64
+            if(!torrentstatus.sessionpaused)
+            {
+                WCHAR num1[64],num2[64];
+
+                format_size(num1,torrentstatus.downloaded,0);
+                format_size(num2,torrentstatus.downloadsize,0);
+
+                wsprintf(bufw,STR(STR_UPD_PROGRES),
+                         num1,
+                         num2,
+                         (torrentstatus.downloadsize)?torrentstatus.downloaded*100/torrentstatus.downloadsize:0);
+
+                drawbutton(hdc,x,pos,index,bufw,STR(STR_UPD_MODIFY));
+            }
+            else
+#endif
+                drawbutton(hdc,x,pos,index,bufw,STR(STR_UPD_START));
+
             break;
 
         case SLOT_SNAPSHOT:
