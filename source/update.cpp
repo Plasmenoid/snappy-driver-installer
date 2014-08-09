@@ -105,6 +105,30 @@ int getcurver(const char *ptr)
     return 0;
 }
 
+void delolddrp(const char *ptr)
+{
+    WCHAR bffw[BUFLEN];
+    WCHAR buf[BUFLEN];
+    WCHAR *s=bffw;
+
+    wsprintf(bffw,L"%S",ptr);
+    log_con("dep '%ws'\n",bffw);
+    while(*s)
+    {
+        if(*s=='_'&&s[1]>='0'&&s[1]<='9')
+        {
+            *s=0;
+            s=finddrp(bffw);
+            if(!s)return;
+            wsprintf(buf,L"drivers\\%s",s);
+            log_con("'del %ws'\n",buf);
+            _wremove(buf);
+            return;
+        }
+        s++;
+    }
+}
+
 void upddlg_updatelang()
 {
     LVCOLUMN lvc;
@@ -148,24 +172,45 @@ void update_movefiles()
     ti=updatehandle.torrent_file();
     updatehandle.file_progress(file_progress);
 
+    monitor_pause=1;
+    for(i=0;i<numfiles;i++)
+        if(file_progress[i]==ti->file_at(i).size&&
+           StrStrIA(ti->file_at(i).path.c_str(),"indexes\\SDI\\"))
+            break;
+    log_con("[%d]",i==numfiles);
+    if(i!=numfiles)
+        RunSilent(L"cmd",L"/c del indexes\\SDI\\_*.bin",SW_HIDE,0);
+
     for(i=0;i<numfiles;i++)
     if(file_progress[i]==ti->file_at(i).size)
     {
         fe=ti->file_at(i);
         filename=strchr(fe.path.c_str(),'\\')+1;
         wsprintf(buf1,L"update\\%S",fe.path.c_str());
-        wsprintf(buf2,L"res\\%S",filename);
+        wsprintf(buf2,L"%S",filename);
+        //wsprintf(buf2,L"res\\%S",filename);
         wsprintf(buf3,L"%s",buf2);
         p=wcsstr(buf2,L"indexes\\SDI\\");
-        if(p)p[12]=L'_';
+
+        if(StrStrIA(filename,"drivers\\"))delolddrp(filename+8);
+
+        if(p)
+        {
+            CopyFile(buf1,buf2,0);
+            p[12]=L'_';
+        }
         p=buf3;
         while(wcschr(p,L'\\'))p=wcschr(p,L'\\')+1;
-        *--p=0;
         //log_con("Complited '%s' [%ws][%ws]{%ws}\n",filename,buf1,buf2,buf3);
-        mkdir_r(buf3);
-        CopyFile(buf1,buf2,0);
-        //MoveFile(buf1,buf2);
+        if(p[-1]==L'\\')
+        {
+            *--p=0;
+            mkdir_r(buf3);
+        }
+        //CopyFile(buf1,buf2,0);
+        MoveFileEx(buf1,buf2,MOVEFILE_REPLACE_EXISTING);
     }
+    //monitor_pause=0;
 }
 
 unsigned int __stdcall thread_download(void *arg)
@@ -181,6 +226,7 @@ unsigned int __stdcall thread_download(void *arg)
     update_getstatus(&torrentstatus);
     upddlg_populatelist(0);
 
+    ResetEvent(downloadmangar_event);
     while(!downloadmangar_exitflag)
     {
         WaitForSingleObject(downloadmangar_event,INFINITE);
@@ -202,7 +248,12 @@ unsigned int __stdcall thread_download(void *arg)
             }
         }
         sessionhandle->pause();
+        update_getstatus(&torrentstatus);
+        upddlg_populatelist(0);
+        monitor_pause=0;
+        PostMessage(hMain,WM_DEVICECHANGE,7,2);
         log_con("}torrent_stop\n");
+        ResetEvent(downloadmangar_event);
     }
     log_con("}thread_download\n");
     return 0;
@@ -220,8 +271,6 @@ int upddlg_populatelist(HWND hList)
     int newver=0;
     int ret=0;
     int missingindexes=0;
-
-    time_chkupdate=GetTickCount();
 
     boost::intrusive_ptr<torrent_info const> ti;
     std::vector<size_type> file_progress;
@@ -247,7 +296,7 @@ int upddlg_populatelist(HWND hList)
         {
             wsprintf(buf,L"%S",filenamefull);
             *wcsstr(buf,L"DP_")=L'_';
-            log_con("%d '%ws'\n",PathFileExists(buf),buf);
+            //log_con("%d '%ws'\n",PathFileExists(buf),buf);
             if(!PathFileExists(buf))missingindexes=1;
         }
     }
@@ -312,7 +361,6 @@ int upddlg_populatelist(HWND hList)
             }
         }
     }
-    time_chkupdate=GetTickCount()-time_chkupdate;
 
     log_con("Latest version: R%d\nUpdated driverpacks available: %d\n",ret>>8,ret&0xFF);
     manager_g->items_list[SLOT_DOWNLOAD].isactive=ret?1:0;
@@ -331,6 +379,7 @@ void update_start()
 
     if(!sessionhandle)
     {
+        time_chkupdate=GetTickCount();
         sessionhandle=new session();
 
         sessionhandle->start_lsd();
@@ -386,6 +435,7 @@ void update_start()
             Sleep(100);
         }
         log_con("\nStart update\n");
+        time_chkupdate=GetTickCount()-time_chkupdate;
     }
 }
 
@@ -482,8 +532,8 @@ void upddlg_setpriorities(HWND hList)
     else
     {
         updatehandle.file_priority(i,ListView_GetCheckState(hList,0)?2:0);
-        if(ListView_GetCheckState(hList,0))
-            log_con("Needs %s\n",updatehandle.torrent_file()->file_at(i).path.c_str());
+        //if(ListView_GetCheckState(hList,0))
+        //    log_con("Needs %s\n",updatehandle.torrent_file()->file_at(i).path.c_str());
     }
 
     item.mask=LVIF_PARAM;
@@ -494,13 +544,13 @@ void upddlg_setpriorities(HWND hList)
         if(item.lParam>=0&&ListView_GetCheckState(hList,i))
         {
             updatehandle.file_priority(item.lParam,1);
-            log_con("Needs %s\n",updatehandle.torrent_file()->file_at(i).path.c_str());
+            //log_con("Needs %s\n",updatehandle.torrent_file()->file_at(i).path.c_str());
         }
     }
 
     if(sessionhandle->is_paused())
     {
-        log_con("Event\n");
+        log_con("Event 2\n");
         SetEvent(downloadmangar_event);
     }
     sessionhandle->resume();

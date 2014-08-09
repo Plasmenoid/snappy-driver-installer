@@ -20,6 +20,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 //{ Global vars
 monitor_t mon_lang,mon_theme;
 vault_t vLang,vTheme;
+int monitor_pause=0;
 //}
 
 //{ Vault
@@ -530,8 +531,10 @@ void CALLBACK monitor_callback(DWORD dwErrorCode,DWORD dwNumberOfBytesTransfered
                         pNotify->Action==2||
                         (pNotify->Action==3&&m==2));
 
-                log_con("%cMONITOR: a:%d,m:%d,e:%02d,%9d,'%ws'\n",flag?'+':'-',pNotify->Action,m,errno,sz,buf);
-                if(flag)pMonitor->callback(szFile,pNotify->Action,pMonitor->lParam);
+                if(!monitor_pause)
+                    log_con("%cMONITOR: a:%d,m:%d,e:%02d,%9d,'%ws'\n",flag?'+':'-',pNotify->Action,m,errno,sz,buf);
+
+                if(flag&&!monitor_pause)pMonitor->callback(szFile,pNotify->Action,pMonitor->lParam);
 			}
 
 		}while(pNotify->NextEntryOffset!=0);

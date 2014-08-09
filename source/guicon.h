@@ -66,7 +66,7 @@ void log_nul(CHAR const *format,...);
 
 WCHAR *errno_str();
 void print_error(int r,const WCHAR *s);
-DWORD RunSilent(WCHAR* file,WCHAR* cmd,int show,int wait);
+DWORD RunSilent(const WCHAR* file,const WCHAR* cmd,int show,int wait);
 int canWrite(const WCHAR *path);
 void CALLBACK viruscheck(LPTSTR szFile,DWORD action,LPARAM lParam);
 void virusmonitor_start();

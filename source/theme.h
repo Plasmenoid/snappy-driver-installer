@@ -41,6 +41,7 @@ typedef struct _vault_t
 extern entry_t language[STR_NM];
 extern entry_t theme[THEME_NM];
 extern vault_t vLang,vTheme;
+extern int monitor_pause;
 
 // Monitor
 typedef void (CALLBACK *FileChangeCallback)(LPTSTR,DWORD,LPARAM);
