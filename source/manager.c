@@ -144,12 +144,12 @@ void manager_filter(manager_t *manager,int options)
     int o1=options&FILTER_SHOW_ONE;
 
     itembar=&manager->items_list[RES_SLOTS];
-    for(i=RES_SLOTS;i<manager->items_handle.items;i++)
+    for(i=RES_SLOTS;i<manager->items_handle.items;)
     {
         devicematch=itembar->devicematch;
         memset(cnt,0,sizeof(cnt));
         if(!devicematch)continue;
-        for(j=0;j<devicematch->num_matches;j++,itembar++)
+        for(j=0;j<devicematch->num_matches;j++,itembar++,i++)
         {
             itembar->isactive=0;
             if(!itembar)log_con("ERROR a%d\n",j);
@@ -217,7 +217,7 @@ void manager_filter(manager_t *manager,int options)
             if(options&FILTER_SHOW_NF_STANDARD&&devicematch->status&STATUS_NF_STANDARD)itembar->isactive=1;
             if(options&FILTER_SHOW_NF_UNKNOWN&&devicematch->status&STATUS_NF_UNKNOWN)itembar->isactive=1;
             if(options&FILTER_SHOW_NF_MISSING&&devicematch->status&STATUS_NF_MISSING)itembar->isactive=1;
-            itembar++;
+            itembar++;i++;
         }
     }
     i=0;

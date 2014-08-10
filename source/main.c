@@ -537,6 +537,9 @@ unsigned int __stdcall thread_loadall(void *arg)
                 SendMessage(hMain,WM_BUNDLEREADY,(WPARAM)&bundle[bundle_shadow],(LPARAM)&bundle[bundle_display]);
         }
 
+        log_con("{2Sync\n");
+        EnterCriticalSection(&sync);
+        log_con("*");
         bundle_lowprioirity(&bundle[bundle_shadow]);
 
         if(cancel_update)
@@ -551,6 +554,8 @@ unsigned int __stdcall thread_loadall(void *arg)
         bundle_free(&bundle[bundle_shadow]);
         bundle_init(&bundle[bundle_shadow]);
         if(cancel_update)SetEvent(deviceupdate_event);
+        log_con("}2Sync\n");
+        LeaveCriticalSection(&sync);
         WaitForSingleObject(deviceupdate_event,INFINITE);
         //printf("%ld\n",GetTickCount()-t);
     }while(!deviceupdate_exitflag);
