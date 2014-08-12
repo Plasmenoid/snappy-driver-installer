@@ -534,6 +534,12 @@ void update_stop()
 
 void update_resume()
 {
+    if(!sessionhandle||!updatehandle.torrent_file())
+    {
+        finisheddownloading=1;
+        finishedupdating=1;
+        return;
+    }
     if(sessionhandle->is_paused())
     {
         updatehandle.force_recheck();
