@@ -1402,6 +1402,18 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(ctrl_down&&wParam==L'A')PostMessage(hMain,WM_COMMAND,ID_SELECT_ALL,0);
             if(ctrl_down&&wParam==L'N')PostMessage(hMain,WM_COMMAND,ID_SELECT_NONE,0);
             if(ctrl_down&&wParam==L'I')PostMessage(hMain,WM_COMMAND,ID_INSTALL,0);
+            if(ctrl_down&&wParam==L'P')
+            {
+                panels[11].items[2].checked^=1;
+                PostMessage(hMain,WM_COMMAND,ID_RESTPNT,0);
+                redrawmainwnd();
+            }
+            if(ctrl_down&&wParam==L'R')
+            {
+                panels[11].items[3].checked^=1;
+                PostMessage(hMain,WM_COMMAND,ID_REBOOT,0);
+                redrawmainwnd();
+            }
             if(wParam==VK_F5)
                 PostMessage(hwnd,WM_DEVICECHANGE,7,2);
             if(wParam==VK_F6&&ctrl_down)
@@ -1995,7 +2007,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             if(floating_itembar==SLOT_DOWNLOAD)
             {
 #ifndef _WIN64
-                DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),0,(DLGPROC)UpdateProcedure);
+                DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),hwnd,(DLGPROC)UpdateProcedure);
                 break;
 #endif
             }

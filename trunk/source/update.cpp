@@ -20,6 +20,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "libtorrent/config.hpp"
 #include "libtorrent/entry.hpp"
 #include "libtorrent/bencode.hpp"
+#include "libtorrent/alert_types.hpp"
 #include "libtorrent/session.hpp"
 
 #define TORRENT_URL "http://driveroff.net/SDI_209_14_7.torrent"
@@ -207,8 +208,8 @@ void update_movefiles()
             *--p=0;
             mkdir_r(buf3);
         }
-        //CopyFile(buf1,buf2,0);
-        MoveFileEx(buf1,buf2,MOVEFILE_REPLACE_EXISTING);
+        CopyFile(buf1,buf2,0);
+        //MoveFileEx(buf1,buf2,MOVEFILE_REPLACE_EXISTING);
     }
     //monitor_pause=0;
 }
@@ -242,7 +243,28 @@ unsigned int __stdcall thread_download(void *arg)
             if(finisheddownloading)
             {
                 log_con("-torrent_finished\n");
+                sessionhandle->pause();
+
+                log_con("Flushing cache...");
+                updatehandle.flush_cache();
+                while(1)
+                {
+                    alert const* a=sessionhandle->wait_for_alert(seconds(60*2));
+                    if(!a)
+                    {
+                        log_con("time out\n");
+                        break;
+                    }
+                    std::auto_ptr<alert> holder=sessionhandle->pop_alert();
+                    if(alert_cast<cache_flushed_alert>(a))
+                    {
+                        log_con("done\n");
+                        break;
+                    }
+                }
+
                 update_movefiles();
+                updatehandle.force_recheck();
                 upddlg_populatelist(0);
                 break;
             }
@@ -377,66 +399,66 @@ void update_start()
     int i;
     add_torrent_params params;
 
-    if(!sessionhandle)
+    time_chkupdate=GetTickCount();
+    sessionhandle=new session();
+
+    sessionhandle->start_lsd();
+    sessionhandle->start_upnp();
+    sessionhandle->start_natpmp();
+    int port=50171;
+    //port=0;
+
+    sessionhandle->listen_on(std::make_pair(port,port),ec);
+    if(ec)
     {
-        time_chkupdate=GetTickCount();
-        sessionhandle=new session();
-
-        sessionhandle->start_lsd();
-        sessionhandle->start_upnp();
-        sessionhandle->start_natpmp();
-        int port=50171;
-        //port=0;
-
-        sessionhandle->listen_on(std::make_pair(port,port),ec);
-        if(ec)
-        {
-            log_con("failed to open listen socket: %s\n",ec.message().c_str());
-        }
-        log_con("Listen %d,%d\n",sessionhandle->is_listening(),sessionhandle->listen_port());
-
-        dht.privacy_lookups=true;
-        sessionhandle->set_dht_settings(dht);
-        settings.use_dht_as_fallback = false;
-        sessionhandle->add_dht_router(std::make_pair(std::string("router.bittorrent.com"),port));
-        sessionhandle->add_dht_router(std::make_pair(std::string("router.utorrent.com"),port));
-        sessionhandle->add_dht_router(std::make_pair(std::string("router.bitcomet.com"),port));
-        sessionhandle->start_dht();
-
-        settings.user_agent = std::string("SDI 1.3.5");
-        settings.choking_algorithm = session_settings::auto_expand_choker;
-        settings.disk_cache_algorithm = session_settings::avoid_readback;
-        settings.always_send_user_agent=true;
-        settings.volatile_read_cache = false;
-        sessionhandle->set_settings(settings);
-
-        params.save_path="update";
-        params.url=TORRENT_URL;
-        if(ec)
-        {
-            log_con("failed to init torrentinfo: %s\n",ec.message().c_str());
-        }
-        params.flags=0;
-        updatehandle=sessionhandle->add_torrent(params,ec);
-        if(ec)
-        {
-            log_con("failed to add torrent: %s\n",ec.message().c_str());
-        }
-        sessionhandle->pause();
-        log_con("Waiting for torrent");
-        for(i=0;i<50;i++)
-        {
-            log_con(".");
-            if(updatehandle.torrent_file())
-            {
-                log_con("done\n");
-                break;
-            }
-            Sleep(100);
-        }
-        log_con("\nStart update\n");
-        time_chkupdate=GetTickCount()-time_chkupdate;
+        log_con("failed to open listen socket: %s\n",ec.message().c_str());
     }
+    log_con("Listen %d,%d\n",sessionhandle->is_listening(),sessionhandle->listen_port());
+
+    dht.privacy_lookups=true;
+    sessionhandle->set_dht_settings(dht);
+    settings.use_dht_as_fallback = false;
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.bittorrent.com"),port));
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.utorrent.com"),port));
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.bitcomet.com"),port));
+    sessionhandle->start_dht();
+    sessionhandle->set_alert_mask(alert::error_notification|alert::storage_notification);
+
+    settings.user_agent = "Snappy Driver Installer/" SVN_REV2;
+    settings.always_send_user_agent=true;
+    settings.anonymous_mode=false;
+    settings.choking_algorithm = session_settings::auto_expand_choker;
+    settings.disk_cache_algorithm = session_settings::avoid_readback;
+    settings.volatile_read_cache = false;
+    sessionhandle->set_settings(settings);
+
+    params.save_path="update";
+    params.url=TORRENT_URL;
+    if(ec)
+    {
+        log_con("failed to init torrentinfo: %s\n",ec.message().c_str());
+    }
+    params.flags=add_torrent_params::flag_paused;
+    updatehandle=sessionhandle->add_torrent(params,ec);
+    if(ec)
+    {
+        log_con("failed to add torrent: %s\n",ec.message().c_str());
+    }
+    sessionhandle->pause();
+    updatehandle.resume();
+    log_con("Waiting for torrent");
+    for(i=0;i<50;i++)
+    {
+        log_con(".");
+        if(updatehandle.torrent_file())
+        {
+            log_con("DONE\n");
+            break;
+        }
+        Sleep(100);
+    }
+    log_con(updatehandle.torrent_file()?"\nStart update\n":"FAILED\n");
+    time_chkupdate=GetTickCount()-time_chkupdate;
 }
 
 void update_getstatus(torrent_status_t *t)
@@ -497,12 +519,11 @@ void update_getstatus(torrent_status_t *t)
 
 void update_stop()
 {
-    if(sessionhandle)
-    {
-        log_con("Finish %d\n",(int)sessionhandle->status().total_download);
-        if(sessionhandle)delete sessionhandle;
-        sessionhandle=0;
-    }
+    if(!sessionhandle)return;
+
+    log_con("Closing torrent sesstion...");
+    delete sessionhandle;
+    log_con("DONE\n");
 }
 
 void upddlg_calctotalsize(HWND hList)
