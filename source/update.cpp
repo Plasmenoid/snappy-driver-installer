@@ -57,7 +57,8 @@ dht_settings dht;
 
 int totalsize=0,numfiles;
 HWND hUpdate=0;
-int finisheddownloading=0;
+
+int finisheddownloading=0,finishedupdating=0;
 int averageSpeed;
 torrent_status_t torrentstatus;
 
@@ -164,18 +165,16 @@ void update_movefiles()
     file_entry fe;
     int i;
     boost::intrusive_ptr<torrent_info const> ti;
-    std::vector<size_type> file_progress;
     const char *filename;
     WCHAR buf1[BUFLEN];
     WCHAR buf2[BUFLEN];
     WCHAR buf3[BUFLEN],*p;
 
     ti=updatehandle.torrent_file();
-    updatehandle.file_progress(file_progress);
 
     monitor_pause=1;
     for(i=0;i<numfiles;i++)
-        if(file_progress[i]==ti->file_at(i).size&&
+        if(updatehandle.file_priority(i)&&
            StrStrIA(ti->file_at(i).path.c_str(),"indexes\\SDI\\"))
             break;
     log_con("[%d]",i==numfiles);
@@ -183,7 +182,7 @@ void update_movefiles()
         RunSilent(L"cmd",L"/c del indexes\\SDI\\_*.bin",SW_HIDE,0);
 
     for(i=0;i<numfiles;i++)
-    if(file_progress[i]==ti->file_at(i).size)
+    if(updatehandle.file_priority(i))
     {
         fe=ti->file_at(i);
         filename=strchr(fe.path.c_str(),'\\')+1;
@@ -208,10 +207,10 @@ void update_movefiles()
             *--p=0;
             mkdir_r(buf3);
         }
-        CopyFile(buf1,buf2,0);
-        //MoveFileEx(buf1,buf2,MOVEFILE_REPLACE_EXISTING);
+        //CopyFile(buf1,buf2,0);
+        MoveFileEx(buf1,buf2,MOVEFILE_REPLACE_EXISTING);
     }
-    //monitor_pause=0;
+    RunSilent(L"cmd",L" /c rd /s /q update",SW_HIDE,1);
 }
 
 unsigned int __stdcall thread_download(void *arg)
@@ -225,7 +224,7 @@ unsigned int __stdcall thread_download(void *arg)
 
     update_start();
     update_getstatus(&torrentstatus);
-    upddlg_populatelist(0);
+
 
     ResetEvent(downloadmangar_event);
     while(!downloadmangar_exitflag)
@@ -269,6 +268,7 @@ unsigned int __stdcall thread_download(void *arg)
                 break;
             }
         }
+        finishedupdating=1;
         sessionhandle->pause();
         update_getstatus(&torrentstatus);
         upddlg_populatelist(0);
@@ -447,7 +447,7 @@ void update_start()
     sessionhandle->pause();
     updatehandle.resume();
     log_con("Waiting for torrent");
-    for(i=0;i<50;i++)
+    for(i=0;i<100;i++)
     {
         log_con(".");
         if(updatehandle.torrent_file())
@@ -455,9 +455,13 @@ void update_start()
             log_con("DONE\n");
             break;
         }
+        if(downloadmangar_exitflag)break;
         Sleep(100);
     }
-    log_con(updatehandle.torrent_file()?"\nStart update\n":"FAILED\n");
+    log_con(updatehandle.torrent_file()?"":"FAILED\n");
+    upddlg_populatelist(0);
+    for(i=0;i<numfiles;i++)updatehandle.file_priority(i,0);
+
     time_chkupdate=GetTickCount()-time_chkupdate;
 }
 
@@ -526,6 +530,20 @@ void update_stop()
     log_con("DONE\n");
 }
 
+void update_resume()
+{
+    if(sessionhandle->is_paused())
+    {
+        updatehandle.force_recheck();
+        log_con("torrent_resume\n");
+        SetEvent(downloadmangar_event);
+    }
+    sessionhandle->resume();
+    finisheddownloading=0;
+    finishedupdating=0;
+    torrenttime=GetTickCount();
+}
+
 void upddlg_calctotalsize(HWND hList)
 {
     WCHAR buf[BUFLEN];
@@ -568,15 +586,21 @@ void upddlg_setpriorities(HWND hList)
             //log_con("Needs %s\n",updatehandle.torrent_file()->file_at(i).path.c_str());
         }
     }
+}
 
-    if(sessionhandle->is_paused())
+void upddlg_setpriorities_driverpack(const WCHAR *name,int pri)
+{
+    int i;
+    char buf[BUFLEN];
+
+    sprintf(buf,"%ws",name);
+    //log_con("<%s> %d\n",buf,pri);
+    for(i=0;i<numfiles;i++)
+    if(StrStrIA(updatehandle.torrent_file()->file_at(i).path.c_str(),buf))
     {
-        log_con("Event 2\n");
-        SetEvent(downloadmangar_event);
+        updatehandle.file_priority(i,pri);
+        log_con("%ws,%d\n",name,pri);
     }
-    sessionhandle->resume();
-    finisheddownloading=0;
-    torrenttime=GetTickCount();
 }
 
 void upddlg_setcheckboxes(HWND hList)
@@ -655,11 +679,13 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                 case IDOK:
                     hUpdate=0;
                     upddlg_setpriorities(hList);
+                    update_resume();
                     EndDialog(hwnd,IDOK);
                     return TRUE;
 
                 case IDACCEPT:
                     upddlg_setpriorities(hList);
+                    update_resume();
                     return TRUE;
 
                 case IDCANCEL:

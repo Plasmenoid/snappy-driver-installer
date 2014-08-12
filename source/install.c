@@ -251,6 +251,22 @@ unsigned int __stdcall thread_install(void *arg)
     manager_setpos(manager_g);
     if(panels[11].items[3].checked)flags|=FLAG_AUTOINSTALL;
 
+    // Download driverpacks
+    itembar=&manager_g->items_list[RES_SLOTS];
+    for(i=RES_SLOTS;i<manager_g->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
+        if(itembar->checked&&itembar->isactive&&itembar->hwidmatch&&getdrp_packontorrent(itembar->hwidmatch))
+    {
+        upddlg_setpriorities_driverpack(getdrp_packname(itembar->hwidmatch),1);
+    }
+    update_resume();
+    log_con("{{{{{{{{\n");
+    while(installmode&&!finishedupdating)
+    {
+        Sleep(500);
+    }
+    log_con("{}}}}}}}}}\n");
+
+
     // Restore point
     if(manager_g->items_list[SLOT_RESTORE_POINT].checked)
     {
