@@ -69,7 +69,7 @@ STR_SHOW_INVALID_H      = "Poka¿ sterowniki, które s¹ niezgodne z bie¿¹cym syste
 STR_OPTIONS             = "Opcje"
 STR_OPTIONS_H           = ""
 STR_REBOOT              = "Uruchom ponownie komputer po instalacji"
-STR_REBOOT_H            = "Uruchom ponownie komputer(jeœli wymagane) po zakoñczeniu instalacji.\n\nWSKAZÓWKA: W ka¿dej chwili mo¿esz anulowaæ ponowne uruchomienie komputera odznaczaj¹c pole wyboru."
+STR_REBOOT_H            = "Uruchom ponownie komputer(jeœli wymagane) po zakoñczeniu instalacji(Ctrl+R).\n\nWSKAZÓWKA: W ka¿dej chwili mo¿esz anulowaæ ponowne uruchomienie komputera odznaczaj¹c pole wyboru."
 
 // Sysinfo
 STR_SYSINF_WINDOWS      = "Windows"
@@ -224,7 +224,7 @@ STR_INDEXLZMA           = "Kompresowanie indeksów..."
 STR_OF                  = " z "
 
 STR_RESTOREPOINT        = "Utwórz punkt przywracania"
-STR_RESTOREPOINT_H      = "Utwórz punkt przywracania, aby móc przywróciæ system do wczeœniejszego stanu w przypadku, gdy coœ pójdzie Ÿle.\n\nWSKAZÓWKA: Kliknij prawym przyciskiem myszy na tym przycisku, aby otworzyæ menu kontekstowe."
+STR_RESTOREPOINT_H      = "Utwórz punkt przywracania, aby móc przywróciæ system do wczeœniejszego stanu w przypadku, gdy coœ pójdzie Ÿle(Ctrl+P).\n\nWSKAZÓWKA: Kliknij prawym przyciskiem myszy na tym przycisku, aby otworzyæ menu kontekstowe."
 STR_REST_SCHEDULE       = "Harmonogram tworzenia punktu przywracania"
 STR_REST_ROLLBACK       = "Cofnij do istniej¹cego punktu przywracania..."
 STR_REST_CREATING       = "Tworzenie punktu przywracania..."

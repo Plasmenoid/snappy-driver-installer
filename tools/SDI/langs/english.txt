@@ -69,7 +69,7 @@ STR_SHOW_INVALID_H      = "Show drivers which are incompatible with the current 
 STR_OPTIONS             = "Options"
 STR_OPTIONS_H           = ""
 STR_REBOOT              = "Reboot PC after installation"
-STR_REBOOT_H            = "Reboot PC(if required) after installation.\n\nHINT: You can cancel rebooting PC anytime by clearing the checkbox."
+STR_REBOOT_H            = "Reboot PC(if required) after installation(Ctrl+R).\n\nHINT: You can cancel rebooting PC anytime by clearing the checkbox."
 
 // Sysinfo
 STR_SYSINF_WINDOWS      = "Windows"
@@ -224,7 +224,7 @@ STR_INDEXLZMA           = "Compressing indexes..."
 STR_OF                  = " of "
 
 STR_RESTOREPOINT        = "Create a restore point"
-STR_RESTOREPOINT_H      = "Create a restore point in order to be able to roll back system to earlier state in case something goes back.\n\nHINT: Right click on this button to open context menu."
+STR_RESTOREPOINT_H      = "Create a restore point in order to be able to roll back system to earlier state in case something goes back(Ctrl+P).\n\nHINT: Right click on this button to open context menu."
 STR_REST_SCHEDULE       = "Schedule creating a restore point"
 STR_REST_ROLLBACK       = "Roll back to an existing restore point..."
 STR_REST_CREATING       = "Creating a restore point..."
