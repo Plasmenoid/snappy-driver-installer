@@ -23,7 +23,8 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "libtorrent/alert_types.hpp"
 #include "libtorrent/session.hpp"
 
-#define TORRENT_URL "http://driveroff.net/SDI_209_14_7.torrent"
+#define TORRENT_URL "http://driveroff.net/SDI_Update.torrent"
+//#define TORRENT_URL "http://driveroff.net/SDI_209_14_7.torrent"
 //#define TORRENT_URL "http://driveroff.net/SDI_210_14_8.torrent"
 #define SMOOTHING_FACTOR 0.005
 using namespace libtorrent;
@@ -376,6 +377,7 @@ int upddlg_populatelist(HWND hList)
                 wsprintf(buf,L"%d",newver);
                 ListView_SetItemText(hList,j,3,buf);
                 wsprintf(buf,L"%d",oldver);
+                if(!oldver)wsprintf(buf,L"%ws",STR(STR_UPD_NO));
                 ListView_SetItemText(hList,j,4,buf);
                 wsprintf(buf,L"%S",filename);
                 wsprintf(buf,L"%ws",STR(STR_UPD_YES+manager_drplive(buf)));

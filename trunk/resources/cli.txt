@@ -49,6 +49,7 @@ Settings.cfg
 /norestorepnt     Suppress creating of restore point.
 /showdrpnames     Shows driverpack names.
 /preservecfg      Prevents updating of settings.cfg.
+/checkupdates     Checks for updates online.
 /cfg:<FileName>   Custom .cfg file, if set "settings.cfg" not processed.
                   Other swithes processed
 ---------
