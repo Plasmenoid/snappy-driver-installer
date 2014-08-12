@@ -390,6 +390,9 @@ void manager_toggle(manager_t *manager,int index)
     itembar_t *itembar,*itembar1;
     int i,group;
 
+    if(installmode&&!torrentstatus.sessionpaused)
+        return;
+
     itembar1=&manager->items_list[index];
     if(index>=RES_SLOTS&&!itembar1->hwidmatch)return;
     itembar1->checked^=1;
@@ -448,6 +451,9 @@ void manager_selectnone(manager_t *manager)
     itembar_t *itembar;
     int i;
 
+    if(installmode&&!torrentstatus.sessionpaused)
+        return;
+
     if(manager->items_list[SLOT_RESTORE_POINT].isactive)
     {
         set_rstpnt(0);
@@ -460,6 +466,9 @@ void manager_selectall(manager_t *manager)
 {
     itembar_t *itembar;
     int i,group=-1;
+
+    if(installmode&&!torrentstatus.sessionpaused)
+        return;
 
     itembar=&manager->items_list[SLOT_RESTORE_POINT];
     if(itembar->install_status==STR_RESTOREPOINT&&itembar->isactive)
@@ -1871,7 +1880,7 @@ void popup_download(HDC hdcMem)
     format_size(num2,t.wastedhashfailes,0);
     TextOutSF(&td,STR(STR_DWN_WASTED),STR(STR_DWN_WASTED_F),num1,num2);
 
-    TextOutSF(&td,L"Paused",L"%d,%d",t.sessionpaused,t.torrentpaused);
+//    TextOutSF(&td,L"Paused",L"%d,%d",t.sessionpaused,t.torrentpaused);
 #endif
     popup_resize((td.maxsz+95+p0+p1),td.y+D(POPUP_OFSY));
 }

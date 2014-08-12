@@ -35,11 +35,13 @@ extern volatile int downloadmangar_exitflag;
 extern HANDLE downloadmangar_event;
 extern HANDLE thandle_download;
 extern torrent_status_t torrentstatus;
+extern int finisheddownloading,finishedupdating;
 
 // Dialog
 void upddlg_updatelang();
 void upddlg_setcheckboxes(HWND hList);
 void upddlg_setpriorities(HWND hList);
+void upddlg_setpriorities_driverpack(const WCHAR *name,int pri);
 void upddlg_calctotalsize(HWND hList);
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
 int  getnewver(const char *ptr);
@@ -49,6 +51,7 @@ int  upddlg_populatelist(HWND hList);
 // Update
 void update_start();
 void update_stop();
+void update_resume();
 void update_getstatus(torrent_status_t *t);
 void delolddrp(const char *ptr);
 void update_movefiles();
