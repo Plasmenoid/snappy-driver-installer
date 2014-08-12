@@ -232,7 +232,7 @@ unsigned int __stdcall thread_install(void *arg)
     WCHAR hwid[BUFLEN];
     WCHAR inf[BUFLEN];
     WCHAR buf[BUFLEN];
-    int i,j;
+    int i,j,downdrivers=0;
     RESTOREPOINTINFOW pRestorePtSpec;
     STATEMGRSTATUS pSMgrStatus;
     HINSTANCE hinstLib=0;
@@ -257,14 +257,18 @@ unsigned int __stdcall thread_install(void *arg)
         if(itembar->checked&&itembar->isactive&&itembar->hwidmatch&&getdrp_packontorrent(itembar->hwidmatch))
     {
         upddlg_setpriorities_driverpack(getdrp_packname(itembar->hwidmatch),1);
+        downdrivers++;
     }
-    update_resume();
-    log_con("{{{{{{{{\n");
-    while(installmode&&!finishedupdating)
+    if(downdrivers)
     {
-        Sleep(500);
+        update_resume();
+        log_con("{{{{{{{{\n");
+        while(installmode&&!finishedupdating)
+        {
+            Sleep(500);
+        }
+        log_con("{}}}}}}}}}\n");
     }
-    log_con("{}}}}}}}}}\n");
 
 
     // Restore point
