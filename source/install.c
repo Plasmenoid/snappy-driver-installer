@@ -252,6 +252,7 @@ unsigned int __stdcall thread_install(void *arg)
     if(panels[11].items[3].checked)flags|=FLAG_AUTOINSTALL;
 
     // Download driverpacks
+#ifndef _WIN64
     itembar=&manager_g->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager_g->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
         if(itembar->checked&&itembar->isactive&&itembar->hwidmatch&&getdrp_packontorrent(itembar->hwidmatch))
@@ -269,6 +270,7 @@ unsigned int __stdcall thread_install(void *arg)
         }
         log_con("{}}}}}}}}}\n");
     }
+#endif
 
 
     // Restore point
@@ -397,10 +399,15 @@ goaround:
                     log_con("OK\n");
                 }
             }while(r);
+            if(installmode==MODE_STOPPING)
+            {
+                manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
+                itembar->install_status=STR_INST_STOPPING;
+            }
             if(!itembar->checked)manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
             //itembar->percent=manager_g->items_list[SLOT_EMPTY].percent;
             hwidmatch=itembar->hwidmatch;
-            log_con("Ret %d\n",r);
+            log_con("Ret %d [%d]\n",r,installmode);
             if(r&&itembar->install_status!=STR_INST_STOPPING)
             {
                 itembar->install_status=STR_EXTR_FAILED;

@@ -390,8 +390,10 @@ void manager_toggle(manager_t *manager,int index)
     itembar_t *itembar,*itembar1;
     int i,group;
 
+#ifndef _WIN64
     if(installmode&&!torrentstatus.sessionpaused)
         return;
+#endif
 
     itembar1=&manager->items_list[index];
     if(index>=RES_SLOTS&&!itembar1->hwidmatch)return;
@@ -451,8 +453,10 @@ void manager_selectnone(manager_t *manager)
     itembar_t *itembar;
     int i;
 
+#ifndef _WIN64
     if(installmode&&!torrentstatus.sessionpaused)
         return;
+#endif
 
     if(manager->items_list[SLOT_RESTORE_POINT].isactive)
     {
@@ -467,8 +471,10 @@ void manager_selectall(manager_t *manager)
     itembar_t *itembar;
     int i,group=-1;
 
+#ifndef _WIN64
     if(installmode&&!torrentstatus.sessionpaused)
         return;
+#endif
 
     itembar=&manager->items_list[SLOT_RESTORE_POINT];
     if(itembar->install_status==STR_RESTOREPOINT&&itembar->isactive)
