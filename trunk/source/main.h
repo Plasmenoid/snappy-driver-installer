@@ -206,6 +206,7 @@ extern int horiz_sh;
 extern int ret_global;
 
 // Settings
+extern WCHAR index_dir [BUFLEN];
 extern WCHAR drpext_dir[BUFLEN];
 extern WCHAR data_dir  [BUFLEN];
 extern WCHAR state_file[BUFLEN];

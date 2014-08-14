@@ -43,6 +43,7 @@ void upddlg_setcheckboxes(HWND hList);
 void upddlg_setpriorities(HWND hList);
 void upddlg_setpriorities_driverpack(const WCHAR *name,int pri);
 void upddlg_calctotalsize(HWND hList);
+LRESULT CALLBACK NewButtonProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
 int  getnewver(const char *ptr);
 int  getcurver(const char *ptr);

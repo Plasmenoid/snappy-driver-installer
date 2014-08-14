@@ -24,8 +24,6 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #include "libtorrent/session.hpp"
 
 #define TORRENT_URL "http://driveroff.net/SDI_Update.torrent"
-//#define TORRENT_URL "http://driveroff.net/SDI_209_14_7.torrent"
-//#define TORRENT_URL "http://driveroff.net/SDI_210_14_8.torrent"
 #define SMOOTHING_FACTOR 0.005
 using namespace libtorrent;
 
@@ -58,6 +56,8 @@ dht_settings dht;
 
 int totalsize=0,numfiles;
 HWND hUpdate=0;
+int bMouseInWindow=0;
+WNDPROC wpOrigButtonProc;
 
 int finisheddownloading=0,finishedupdating=0;
 int averageSpeed;
@@ -166,8 +166,9 @@ void update_movefiles()
     file_entry fe;
     int i;
     boost::intrusive_ptr<torrent_info const> ti;
-    const char *filename;
-    WCHAR buf1[BUFLEN];
+    const char *filenamefull;
+    WCHAR buf [BUFLEN];
+    WCHAR filenamefull_src[BUFLEN];
     WCHAR buf2[BUFLEN];
     WCHAR buf3[BUFLEN],*p;
 
@@ -176,28 +177,31 @@ void update_movefiles()
     monitor_pause=1;
     for(i=0;i<numfiles;i++)
         if(updatehandle.file_priority(i)&&
-           StrStrIA(ti->file_at(i).path.c_str(),"indexes\\SDI\\"))
+           StrStrIA(ti->file_at(i).path.c_str(),"indexes\\SDI"))
             break;
-    log_con("[%d]",i==numfiles);
+    log_con("New index files: %d\n",i==numfiles);
     if(i!=numfiles)
-        RunSilent(L"cmd",L"/c del indexes\\SDI\\_*.bin",SW_HIDE,0);
+    {
+        wsprintf(buf,L"/c del %ws\\_*.bin",index_dir);
+        RunSilent(L"cmd",buf,SW_HIDE,0);
+    }
 
     for(i=0;i<numfiles;i++)
     if(updatehandle.file_priority(i))
     {
         fe=ti->file_at(i);
-        filename=strchr(fe.path.c_str(),'\\')+1;
-        wsprintf(buf1,L"update\\%S",fe.path.c_str());
-        wsprintf(buf2,L"%S",filename);
+        filenamefull=strchr(fe.path.c_str(),'\\')+1;
+        wsprintf(filenamefull_src,L"update\\%S",fe.path.c_str());
+        wsprintf(buf2,L"%S",filenamefull);
         //wsprintf(buf2,L"res\\%S",filename);
         wsprintf(buf3,L"%s",buf2);
         p=wcsstr(buf2,L"indexes\\SDI\\");
 
-        if(StrStrIA(filename,"drivers\\"))delolddrp(filename+8);
+        if(StrStrIA(filenamefull,"drivers\\"))delolddrp(filenamefull+8);
 
         if(p)
         {
-            CopyFile(buf1,buf2,0);
+            CopyFile(filenamefull_src,buf2,0);
             p[12]=L'_';
         }
         p=buf3;
@@ -209,7 +213,7 @@ void update_movefiles()
             mkdir_r(buf3);
         }
         //CopyFile(buf1,buf2,0);
-        MoveFileEx(buf1,buf2,MOVEFILE_REPLACE_EXISTING);
+        MoveFileEx(filenamefull_src,buf2,MOVEFILE_REPLACE_EXISTING);
     }
     RunSilent(L"cmd",L" /c rd /s /q update",SW_HIDE,1);
 }
@@ -377,7 +381,7 @@ int upddlg_populatelist(HWND hList)
                 wsprintf(buf,L"%d",newver);
                 ListView_SetItemText(hList,j,3,buf);
                 wsprintf(buf,L"%d",oldver);
-                if(!oldver)wsprintf(buf,L"%ws",STR(STR_UPD_NO));
+                if(!oldver)wsprintf(buf,L"%ws",STR(STR_UPD_MISSING));
                 ListView_SetItemText(hList,j,4,buf);
                 wsprintf(buf,L"%S",filename);
                 wsprintf(buf,L"%ws",STR(STR_UPD_YES+manager_drplive(buf)));
@@ -640,36 +644,72 @@ void upddlg_setcheckboxes(HWND hList)
     }
 }
 
+LRESULT CALLBACK NewButtonProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+    short x,y;
+
+    x=LOWORD(lParam);
+    y=HIWORD(lParam);
+
+    switch(uMsg)
+    {
+        case WM_MOUSEMOVE:
+            drawpopup(STR_UPD_BTN_THISPC_H,FLOATING_TOOLTIP,x,y,hWnd);
+            if(!bMouseInWindow)
+            {
+                bMouseInWindow=1;
+                TRACKMOUSEEVENT tme;
+                tme.cbSize=sizeof(tme);
+                tme.dwFlags=TME_LEAVE;
+                tme.hwndTrack=hWnd;
+                TrackMouseEvent(&tme);
+            }
+            break;
+
+        case WM_MOUSELEAVE:
+            bMouseInWindow=0;
+            drawpopup(-1,FLOATING_NONE,0,0,hWnd);
+            break;
+
+        default:
+            return CallWindowProc(wpOrigButtonProc,hWnd,uMsg,wParam,lParam);
+    }
+    return true;
+}
+
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
     LVCOLUMN lvc;
-    HWND hList;
+    HWND hList,thispcbut;
     WCHAR buf[32];
     int i;
 
     hList=GetDlgItem(hwnd,IDLIST);
+    thispcbut=GetDlgItem(hwnd,IDCHECKTHISPC);
+
     switch(Message)
     {
         case WM_INITDIALOG:
+            ListView_SetExtendedListViewStyle(hList,LVS_EX_CHECKBOXES|LVS_EX_FULLROWSELECT);
+
+            lvc.mask=LVCF_FMT|LVCF_WIDTH|LVCF_SUBITEM|LVCF_TEXT;
+            lvc.pszText=(WCHAR *)L"";
+            for(i=0;i<6;i++)
             {
-                ListView_SetExtendedListViewStyle(hList,LVS_EX_CHECKBOXES|LVS_EX_FULLROWSELECT);
-
-                lvc.mask=LVCF_FMT|LVCF_WIDTH|LVCF_SUBITEM|LVCF_TEXT;
-                lvc.pszText=(WCHAR *)L"";
-                for(i=0;i<6;i++)
-                {
-                    lvc.cx=cxn[i];
-                    lvc.iSubItem=i;
-                    lvc.fmt=i?LVCFMT_RIGHT:LVCFMT_LEFT;
-                    ListView_InsertColumn(hList,i,&lvc);
-                }
-
-                hUpdate=hwnd;
-                upddlg_populatelist(hList);
-                upddlg_updatelang();
-                upddlg_setcheckboxes(hList);
+                lvc.cx=cxn[i];
+                lvc.iSubItem=i;
+                lvc.fmt=i?LVCFMT_RIGHT:LVCFMT_LEFT;
+                ListView_InsertColumn(hList,i,&lvc);
             }
+
+            hUpdate=hwnd;
+            upddlg_populatelist(hList);
+            upddlg_updatelang();
+            upddlg_setcheckboxes(hList);
+
+            wpOrigButtonProc=(WNDPROC)SetWindowLong(thispcbut,GWLP_WNDPROC,(LONG)NewButtonProc);
+
             return TRUE;
 
         case WM_NOTIFY:
@@ -679,6 +719,10 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                 upddlg_updatelang();
                 return TRUE;
             }
+            break;
+
+        case WM_DESTROY:
+            SetWindowLong(thispcbut,GWLP_WNDPROC,(LONG)wpOrigButtonProc);
             break;
 
         case WM_COMMAND:

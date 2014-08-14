@@ -417,6 +417,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     thr=(HANDLE)_beginthreadex(0,0,&thread_loadall,&bundle[0],0,0);
 
     #ifndef _WIN64
+    torrentstatus.sessionpaused=1;
     if(flags&FLAG_CHECKUPDATES)
     {
         downloadmangar_event=CreateEvent(0,1,0,0);
