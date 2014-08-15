@@ -1,0 +1,317 @@
+﻿// Translated by LaMoLa
+
+STR_EMPTY               = ""
+STR_EMPTY_H             = ""
+
+STR_LANG_NAME           = "Hungarian"
+STR_LANG_CODE           = 0x0E
+
+// left panel
+STR_SHOW_SYSINFO        = "  Rendszer Infó."
+STR_SHOW_SYSINFO_H      = ""
+
+STR_INSTALL             = "- TELEPÍTÉS -"
+STR_INSTALL_H           = ""
+STR_SELECT_ALL          = "  - Mind kijelöl -"
+STR_SELECT_ALL_H        = ""
+STR_SELECT_NONE         = "- Mind visszavon -"
+STR_SELECT_NONE_H       = ""
+
+STR_LANG                = "Nyelv kiválasztása"
+STR_LANG_H              = ""
+STR_THEME               = "Felület (skin)"
+STR_THEME_H             = ""
+STR_EXPERT              = "Speciális lehetõségek"
+STR_EXPERT_H            = "További lehetõségek : alkalmazása.\n\nNyomja le a Ctrl vagy Space gombot (vagy egér jobbklikk) a driver ablak felett, hogy extra tájékoztatást kapjon."
+
+STR_OPENLOGS            = "Naplók megnyitása"
+STR_OPENLOGS_H          = "Nyissa meg a naplót és a pillanatfelvételt tartalmazó mappát.\n\nElküldheti ezeket a fájlokat, ha segítségre van szüksége."
+STR_SNAPSHOT            = "Pillanatfelvétel betöltése..."
+STR_SNAPSHOT_H          = "Egy másik rendszer Pillanatfelvételének betöltése.\n\nPillanatfelvételek automatikusan lettek létrehozva a log mappába. Tartalmazzák az eszközök leírását, drivereket, Windows verziót, akkumlátort és a monitorokat.\n\nPillanatfelvételek nem tartalmaznak infót külsõ rendszeren lévõ Driver-csomagokról.\n\nA betöltött pillanatfelvétel lehetõvé teszi a külsõ rendszer emulálását, de a driverek a helyi Driver-csomagokban lesznek keresve."
+STR_EXTRACT             = "Kibontás helye..."
+STR_EXTRACT_H           = "A kijelölt driverek kicsomagolása\n\nHasználhatja biztonsági mentés létrehozására a jelenlegi Driverekbõl kiválasztva."
+STR_DRVDIR              = "Driver mappa kiválasztása."
+STR_DRVDIR_H            = "Válasszon másik mappát driver-csomagoknak vagy kicsomagolatlan Drivereknek.\n\nFelhasználhatja a Driverek keresésére a driver CD/DVD-n."
+
+STR_SHOW_FOUND          = "Választható driverek,melyek:"
+STR_SHOW_FOUND_H        = "A csomagban található és telepíthetõ llesztõprogramok.\n\nAzt tanácsoljuk, hogy telepítse a Drivereket az alábbi kategóriákból: Nem telepített, Újabb, Megfelelõbb."
+STR_SHOW_MISSING        = "Nem telepítettek"
+STR_SHOW_MISSING_H      = "Azokat a drivereket mutassa a csomagból, melyek a különbözõ eszközökhöz szükségesek, de nincsenek még telepítve.\n\nTanácsoljuk ezen driverek telepítését."
+STR_SHOW_NEWER          = "Újabbak"
+STR_SHOW_NEWER_H        = "Azokat a drivereket mutassa a csomagból, melyek újabbak, mint a jelenleg telepítettek.\n\nJavasoljuk, ezen Driverek telepítését."
+STR_SHOW_CURRENT        = "Jelenlegiek"
+STR_SHOW_CURRENT_H      = "Azokat a drivereket mutassa a csomagból, melyek illeszkednek a jelenleg telepített illesztõprogramokhoz."
+STR_SHOW_OLD            = "Korábbiak"
+STR_SHOW_OLD_H          = "Azokat a drivereket mutassa a csomagból, melyek régebbiek, mint a jelenleg telepítettek."
+STR_SHOW_BETTER         = "Megfelelõbbek"
+STR_SHOW_BETTER_H       = "Azokat a drivereket mutassa a csomagból, melyek jobban illeszkednek mint, a jelenleg telepítettek."
+STR_SHOW_WORSE_RANK     = "Rosszabbak"
+STR_SHOW_WORSE_RANK_H   = "Azokat a drivereket mutassa a csomagból, melyek rosszabbak, mint a jelenleg telepített illesztõprogramok."
+
+STR_SHOW_NOTFOUND       = "Nem található Driver,mert:"
+STR_SHOW_NOTFOUND_H     = "Driverek nem találhatók a csomagokban és ezért nem telepíthetõk."
+STR_SHOW_NF_MISSING     = "Nincs telepítve"
+STR_SHOW_NF_MISSING_H   = "Megjelenítõ eszközök melyeknek driver szükséges, de nem találhatók a csomagokban."
+STR_SHOW_NF_UNKNOWN     = "Ismeretlen"
+STR_SHOW_NF_UNKNOWN_H   = "Azokat az ismeretlen drivereket mutassa, amelyek telepítve vannak a rendszerben, de nem találhatók meg Driver-csomagokban."
+STR_SHOW_NF_STANDARD    = "Szabványos"
+STR_SHOW_NF_STANDARD_H  = "Azokat a szabványos drivereket mutassa, amelyek telepítve vannak a rendszerben, de nem találhatók meg Driver-csomagokban."
+
+STR_SHOW_DISPLAY        = "Kijelzõ"
+STR_SHOW_DISPLAY_H      = ""
+STR_SHOW_ONE            = "Legjobbat mutassa"
+STR_SHOW_ONE_H          = "Csak a legjobb driverek mutassa eszközönként."
+STR_SHOW_DUP            = "Duplákat mutassa"
+STR_SHOW_DUP_H          = "A dupla drivereket mutassa."
+STR_SHOW_INVALID        = "Érvénytelent mutassa"
+STR_SHOW_INVALID_H      = "Mutassa a rendszerrel nem kompatibilis drivereket."
+
+STR_OPTIONS             = "Beállítások"
+STR_OPTIONS_H           = ""
+STR_REBOOT              = "PC újraindítása a telepítés után"
+STR_REBOOT_H            = ""
+
+// Sysinfo
+STR_SYSINF_WINDOWS      = "Windows"
+STR_SYSINF_VERSION      = "Verzió"
+STR_SYSINF_PLATFORM     = "Platform ID"
+STR_SYSINF_UPDATE       = "Frissítés"
+STR_SYSINF_SERVICEPACK  = "Service Pack"
+STR_SYSINF_SUITEMASK    = "Suite Maszk"
+STR_SYSINF_PRODUCTTYPE  = "Termék típus"
+STR_SYSINF_ENVIRONMENT  = "Környezet"
+STR_SYSINF_WINDIR       = "Windows mappa"
+STR_SYSINF_TEMP         = "Ideiglenes mappa"
+STR_SYSINF_MOTHERBOARD  = "Alaplap"
+STR_SYSINF_PRODUCT      = "Típus"
+STR_SYSINF_MODEL        = "Model"
+STR_SYSINF_MANUF        = "Gyártó"
+STR_SYSINF_BATTERY      = "Akkumlátor"
+STR_SYSINF_AC_STATUS    = "AC_Állapot"
+STR_SYSINF_OFFLINE      = "Offline"
+STR_SYSINF_ONLINE       = "Online"
+STR_SYSINF_UNKNOWN      = "Ismeretlen"
+STR_SYSINF_FLAGS        = "Jelzések"
+STR_SYSINF_HIGH         = "[feltöltve]"
+STR_SYSINF_LOW          = "[gyenge]"
+STR_SYSINF_CRITICAL     = "[kritikus]"
+STR_SYSINF_CHARGING     = "[töltés alatt]"
+STR_SYSINF_NOBATTERY    = "[nincs akku.]"
+STR_SYSINF_UNKNOWN      = "[ismeretlen]"
+STR_SYSINF_CHARGED      = "Töltve"
+STR_SYSINF_LIFETIME     = "Élettartam"
+STR_SYSINF_FULLLIFETIME = "Örök élettartam"
+STR_SYSINF_MINS         = "perc"
+STR_SYSINF_MONITORS     = "Monitor"
+STR_SYSINF_CM           = "cm"
+STR_SYSINF_INCH         = "coll"
+STR_SYSINF_WIDE         = "széles képernyõ"
+STR_SYSINF_MISC         = "(Klikk a panelra az Eszközkezelõ megnyitásához)"
+STR_SYSINF_TYPE         = "Típus"
+STR_SYSINF_LAPTOP       = "Laptop"
+STR_SYSINF_DESKTOP      = "Asztali PC"
+STR_SYSINF_LOCALE       = "Helyi"
+STR_SYSINF_CPU_ARCH     = "CPU_kialakítás"
+STR_SYSINF_32BIT        = "32-bit"
+STR_SYSINF_64BIT        = "64-bit"
+
+// About
+//STR_ABOUT_VER           = ""
+STR_ABOUT_DEV_TITLE     = "Fejlesztõ: "
+//STR_ABOUT_DEV_LIST      = ""
+STR_ABOUT_TESTERS_TITLE = "Tesztelõk: "
+STR_ABOUT_TESTERS_LIST  = "QuarQ, SamLab, Sorc  - Hungarian By LaMoLa"
+STR_ABOUT_LICENSE       = "GNU V.3 alapján engedélyezett alkalmazás"
+
+// Popup on drivers(while holding Ctrl or spacebar)
+STR_HINT_UNKNOWN        = "Ismeretlen"
+STR_HINT_ANALYSIS       = "Elemzés"
+STR_HINT_DRP            = "Driverpack"
+STR_HINT_DEVICE         = "Eszköz"
+STR_HINT_HARDWAREID     = "Hardver ID"
+STR_HINT_COMPID         = "Kompatibilitás ID"
+STR_HINT_INSTDRV        = "Telepített driver"
+STR_HINT_AVAILDRV       = "Elérhetõ driver"
+STR_HINT_AVAILDRVS      = "Elérhetõ driverek"
+STR_HINT_MANUF          = "Gyártó: "
+STR_HINT_PROVIDER       = "Szolgáltató: "
+STR_HINT_DATE           = "Dátum: "
+STR_HINT_VERSION        = "Verzió: "
+STR_HINT_ID             = "ID: "
+STR_HINT_INF            = "Inf fájl: "
+STR_HINT_SECTION        = "Szekció: "
+STR_HINT_SCORE          = "Pontszám: "
+STR_HINT_SCROLL         = "Vízszintes görgetés az egérgörgõvel"
+
+// Context menu
+STR_CONT_INSTALL        = "Tervezett telepítés"
+STR_CONT_SHOWALT        = "Alternatív meghajtók megjelenítése"
+STR_CONT_OPENINF        = "A telepített driver inf fájljának megnyitása"
+STR_CONT_LOCATEINF      = "Keresse meg az inf fájlt a telepített meghajtón"
+STR_CONT_HWID_SEARCH    = "Keresés az interneten a Hardver ID-re"
+STR_CONT_HWID_CLIP      = "Hardver ID másolása a vágólapra"
+
+// Misc
+STR_OPENSNAPSHOT        = "Pillanatfelvétel fájlok (*.snp)\0*.snp\0Minden fájl\0*.*\0\0"
+STR_EXTRACTFOLDER       = "Adja meg a cél mappát."
+
+// Device status
+STR_STATUS_NOTPRESENT   = "Az eszköz nem található"
+STR_STATUS_DISABLED     = "Az eszköz letíltva"
+STR_STATUS_DEVPROBLEM   = "Az eszközzel kapcsolatos probléma: %d"
+STR_STATUS_DRVPROBLEM   = "A driver hibajelezést küldött az eszközrõl"
+STR_STATUS_RUNNING      = "Az eszköz használatban"
+STR_STATUS_STOPPED      = "Az eszköz jelenleg leállítva"
+
+// Driver status
+STR_STATUS_INVALID      = "Nem kompatibilis driver"
+STR_STATUS_MISSING      = "A Driver elérhetõ (driver még nincs telepítve)"
+STR_STATUS_NOTSIGNED    = " (nem szignózott)"
+
+STR_STATUS_BETTER_NEW   = "Újabb optimalizált driver érhetõ el"
+STR_STATUS_SAME_NEW     = "Újabb illesztõprogram érhetõ el"
+STR_STATUS_WORSE_NEW    = "Optimálisnál gyengébb driver érhetõ el, bármennyire is újabb"
+
+STR_STATUS_BETTER_CUR   = "Több optimális Driver érhetõ el"
+STR_STATUS_SAME_CUR     = "Már telepített"
+STR_STATUS_WORSE_CUR    = "Gyengébb mint az optimális driver"
+
+STR_STATUS_BETTER_OLD   = "Több optimális driver érhetõ el, azonban régebbiek"
+STR_STATUS_SAME_OLD     = "Régi driver"
+STR_STATUS_WORSE_OLD    = "Régi driver és az optimálisnál gyengébb"
+
+STR_STATUS_DUP          = " (dupla)"
+
+STR_STATUS_NF_MISSING   = "Driver szükséges az eszközhöz,de nincs a driver-csomagokban"
+STR_STATUS_NF_UNKNOWN   = "Az eszköz megfelelõen mûködik, de nincs a driver-csomagokban"
+STR_STATUS_NF_STANDARD  = "Szabványos driver"
+
+// Virus
+STR_VIRUS               = "A média az alkalmazással virus veszélybe kerülhet"
+STR_VIRUS_AUTORUN       = "AUTORUN.INF található a gyökér mappában"
+STR_VIRUS_AUTORUN_H     = "AUTORUN.INF fájl található, melyet rosszindulatú szoftverek is hasznáhatnak a PC megfertõzésére. Ajánlatos ellenõrizni, hogy virusmentes-e a fájl.\n\nHa biztos benne, hogy vírusmentes, akkor írja be, hogy [NOT_A_VIRUS] a figyelmeztetés elrejtéséhez."
+STR_VIRUS_RECYCLER      = "Lomtár mappa található a gyökér mappában"
+STR_VIRUS_RECYCLER_H    = "Szokatlan,ha ehhez a médiához LOMTÁR mappa társulna. Javasolt a mappa vírusellenõrzése.\n\nHa biztos benne, hogy vírusmentes, akkor hozzon létre egy: not_a_virus.txt nevû fájlt a  mappában."
+STR_VIRUS_HIDDEN        = "Rejtett mappák vannak a gyökér mappában"
+STR_VIRUS_HIDDEN_H      = "A gyökérmappa rejtett almappákat tartalmaz. Vírusok rejtett mappákat hozhatnak létre a jelenlétük elrejtéséhez. Ajánlatos a mappák vírus ellenõrzése (lásd a részleteket a naplóban).\n\nHa biztos a tisztaságban, akkor hozzon létre egy megnevezett fájlt.
+
+// Status
+STR_CLOSE_SNAPSHOT      = "(Klikk ide az emulálás leállításához)"
+STR_EMPTYDRP            = "Illessze be a Driver-csomagokat és a kicsomagolatlan Drivereket a Drivers mappába (7Z kiterjesztéssel!)"
+STR_CLOSE_DRPEXT        = "(Klikk ide az alapértelmezett mappába való visszatéréshez)"
+STR_NOUPDATES           = "Driverek frissítve"
+STR_INITIALIZING        = "Inicializálás..."
+
+
+// Progressbar
+STR_INST_EXTRACT        = "Kicsomagolás... %d%% (1 a 2-bõl)"
+STR_INST_INSTALL        = "Telepítés... (2 a 2-bõl)"
+STR_INST_OK             = "Sikeres telepítés"
+STR_INST_REBOOT         = "Sikeresen telepítve (rendszer újraindítása szükséges)"
+STR_INST_FAILED         = "Telepítési hiba "
+
+STR_INST_INSTALLING     = "Telepítés... "
+STR_INST_COMPLITED      = "A telepítés befejezõdött"
+STR_INST_COMPLITED_RB   = "A telepítés befejezõdött (rendszer újraindítása szükséges)"
+STR_INST_CLOSE          = "(Klikk ide a telepített illesztõprogramok rejtéséhez-bezárásához)"
+
+STR_EXTR_EXTRACTING     = "Kicsomagolás... "
+STR_EXTR_OK             = "Kicsomagolva"
+STR_EXTR_FAILED         = "Kicsomagolási hiba"
+
+STR_INST_STOPPING       = "A telepítés leállt"
+STR_INDEXING            = "Indexelés..."
+STR_INDEXLZMA           = "Indexelés tömörítése..."
+STR_OF                  = " < < < "
+
+STR_RESTOREPOINT        = "Visszaállítási pont létrehozása"
+STR_RESTOREPOINT_H      = "Visszaállítási pont létrehozása arra az esetre,ha szügség lenne  a rendszer visszaállításra egy korábbi idõpontra.\n\nHINT: Jobb klikk erre a gombra, a kontext menü megnyitásához."
+STR_REST_SCHEDULE       = "Ütemezett Visszaállítási pont létrehozása"
+STR_REST_ROLLBACK       = "Visszaállítás egy meglévõ pontra..."
+STR_REST_CREATING       = "Létrehozás..."
+STR_REST_CREATED        = "Létrehozva"
+STR_REST_FAILED         = "Nem sikerült létrehozni"
+
+STR_HINT_STOPINST       = "Klikk ide a telepítés megszakításához"
+STR_HINT_STOPEXTR       = "Klikk ide a kicsomagolás leállításához"
+STR_HINT_DRIVER         = "Klikk ide az alternatív driverek megjelenítéséhez\nNyomja le a  Space gombot,az alternatív driverek leírásához"
+
+STR_SYS_WINVER          = "Windows verzió"
+STR_SYS_32              = "32-bit"
+STR_SYS_64              = "64-bit"
+STR_SYS_DEVICEMNG       = "Eszközkezelõ"
+STR_SYS_DISINSTALL      = "Telepítés letiltása"
+STR_SYS_DISRESTPNT      = "Visszaállítási pontok blokkolása"
+
+// Update
+STR_UPD_TITLE           = "Frissítés"
+STR_UPD_BTN_ALL         = "Mind ellenõrzése"
+STR_UPD_BTN_NONE        = "Nincs ellenõrzés"
+STR_UPD_BTN_THISPC      = "Csak ehhez a PC-hez szükséges megtekintése"
+// STR_UPD_BTN_THISPC_H    = "" // translate
+STR_UPD_TOTALSIZE       = "Összes letöltés mérete: %d MB"
+STR_UPD_BTN_OK          = "OK"
+STR_UPD_BTN_CANCEL      = "Mégse"
+STR_UPD_BTN_ACCEPT      = "Elfogad"
+STR_UPD_COL_NAME        = "Driver-csomag"
+STR_UPD_COL_SIZE        = "Méret"
+STR_UPD_COL_PER         = "%"
+STR_UPD_COL_NEW         = "Új"
+STR_UPD_COL_CUR         = "Jelenlegi"
+STR_UPD_COL_THISPC      = "Erre a PC-re?"
+STR_UPD_WEBSTATUS       = " (Internet)"
+STR_UPD_YES             = "Igen"
+STR_UPD_NO              = "Nem"
+STR_UPD_UNKNOWN         = "Ismeretlen"
+//STR_UPD_MISSING         = "" // translate
+//STR_UPD_BYTES           = "" // translate
+//STR_UPD_KB              = "" // translate
+STR_UPD_MB              = "MB"
+//STR_UPD_GB              = "" // translate
+//STR_UPD_SEC             = "" // translate
+//STR_UPD_TSEC            = "" // translate
+//STR_UPD_TMIN            = "" // translate
+//STR_UPD_THOUR           = "" // translate
+//STR_UPD_TDAY            = "" // translate
+STR_UPD_BASEFILES       = "Alkalmazás + indexek"
+STR_UPD_APP             = "Alkalmazás"
+STR_UPD_INDEXES         = "indexek"
+STR_UPD_UPDATEHINT1     = "Utalás"
+STR_UPD_UPDATEHINT2     = "Elõszõr frissítenie kell az alapot, hogy ezt a funkciót használhassa."
+
+// Update hint
+//STR_UPD_AVAIL1          = "Updates are available: SDI R%d"
+//STR_UPD_AVAIL2          = "Updates are available: %d driverpacks"
+//STR_UPD_AVAIL3          = "Updates are available: SDI R%d and %d driverpacks"
+//STR_UPD_START           = "(Click here to start the download)"
+//STR_UPD_PROGRES         = "Downloaded %s out of %s (%d%%)"
+//STR_UPD_MODIFY          = "(Click here to select updates)"
+
+//STR_DWN_DOWNLOADED      = "Downloaded"
+//STR_DWN_DOWNLOADED_F    = "%s out of %s (%d%%)"
+//STR_DWN_UPLOADED        = "Uploaded"
+//STR_DWN_ELAPSED         = "Time elapsed"
+//STR_DWN_REMAINING       = "Time remaining"
+
+//STR_DWN_STATUS          = "Status"
+//STR_DWN_ERROR           = "Error"
+//STR_DWN_DOWNLOADSPEED   = "Download speed"
+//STR_DWN_UPLOADSPEED     = "Upload speed"
+
+//STR_DWN_SEEDS_F         = "%d out of %d connected"
+//STR_DWN_SEEDS           = "Seeds"
+//STR_DWN_PEERS           = "Peers"
+//STR_DWN_WASTED          = "Wasted"
+//STR_DWN_WASTED_F        = "%s (%s in hashfails)"
+
+//STR_DWN_ERRSES          = "Failed to start update session"
+//STR_DWN_ERRTOR          = "Failed to start torrent"
+
+//STR_TR_ST0              = "queued for checking"
+//STR_TR_ST1              = "checking files"
+//STR_TR_ST2              = "downloading metadata"
+//STR_TR_ST3              = "downloading files"
+//STR_TR_ST4              = "finished"
+//STR_TR_ST5              = "seeding"
+//STR_TR_ST6              = "allocating space"
+//STR_TR_ST7              = "checking resume data"
