@@ -201,7 +201,7 @@ void update_movefiles()
 
         if(p)
         {
-            CopyFile(filenamefull_src,buf2,0);
+            //CopyFile(filenamefull_src,buf2,0);
             p[12]=L'_';
         }
         p=buf3;
@@ -213,6 +213,7 @@ void update_movefiles()
             mkdir_r(buf3);
         }
         //CopyFile(buf1,buf2,0);
+        log_con("File '%ws'\n",buf2);
         MoveFileEx(filenamefull_src,buf2,MOVEFILE_REPLACE_EXISTING);
     }
     RunSilent(L"cmd",L" /c rd /s /q update",SW_HIDE,1);
@@ -286,6 +287,12 @@ unsigned int __stdcall thread_download(void *arg)
     return 0;
 }
 
+int CALLBACK CompareFunc(LPARAM lParam1,LPARAM lParam2,LPARAM lParamSort)
+{
+    UNREFERENCED_PARAMETER(lParamSort)
+    return lParam1-lParam2;
+}
+
 int upddlg_populatelist(HWND hList)
 {
     error_code ec;
@@ -293,6 +300,7 @@ int upddlg_populatelist(HWND hList)
     LVITEM lvI;
     int i;
     int basesize=0,basedownloaded=0;
+    int indexsize=0,indexdownloaded=0;
     const char *filename,*filenamefull;
     WCHAR buf[BUFLEN];
     int newver=0;
@@ -311,20 +319,21 @@ int upddlg_populatelist(HWND hList)
     {
         fe=ti->file_at(i);
         filenamefull=fe.path.c_str();
-        if(!StrStrIA(filenamefull,"drivers\\"))
+
+        if(StrStrIA(filenamefull,"indexes\\"))
+        {
+            indexsize+=fe.size;
+            indexdownloaded+=file_progress[i];
+            wsprintf(buf,L"%S",filenamefull);
+            *wcsstr(buf,L"DP_")=L'_';
+            if(!PathFileExists(buf))missingindexes=1; //hardcoded path
+        }
+        else if(!StrStrIA(filenamefull,"drivers\\"))
         {
             basesize+=fe.size;
             basedownloaded+=file_progress[i];
-            //log_con("%3d %s\n",(int)(file_progress[i]*100/fe.size),filenamefull);
             if(StrStrIA(filenamefull,"sdi_R"))
                 newver=atol(StrStrIA(filenamefull,"sdi_R")+5);
-        }
-        if(StrStrIA(filenamefull,"indexes\\"))
-        {
-            wsprintf(buf,L"%S",filenamefull);
-            *wcsstr(buf,L"DP_")=L'_';
-            //log_con("%d '%ws'\n",PathFileExists(buf),buf);
-            if(!PathFileExists(buf))missingindexes=1;
         }
     }
 
@@ -333,21 +342,34 @@ int upddlg_populatelist(HWND hList)
     lvI.iSubItem  =0;
     lvI.state     =0;
     lvI.iItem     =0;
-    lvI.lParam    =-1;
+    lvI.lParam    =-2;
+    newver=200;
     if(newver>SVN_REV)ret+=newver<<8;
-    if((newver>SVN_REV||missingindexes)&&hList)
+    if(newver>SVN_REV&&hList)
     {
-        lvI.pszText=(WCHAR *)STR(STR_UPD_BASEFILES);
-        ListView_InsertItem(hList,&lvI);
+        lvI.pszText=(WCHAR *)STR(STR_UPD_APP);
+        i=ListView_InsertItem(hList,&lvI);
         wsprintf(buf,L"%d %s",basesize/1024/1024,STR(STR_UPD_MB));
-        ListView_SetItemText(hList,0,1,buf);
+        ListView_SetItemText(hList,i,1,buf);
         wsprintf(buf,L"%d%%",basedownloaded*100/basesize);
-        ListView_SetItemText(hList,0,2,buf);
+        ListView_SetItemText(hList,i,2,buf);
         wsprintf(buf,L" SDI_R%d",newver);
-        ListView_SetItemText(hList,0,3,buf);
+        ListView_SetItemText(hList,i,3,buf);
         wsprintf(buf,L" SDI_R%d",SVN_REV);
-        ListView_SetItemText(hList,0,4,buf);
-        ListView_SetItemText(hList,0,5,(WCHAR *)STR(STR_UPD_YES));
+        ListView_SetItemText(hList,i,4,buf);
+        ListView_SetItemText(hList,i,5,(WCHAR *)STR(STR_UPD_YES));
+    }
+
+    lvI.lParam    =-1;
+    if(missingindexes&&hList)
+    {
+        lvI.pszText=(WCHAR *)STR(STR_UPD_INDEXES);
+        i=ListView_InsertItem(hList,&lvI);
+        wsprintf(buf,L"%d %s",indexsize/1024/1024,STR(STR_UPD_MB));
+        ListView_SetItemText(hList,i,1,buf);
+        wsprintf(buf,L"%d%%",indexdownloaded*100/indexsize);
+        ListView_SetItemText(hList,i,2,buf);
+        ListView_SetItemText(hList,i,5,(WCHAR *)STR(STR_UPD_YES));
     }
 
     for(i=0;i<numfiles;i++)
@@ -389,6 +411,7 @@ int upddlg_populatelist(HWND hList)
             }
         }
     }
+    ListView_SortItems(hList,CompareFunc,0);
 
     log_con("Latest version: R%d\nUpdated driverpacks available: %d\n",ret>>8,ret&0xFF);
     manager_g->items_list[SLOT_DOWNLOAD].isactive=ret?1:0;
@@ -574,6 +597,15 @@ void upddlg_setpriorities(HWND hList)
 {
     int i;
     LVITEM item;
+    int base_pri=0,indexes_pri=0;
+
+    for(i=0;i<numfiles;i++)
+    {
+        item.iItem=i;
+        ListView_GetItem(hList,&item);
+        if(item.lParam==-2)base_pri=ListView_GetCheckState(hList,i)?2:0;
+        if(item.lParam==-1)indexes_pri=ListView_GetCheckState(hList,i)?2:0;
+    }
 
     for(i=0;i<numfiles;i++)
     if(StrStrIA(updatehandle.torrent_file()->file_at(i).path.c_str(),"drivers\\"))
@@ -582,7 +614,9 @@ void upddlg_setpriorities(HWND hList)
     }
     else
     {
-        updatehandle.file_priority(i,ListView_GetCheckState(hList,0)?2:0);
+        updatehandle.file_priority(i,StrStrIA(updatehandle.torrent_file()->file_at(i).path.c_str(),"indexes\\")?
+                                   indexes_pri:base_pri);
+        //updatehandle.file_priority(i,ListView_GetCheckState(hList,0)?2:0);
         //if(ListView_GetCheckState(hList,0))
         //    log_con("Needs %s\n",updatehandle.torrent_file()->file_at(i).path.c_str());
     }

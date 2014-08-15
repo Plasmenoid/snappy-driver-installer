@@ -139,6 +139,7 @@ enum
     STR_ABOUT_TESTERS_TITLE,
     STR_ABOUT_TESTERS_LIST,
     STR_ABOUT_LICENSE,
+    STR_ABOUT_SIZE,
 
 // Driver popup windows
     STR_HINT_UNKNOWN,

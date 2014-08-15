@@ -64,7 +64,7 @@ CAPTION "Update"
     PUSHBUTTON      "Check All",   IDCHECKALL,                        5, POSY1,  70, 14
     PUSHBUTTON      "Uncheck All", IDUNCHECKALL,                     77, POSY1,  70, 14
     PUSHBUTTON      "Check only needed for this PC", IDCHECKTHISPC,   5, POSY2, 142, 14
-    CONTROL         "", IDLIST, WC_LISTVIEW, WS_TABSTOP | WS_BORDER | LVS_REPORT|LVS_SINGLESEL|LVS_SORTASCENDING,
+    CONTROL         "", IDLIST, WC_LISTVIEW, WS_TABSTOP | WS_BORDER | LVS_REPORT|LVS_SINGLESEL,
         5, 5, 369, LISTY, WS_EX_LEFT|LVS_EX_CHECKBOXES
 
     LTEXT           "Total download size: xx MB", IDTOTALSIZE, 210, POSY1, 150, 14

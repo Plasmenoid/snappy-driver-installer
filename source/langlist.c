@@ -144,6 +144,7 @@ entry_t language[STR_NM]=
     DEF_STR("STR_ABOUT_TESTERS_TITLE")
     DEF_STR("STR_ABOUT_TESTERS_LIST")
     DEF_STR("STR_ABOUT_LICENSE")
+    DEF_STR("STR_ABOUT_SIZE")
 
 // Driver popup windows
     DEF_STR("STR_HINT_UNKNOWN")

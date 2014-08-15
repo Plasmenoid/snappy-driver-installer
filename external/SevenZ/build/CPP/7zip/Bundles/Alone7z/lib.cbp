@@ -286,7 +286,6 @@
 		<Unit filename="../../Archive/7z/7zProperties.cpp" />
 		<Unit filename="../../Archive/7z/7zProperties.h" />
 		<Unit filename="../../Archive/7z/7zRegister.cpp" />
-		<Unit filename="../../Archive/7z/7zSpecStream.cpp" />
 		<Unit filename="../../Archive/7z/7zSpecStream.h" />
 		<Unit filename="../../Archive/7z/7zUpdate.h" />
 		<Unit filename="../../Archive/Common/CoderMixer2.cpp" />
@@ -364,12 +363,10 @@
 		<Unit filename="../../Compress/DeltaFilter.cpp" />
 		<Unit filename="../../Compress/Lzma2Decoder.cpp" />
 		<Unit filename="../../Compress/Lzma2Decoder.h" />
-		<Unit filename="../../Compress/Lzma2Encoder.cpp" />
 		<Unit filename="../../Compress/Lzma2Encoder.h" />
 		<Unit filename="../../Compress/Lzma2Register.cpp" />
 		<Unit filename="../../Compress/LzmaDecoder.cpp" />
 		<Unit filename="../../Compress/LzmaDecoder.h" />
-		<Unit filename="../../Compress/LzmaEncoder.cpp" />
 		<Unit filename="../../Compress/LzmaEncoder.h" />
 		<Unit filename="../../Compress/LzmaRegister.cpp" />
 		<Unit filename="../../Compress/RangeCoder.h" />
