@@ -183,7 +183,7 @@ void update_movefiles()
     if(i!=numfiles)
     {
         wsprintf(buf,L"/c del %ws\\_*.bin",index_dir);
-        RunSilent(L"cmd",buf,SW_HIDE,0);
+        RunSilent(L"cmd",buf,SW_HIDE,1);
     }
 
     for(i=0;i<numfiles;i++)
@@ -214,7 +214,12 @@ void update_movefiles()
         }
         //CopyFile(buf1,buf2,0);
         log_con("File '%ws'\n",buf2);
-        MoveFileEx(filenamefull_src,buf2,MOVEFILE_REPLACE_EXISTING);
+        if(!StrStrIA(filenamefull,"autorun.inf")&&
+           !StrStrIA(filenamefull,".bat"))
+        {
+            int r=MoveFileEx(filenamefull_src,buf2,MOVEFILE_REPLACE_EXISTING);
+            if(!r)log_err("ERROR in MoveFile:%d\n",GetLastError());
+        }
     }
     RunSilent(L"cmd",L" /c rd /s /q update",SW_HIDE,1);
 }
@@ -230,7 +235,6 @@ unsigned int __stdcall thread_download(void *arg)
 
     update_start();
     update_getstatus(&torrentstatus);
-
 
     ResetEvent(downloadmangar_event);
     while(!downloadmangar_exitflag)
@@ -318,7 +322,7 @@ int upddlg_populatelist(HWND hList)
     for(i=0;i<numfiles;i++)
     {
         fe=ti->file_at(i);
-        filenamefull=fe.path.c_str();
+        filenamefull=strchr(fe.path.c_str(),'\\')+1;
 
         if(StrStrIA(filenamefull,"indexes\\"))
         {
@@ -326,7 +330,11 @@ int upddlg_populatelist(HWND hList)
             indexdownloaded+=file_progress[i];
             wsprintf(buf,L"%S",filenamefull);
             *wcsstr(buf,L"DP_")=L'_';
-            if(!PathFileExists(buf))missingindexes=1; //hardcoded path
+            if(!PathFileExists(buf))  //hardcoded path
+            {
+                log_con("Missing index: '%ws'\n",buf);
+                missingindexes=1;
+            }
         }
         else if(!StrStrIA(filenamefull,"drivers\\"))
         {
@@ -343,7 +351,7 @@ int upddlg_populatelist(HWND hList)
     lvI.state     =0;
     lvI.iItem     =0;
     lvI.lParam    =-2;
-    newver=200;
+    //newver=200;
     if(newver>SVN_REV)ret+=newver<<8;
     if(newver>SVN_REV&&hList)
     {
