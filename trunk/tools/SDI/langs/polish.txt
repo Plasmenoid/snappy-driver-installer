@@ -116,12 +116,13 @@ STR_SYSINF_32BIT        = "32-bit"
 STR_SYSINF_64BIT        = "64-bit"
 
 // About
-STR_ABOUT_VER           = "v0.1"
+//STR_ABOUT_VER           = ""
 STR_ABOUT_DEV_TITLE     = "Deweloper: "
-STR_ABOUT_DEV_LIST      = "BadPointer"
+//STR_ABOUT_DEV_LIST      = ""
 STR_ABOUT_TESTERS_TITLE = "Testerzy: "
-STR_ABOUT_TESTERS_LIST  = "QuarQ, SamLab, Sorc, WindR"
+//STR_ABOUT_TESTERS_LIST  = ""
 STR_ABOUT_LICENSE       = "Snappy Driver Installer jest licencjonowany zgodnie z warunkami GNU General Public License w wersji 3\n\n\n\n\nSnappy Driver Installer korzysta z nastêpuj¹cych technologii:\n* WebP jest rozprowadzany na zasadach licencji BSD\n* libtorrent jest rozprowadzany za zasadach licencji BSD\n* Backtrace jest rozprowadzany za zasadach licencji BSD\n* 7-Zip jest licencjonowany zgodnie z warunkami GNU Library lub Lesser General Public License w wersji 2\n\nSnappy Driver Installer jest obs³ugiwany przez DriverPacks, opracowany przez zespó³ DriverPacks.\n\n(Kliknij teraz, aby odwiedziæ stronê internetow¹)"
+STR_ABOUT_SIZE          = 13
 
 // Popup on drivers(while holding Ctrl or spacebar)
 STR_HINT_UNKNOWN        = "nieznany"

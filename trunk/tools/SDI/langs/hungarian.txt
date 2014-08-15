@@ -120,8 +120,9 @@ STR_SYSINF_64BIT        = "64-bit"
 STR_ABOUT_DEV_TITLE     = "Fejlesztõ: "
 //STR_ABOUT_DEV_LIST      = ""
 STR_ABOUT_TESTERS_TITLE = "Tesztelõk: "
-STR_ABOUT_TESTERS_LIST  = "QuarQ, SamLab, Sorc  - Hungarian By LaMoLa"
+STR_ABOUT_TESTERS_LIST  = "QuarQ, SamLab, Sorc, WindR, LaMoLa(Hungarian)"
 STR_ABOUT_LICENSE       = "GNU V.3 alapján engedélyezett alkalmazás"
+STR_ABOUT_SIZE          = 1
 
 // Popup on drivers(while holding Ctrl or spacebar)
 STR_HINT_UNKNOWN        = "Ismeretlen"

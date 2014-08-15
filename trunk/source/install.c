@@ -413,6 +413,7 @@ goaround:
                 itembar->install_status=STR_EXTR_FAILED;
                 itembar->val1=r;
                 itembar->checked=0;
+                log_err("ERROR: extraction failed\n");
             }
         }
 
@@ -456,6 +457,7 @@ goaround:
                 {
                     itembar->install_status=STR_INST_FAILED;
                     itembar->val1=ret;
+                    log_err("ERROR: installation failed\n");
                 }
 
                 if(needrb)needreboot=1;

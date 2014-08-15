@@ -45,6 +45,7 @@ void upddlg_setpriorities_driverpack(const WCHAR *name,int pri);
 void upddlg_calctotalsize(HWND hList);
 LRESULT CALLBACK NewButtonProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
+int CALLBACK CompareFunc(LPARAM lParam1,LPARAM lParam2,LPARAM lParamSort);
 int  getnewver(const char *ptr);
 int  getcurver(const char *ptr);
 int  upddlg_populatelist(HWND hList);
