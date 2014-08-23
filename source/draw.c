@@ -685,51 +685,51 @@ void panel_draw(HDC hdc,panel_t *panel)
         {
             wsprintf(buf,L"%s",STR(STR_SYSINF_MOTHERBOARD));
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+150,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+SYSINFO_COL1,y+ofsy,buf,wcslen(buf));
 
             wsprintf(buf,L"%s",STR(STR_SYSINF_ENVIRONMENT));
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+300,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+SYSINFO_COL2,y+ofsy,buf,wcslen(buf));
         }
         if(i==2&&panel->index==0)
         {
             wsprintf(buf,L"%s (%d-bit)",get_winverstr(manager_g),manager_g->matcher->state->architecture?64:32);
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+10,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+10+SYSINFO_COL0,y+ofsy,buf,wcslen(buf));
 
             wsprintf(buf,L"%s",state_getproduct(manager_g->matcher->state));
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+160,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+10+SYSINFO_COL1,y+ofsy,buf,wcslen(buf));
 
             wsprintf(buf,L"%s",STR(STR_SYSINF_WINDIR));
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+310,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+10+SYSINFO_COL2,y+ofsy,buf,wcslen(buf));
 
             wsprintf(buf,L"%s",manager_g->matcher->state->text+manager_g->matcher->state->windir);
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+410,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+10+SYSINFO_COL3,y+ofsy,buf,wcslen(buf));
         }
         if(i==3&&panel->index==0)
         {
-            if(XP(panel)<160)
+            if(XP(panel)<10+SYSINFO_COL1)
                 wsprintf(buf,L"%s",state_getproduct(manager_g->matcher->state));
             else
                 wsprintf(buf,L"%s",manager_g->matcher->state->platform.szCSDVersion);
 
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+10,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+10+SYSINFO_COL0,y+ofsy,buf,wcslen(buf));
 
             wsprintf(buf,L"%s: %s",STR(STR_SYSINF_TYPE),STR(isLaptop?STR_SYSINF_LAPTOP:STR_SYSINF_DESKTOP));
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+160,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+10+SYSINFO_COL1,y+ofsy,buf,wcslen(buf));
 
             wsprintf(buf,L"%s",STR(STR_SYSINF_TEMP));
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+310,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+10+SYSINFO_COL2,y+ofsy,buf,wcslen(buf));
 
             wsprintf(buf,L"%s",manager_g->matcher->state->text+manager_g->matcher->state->temp);
             SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
-            TextOut(hdc,x+ofsx+410,y+ofsy,buf,wcslen(buf));
+            TextOut(hdc,x+ofsx+10+SYSINFO_COL3,y+ofsy,buf,wcslen(buf));
         }
         if(panel->items[i].type==TYPE_GROUP_BREAK&&!expertmode)break;
         switch(panel->items[i].type)

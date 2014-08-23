@@ -18,6 +18,13 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #define DEF_VAL(a) {TEXT(a),0,0},
 #define DEF_STR(a) {TEXT(a),0,0},
 
+#define POPUP_SYSINFO_OFS ((int)(D(FONT_SIZE)*9.5))
+
+#define SYSINFO_COL0 (D(FONT_SIZE)*0)
+#define SYSINFO_COL1 (D(FONT_SIZE)*15)
+#define SYSINFO_COL2 (D(FONT_SIZE)*30)
+#define SYSINFO_COL3 (D(FONT_SIZE)*40)
+
 enum
 {
     BOX_MAINWND=0,

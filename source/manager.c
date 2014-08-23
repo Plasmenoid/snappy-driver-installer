@@ -1322,7 +1322,7 @@ void TextOutSF(textdata_t *td,WCHAR *str,WCHAR *format,...)
     va_start(args,format);
     _vsnwprintf (buffer,BUFLEN,format,args);
     TextOut_CM(td->hdcMem,td->x,td->y,str,td->col,&td->maxsz,1);
-    TextOut_CM(td->hdcMem,td->x+95,td->y,buffer,td->col,&td->maxsz,1);
+    TextOut_CM(td->hdcMem,td->x+POPUP_SYSINFO_OFS,td->y,buffer,td->col,&td->maxsz,1);
     td->y+=td->wy;
     va_end(args);
 }
@@ -1393,7 +1393,7 @@ void popup_driverlist(manager_t *manager,HDC hdcMem,RECT rect,int i)
     POINT p;
     WCHAR i_hwid[BUFLEN];
     WCHAR bufw[BUFLEN];
-    int lne=12;
+    int lne=D(POPUP_WY);
     int k;
     int maxsz=0;
     int limits[30];
@@ -1782,7 +1782,7 @@ void popup_sysinfo(manager_t *manager,HDC hdcMem)
     {
         x=buf[1+i*2];
         y=buf[2+i*2];
-        td.maxsz+=95;
+        td.maxsz+=POPUP_SYSINFO_OFS;
         TextOutF(&td,td.col,L"%d%s x %d%s (%.1f %s) %.3f %s",
                   x,STR(STR_SYSINF_CM),
                   y,STR(STR_SYSINF_CM),
@@ -1790,15 +1790,15 @@ void popup_sysinfo(manager_t *manager,HDC hdcMem)
                   (double)y/x,
                   iswide(x,y)?STR(STR_SYSINF_WIDE):L"");
 
-        td.maxsz-=95;
+        td.maxsz-=POPUP_SYSINFO_OFS;
     }
 
     td.x=p0;
-    td.maxsz+=95;
+    td.maxsz+=POPUP_SYSINFO_OFS;
     td.y+=td.wy;
     TextOutF(&td,D(POPUP_CMP_BETTER_COLOR),STR(STR_SYSINF_MISC));td.x=p1;
-    td.maxsz-=95;
-    popup_resize((td.maxsz+95+p0+p1),td.y+D(POPUP_OFSY));
+    td.maxsz-=POPUP_SYSINFO_OFS;
+    popup_resize((td.maxsz+POPUP_SYSINFO_OFS+p0+p1),td.y+D(POPUP_OFSY));
 }
 
 void format_size(WCHAR *buf,long long val,int isspeed)
@@ -1888,6 +1888,6 @@ void popup_download(HDC hdcMem)
 
 //    TextOutSF(&td,L"Paused",L"%d,%d",t.sessionpaused,t.torrentpaused);
 #endif
-    popup_resize((td.maxsz+95+p0+p1),td.y+D(POPUP_OFSY));
+    popup_resize((td.maxsz+p0+p1),td.y+D(POPUP_OFSY));
 }
 //}
