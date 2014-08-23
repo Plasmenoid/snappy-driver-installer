@@ -2193,11 +2193,21 @@ LRESULT CALLBACK PopupProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPar
     return 0;
 }
 
+void GetRelativeCtrlRect(HWND hWnd,RECT *rc)
+{
+   GetWindowRect(hWnd,rc);
+   ScreenToClient(GetParent(hWnd),(LPPOINT)&((LPPOINT)rc)[0]);
+   ScreenToClient(GetParent(hWnd),(LPPOINT)&((LPPOINT)rc)[1]);
+   rc->right-=rc->left;
+   rc->bottom-=rc->top;
+}
+
 BOOL CALLBACK LicenseProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
 
     HWND hEditBox;
+    RECT rect;
     void *s;int sz;
 
     switch(Message)
@@ -2226,6 +2236,33 @@ BOOL CALLBACK LicenseProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lPara
                     break;
             }
             break;
+
+        case WM_WINDOWPOSCHANGED :
+            {
+                WINDOWPOS *wpos=(WINDOWPOS*)lParam;
+
+                SystemParametersInfo(SPI_GETWORKAREA,0,&rect,0);
+                if(wpos->cy-rect.bottom>0)
+                {
+                    sz=rect.bottom-20-wpos->cy;
+                    wpos->y=10;
+                    wpos->cy=rect.bottom-20;
+                    MoveWindow(hwnd,wpos->x,wpos->y,wpos->cx,wpos->cy,1);
+
+                    GetRelativeCtrlRect(GetDlgItem(hwnd,IDC_EDIT1),&rect);
+                    rect.bottom+=sz;
+                    MoveWindow(GetDlgItem(hwnd,IDC_EDIT1),rect.left,rect.top,rect.right,rect.bottom,1);
+
+                    GetRelativeCtrlRect(GetDlgItem(hwnd,IDOK),&rect);
+                    rect.top+=sz;
+                    MoveWindow(GetDlgItem(hwnd,IDOK),rect.left,rect.top,rect.right,rect.bottom,1);
+
+                    GetRelativeCtrlRect(GetDlgItem(hwnd,IDCANCEL),&rect);
+                    rect.top+=sz;
+                    MoveWindow(GetDlgItem(hwnd,IDCANCEL),rect.left,rect.top,rect.right,rect.bottom,1);
+                }
+            }
+            return TRUE;
 
         default:
             break;

@@ -39,7 +39,7 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
 #endif
         132,23
     },
-    // Windows 7 and Windows 8.1
+    // Windows 7 and Windows 8.1 (normal)
     {
         500,270,
         500,270,
@@ -49,6 +49,18 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
 #else
         47,67,     // stop
         448,72     // stop
+#endif
+    },
+    // Windows 7 and Windows 8.1 (rare)
+    {
+        500,230,
+        500,230,
+#ifdef AUTOCLICKER_CONFIRM
+        47,120,  // continue
+        448,66   // continue
+#else
+        47,67,     // stop
+        448,53     // stop
 #endif
     },
     {

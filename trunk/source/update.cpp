@@ -332,7 +332,7 @@ int upddlg_populatelist(HWND hList)
             *wcsstr(buf,L"DP_")=L'_';
             if(!PathFileExists(buf))  //hardcoded path
             {
-                log_con("Missing index: '%ws'\n",buf);
+                //log_con("Missing index: '%ws'\n",buf);
                 missingindexes=1;
             }
         }
@@ -607,7 +607,8 @@ void upddlg_setpriorities(HWND hList)
     LVITEM item;
     int base_pri=0,indexes_pri=0;
 
-    for(i=0;i<numfiles;i++)
+    item.mask=LVIF_PARAM;
+    for(i=0;i<ListView_GetItemCount(hList);i++)
     {
         item.iItem=i;
         ListView_GetItem(hList,&item);
