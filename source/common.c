@@ -282,6 +282,19 @@ char *heap_load(heap_t *t,char *p)
 //}
 
 //{ Strings
+void strsub(WCHAR *str,const WCHAR *pattern,const WCHAR *rep)
+{
+    WCHAR buf[BUFLEN],*s;
+
+    s=StrStrIW(str,pattern);
+    if(s)
+    {
+        wcscpy(buf,s);
+        wcscpy(s,rep);
+        wcscpy(s+wcslen(rep),buf+wcslen(pattern));
+    }
+}
+
 void strtoupper(char *s,int len)
 {
     while(len--)

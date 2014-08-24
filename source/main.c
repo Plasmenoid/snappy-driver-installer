@@ -22,6 +22,7 @@ const WCHAR *menu3str[]=
 {
     L"SDI at samforum.org (Russian)",
     L"SDI at forum.oszone.net (Russian)",
+    L"SDI at VKontakte (Russian)",
     L"SDI at Google Code",
     L"SamDrivers",
     L"DriverPacks.net",
@@ -31,6 +32,7 @@ WCHAR *menu3url[]=
 {
     L"http://samforum.org/showthread.php?t=31662",
     L"http://forum.oszone.net/thread-277409.html",
+    L"http://vk.com/snappydriverinstaller",
     L"http://code.google.com/p/snappy-driver-installer",
     L"http://driveroff.net/sam",
     L"http://driverpacks.net",
@@ -102,6 +104,7 @@ int expertmode=0;
 int license=0;
 WCHAR curlang [BUFLEN]=L"";
 WCHAR curtheme[BUFLEN]=L"(default)";
+int hintdelay=1;
 int filters=
     (1<<ID_SHOW_MISSING)+
     (1<<ID_SHOW_NEWER)+
@@ -167,6 +170,7 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-lang:"))        wcscpy(curlang,pr+6);else
         if( wcsstr(pr,L"-theme:"))       wcscpy(curtheme,pr+7);else
         if(!wcscmp(pr,L"-expertmode"))   expertmode=1;else
+        if( wcsstr(pr,L"-hintdelay:"))   hintdelay=_wtoi(pr+11);else
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
@@ -174,7 +178,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-showdrpnames")) flags|=FLAG_SHOWDRPNAMES;else
         if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
         if(!wcscmp(pr,L"-showconsole"))  flags|=FLAG_SHOWCONSOLE;else
-        if(!wcscmp(pr,L"-checkupdates"))  flags|=FLAG_CHECKUPDATES;else
+        if(!wcscmp(pr,L"-checkupdates")) flags|=FLAG_CHECKUPDATES;else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
@@ -264,11 +268,11 @@ void settings_save()
     fwprintf(f,L"\"-drp_dir:%s\" \"-index_dir:%s\" \"-output_dir:%s\" "
               "\"-data_dir:%s\" \"-log_dir:%s\" "
               "\"-finish_cmd:%s\" \"-finishrb_cmd:%s\" "
-              "-filters:%d \"-lang:%s\" \"-theme:%s\" ",
+              "-hintdelay:%d -filters:%d \"-lang:%s\" \"-theme:%s\" ",
             drp_dir,index_dir,output_dir,
             data_dir,logO_dir,
             finish,finish_rb,
-            filters,curlang,curtheme);
+            hintdelay,filters,curlang,curtheme);
 
     if(license)fwprintf(f,L"-license ");
     if(expertmode)fwprintf(f,L"-expertmode ");
@@ -313,6 +317,20 @@ void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
     UNREFERENCED_PARAMETER(lParam);
 
     //if(StrStrIW(szFile,L".7z")||StrStrIW(szFile,L".inf"))SetEvent(event);
+}
+
+void checkupdates()
+{
+    #ifndef _WIN64
+    if(downloadmangar_event)return;
+
+    torrentstatus.sessionpaused=1;
+    if(flags&FLAG_CHECKUPDATES)
+    {
+        downloadmangar_event=CreateEvent(0,1,0,0);
+        thandle_download=(HANDLE)_beginthreadex(0,0,&thread_download,0,0,0);
+    }
+    #endif
 }
 
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
@@ -416,15 +434,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     deviceupdate_event=CreateEvent(0,0,0,0);
     thr=(HANDLE)_beginthreadex(0,0,&thread_loadall,&bundle[0],0,0);
 
-    #ifndef _WIN64
-    torrentstatus.sessionpaused=1;
-    if(flags&FLAG_CHECKUPDATES)
-    {
-        downloadmangar_event=CreateEvent(0,1,0,0);
-        thandle_download=(HANDLE)_beginthreadex(0,0,&thread_download,0,0,0);
-    }
-    #endif
-
+    checkupdates();
     mon_drp=monitor_start(drp_dir,FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_FILE_NAME,1,drp_callback);
     virusmonitor_start();
     viruscheck(L"",0,0);
@@ -447,7 +457,6 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         CloseHandle_log(downloadmangar_event,L"downloadmangar_event",L"event");
     }
     #endif
-
     bundle_free(&bundle[0]);
     bundle_free(&bundle[1]);
     vault_free();
@@ -693,7 +702,7 @@ void lang_refresh()
     }
     redrawmainwnd();
     redrawfield();
-    InvalidateRect(hPopup,0,0);
+    InvalidateRect(hPopup,0,1);
 #ifndef _WIN64
     upddlg_updatelang();
 #endif
@@ -869,6 +878,13 @@ void gui(int nCmd)
     if(!license)
         DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG1),0,(DLGPROC)LicenseProcedure);
 
+    if(license==2&&(lang_set(0),MessageBox(0,STR(STR_UPD_DIALOG_MSG),STR(STR_UPD_DIALOG_TITLE),MB_YESNO|MB_ICONQUESTION)==IDYES))
+    {
+        flags|=FLAG_CHECKUPDATES;
+        checkupdates();
+        if(canWrite(L"update"))SetEvent(downloadmangar_event);
+    }
+
     if(license)
     {
         hMain=CreateWindowEx(WS_EX_LAYERED,
@@ -946,6 +962,11 @@ LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_MOUSELEAVE:
             ShowWindow(hPopup,SW_HIDE);
             InvalidateRect(hwnd,0,0);//common
+            break;
+
+        case WM_MOUSEHOVER:
+            InvalidateRect(hPopup,0,1);
+            ShowWindow(hPopup,floating_type==FLOATING_NONE?SW_HIDE:SW_SHOWNOACTIVATE);
             break;
 
         case WM_ACTIVATE:
@@ -1843,7 +1864,7 @@ void contextmenu3(int x,int y)
     RECT rect;
     HMENU hPopupMenu=CreatePopupMenu();
 
-    for(i=0;i<5;i++)InsertMenu(hPopupMenu,i,MF_BYPOSITION|MF_STRING,ID_URL0+i,menu3str[i]);
+    for(i=0;i<6;i++)InsertMenu(hPopupMenu,i,MF_BYPOSITION|MF_STRING,ID_URL0+i,menu3str[i]);
     SetForegroundWindow(hMain);
     GetWindowRect(hMain,&rect);
     TrackPopupMenu(hPopupMenu,TPM_LEFTALIGN,rect.left+x,rect.top+y,0,hMain,NULL);
@@ -2223,7 +2244,7 @@ BOOL CALLBACK LicenseProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lPara
             switch(LOWORD(wParam))
             {
                 case IDOK:
-                    license=1;
+                    license=2;
                     EndDialog(hwnd,IDOK);
                     return TRUE;
 

@@ -244,6 +244,10 @@ STR_SYS_DISINSTALL      = "Disable instalation"
 STR_SYS_DISRESTPNT      = "Disable restore points"
 
 // Update
+STR_UPD_DIALOG_TITLE    = "Update checking"
+STR_UPD_DIALOG_MSG      = "Would you like to enable automatic checking online for new versions of driverpacks and the application?"
+STR_UPD_DIALOG_INDEX    = "Would you like to download latest indexes in order to make it possible to determine which driverpacks you need to download?"
+
 STR_UPD_TITLE           = "Update"
 STR_UPD_BTN_ALL         = "Check All"
 STR_UPD_BTN_NONE        = "Uncheck All"

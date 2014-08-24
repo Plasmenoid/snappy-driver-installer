@@ -225,7 +225,8 @@ void manager_filter(manager_t *manager,int options)
     for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
         if(itembar->isactive&&itembar->hwidmatch)i++;else itembar->checked=0;
 
-    manager->items_list[SLOT_NOUPDATES].isactive=(i==0&&statemode==0)?1:0;
+    manager->items_list[SLOT_NOUPDATES].isactive=
+        (i==0&&statemode==0&&manager->matcher->col->driverpack_handle.items>1)?1:0;
 
     manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==
         STATEMODE_LOAD||i==0||(flags&FLAG_NORESTOREPOINT)?0:1;
@@ -1888,6 +1889,6 @@ void popup_download(HDC hdcMem)
 
 //    TextOutSF(&td,L"Paused",L"%d,%d",t.sessionpaused,t.torrentpaused);
 #endif
-    popup_resize((td.maxsz+p0+p1),td.y+D(POPUP_OFSY));
+    popup_resize((td.maxsz+POPUP_SYSINFO_OFS+p0+p1),td.y+D(POPUP_OFSY));
 }
 //}

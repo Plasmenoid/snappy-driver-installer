@@ -131,6 +131,7 @@ char *heap_save(heap_t *t,char *p);
 char *heap_load(heap_t *t,char *p);
 
 // Strings
+void strsub(WCHAR *str,const WCHAR *pattern,const WCHAR *rep);
 void strtoupper(char *s,int len);
 void strtolower(char *s,int len);
 char *strtolower_alloc(const char *s);

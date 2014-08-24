@@ -206,11 +206,13 @@ extern int horiz_sh;
 extern int ret_global;
 
 // Settings
+extern WCHAR drp_dir   [BUFLEN];
 extern WCHAR index_dir [BUFLEN];
 extern WCHAR drpext_dir[BUFLEN];
 extern WCHAR data_dir  [BUFLEN];
 extern WCHAR state_file[BUFLEN];
 extern WCHAR finish_rb [BUFLEN];
+extern int hintdelay;
 extern int filters;
 extern int flags;
 extern int statemode;
@@ -234,6 +236,7 @@ void settings_save();
 int  settings_load(WCHAR *filename);
 void SignalHandler(int signum);
 void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam);
+void checkupdates();
 //int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd);
 
 // Threads
