@@ -882,7 +882,9 @@ void gui(int nCmd)
     {
         flags|=FLAG_CHECKUPDATES;
         checkupdates();
+#ifndef _WIN64
         if(canWrite(L"update"))SetEvent(downloadmangar_event);
+#endif
     }
 
     if(license)
