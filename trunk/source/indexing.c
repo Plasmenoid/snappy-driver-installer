@@ -647,17 +647,36 @@ void collection_printstates(collection_t *col)
 
 WCHAR *collection_finddrp(collection_t *col,WCHAR *fnd)
 {
-    int i;
+    int i,j,num;
     driverpack_t *drp;
-    WCHAR *s;
+    WCHAR *s,*d,*n_s;
 
-    for(i=0;i<col->driverpack_handle.items;i++)
+    num=col->driverpack_handle.items;
+    j=0;
+    n_s=0;
+    for(i=0;i<num;i++)
     {
         drp=&col->driverpack_list[i];
         s=(WCHAR *)(drp->text+drp->drpfilename);
-        if(StrStrIW(s,fnd)&&drp->type!=DRIVERPACK_TYPE_UPDATE)return s;
+        if(StrStrIW(s,fnd)&&drp->type!=DRIVERPACK_TYPE_UPDATE)
+        {
+            d=s;
+            while(*d)
+            {
+                if(*d==L'_'&&d[1]>=L'0'&&d[1]<=L'9')
+                {
+                    if(j<_wtoi(d+1))
+                    {
+                        j=_wtoi(d+1);
+                        n_s=s;
+                    }
+                    break;
+                }
+                d++;
+            }
+        }
     }
-    return 0;
+    return n_s;
 }
 
 void collection_scanfolder(collection_t *col,const WCHAR *path)

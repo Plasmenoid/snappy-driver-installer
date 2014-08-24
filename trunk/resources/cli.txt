@@ -43,7 +43,8 @@ Settings.cfg
 /log_dir:<dir>    Path to logs and snapshots.
 /lang:<name>      Current interface language.
 /theme:<name>     Current theme.
-/filters:<flags>  Set filters.
+/hintdelay:<time> Sets hint delay.
+/filters:<flags>  Sets filters.
 /expertmode       Enable the expert mode.
 /license          Suppress the license dialog.
 /norestorepnt     Suppress creating of restore point.

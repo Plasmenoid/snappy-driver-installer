@@ -520,10 +520,12 @@ void drawpopup(int itembar,int type,int x,int y,HWND hwnd)
         TRACKMOUSEEVENT tme;
         tme.cbSize=sizeof(tme);
         tme.hwndTrack=hwnd;
-        tme.dwFlags=TME_LEAVE;
+        tme.dwFlags=TME_LEAVE|TME_HOVER;
+        tme.dwHoverTime=hintdelay;
         TrackMouseEvent(&tme);
     }
-    ShowWindow(hPopup,type==FLOATING_NONE?SW_HIDE:SW_SHOWNOACTIVATE);
+    //ShowWindow(hPopup,type==FLOATING_NONE?SW_HIDE:SW_SHOWNOACTIVATE);
+    if(type==FLOATING_NONE)ShowWindow(hPopup,SW_HIDE);
 }
 //}
 
