@@ -373,7 +373,7 @@ PANEL13_BITMAP_FILL_H    = PANEL_BITMAP_FILL
 PANEL_LIST_OFSX          = 0
 PNLITEM_OFSX             = 4
 PNLITEM_OFSY             = 3
-PNLITEM_WY               = 17
+PNLITEM_WY               = PANEL_WY
 
 // Checkboxes on left panel
 CHKBOX_TEXT_OFSX         = 18
