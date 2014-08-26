@@ -94,7 +94,7 @@ PROGR_S_BITMAP_FILL      = 0
 PANEL_OFSX               = 10
 PANEL_OFSY               = 10
 PANEL_WX                 = 135
-PANEL_WY                 = 16
+PANEL_WY                 = 17
 PANEL_INSIDE_COLOR       = 0xC9B0B0 // set 0xFF000000 to expose the background
 PANEL_OUTLINE_COLOR      = 0x000000
 PANEL_OUTLINE_WIDTH      = 1        // set 0 to remove the borders
@@ -374,7 +374,7 @@ PANEL13_BITMAP_FILL_H    = PANEL_BITMAP_FILL
 PANEL_LIST_OFSX          = 0
 PNLITEM_OFSX             = 4
 PNLITEM_OFSY             = 3
-PNLITEM_WY               = 17
+PNLITEM_WY               = PANEL_WY
 
 // Checkboxes on left panel
 CHKBOX_TEXT_OFSX         = 18

@@ -104,7 +104,7 @@ int expertmode=0;
 int license=0;
 WCHAR curlang [BUFLEN]=L"";
 WCHAR curtheme[BUFLEN]=L"(default)";
-int hintdelay=1;
+int hintdelay=500;
 int filters=
     (1<<ID_SHOW_MISSING)+
     (1<<ID_SHOW_NEWER)+

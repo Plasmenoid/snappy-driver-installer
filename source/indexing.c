@@ -1218,8 +1218,8 @@ int checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashta
             if(!wcscmp(folder2,file2->str))
             {
                 sizeuniq-=file1->size;
-                if(sub&&file1->crc!=file2->crc)
-                    log_con("  %c%ws\t%d\n",file1->crc==file2->crc?'+':'-',file1->str,file1->size);
+                //if(/*sub&&*/file1->crc!=file2->crc)
+                  //  log_con("rem diff %c%ws\t%d\n",file1->crc==file2->crc?'+':'-',file1->str,file1->size);
 
                 if(file1->crc==file2->crc)
                     size+=file1->size;
@@ -1234,9 +1234,9 @@ int checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashta
 
         file1=(filedata_t *)hash_findnext(path2filename);
     }
-    if(ismergeable&&sub==0)
+    if(ismergeable&&sub==0&&size>=1024*1024)
     {
-        WCHAR folder1d[BUFLEN],folder2d[BUFLEN];
+        WCHAR folder1d[BUFLEN],folder2d[BUFLEN],folder3[BUFLEN];
         WCHAR *folder1a=folder1d,*folder2a=folder2d;
         wcscpy(folder1a,folder1);
         wcscpy(folder2a,folder2);
@@ -1248,14 +1248,26 @@ int checkfolders(WCHAR *folder1,WCHAR *folder2,hashtable_t *filename2path,hashta
         log_con("\nrem %ws\nrem %ws\n",folder1,folder2);
         log_con("rem %s (%d,%d,%d)\n",ismergeable?"++++":"----",size/1024,sizedif/1024,sizeuniq/1024);
         int val=checkfolders(folder1d,folder2d,filename2path,path2filename,1);
-        log_con("rem %d\n",val);
+        log_con("rem subfolders(%ws,%ws):%d\n",folder1d,folder2d,val);
 
-        folder1a=folder1d;folder2a=folder2d;
-        while(wcschr(folder1a,L'/'))*wcschr(folder1a,L'/')=L'\\';
-        while(wcschr(folder2a,L'/'))*wcschr(folder2a,L'/')=L'\\';
-        log_con("xcopy /S /I /Y /H %ws %ws\n",folder1d,folder1d);
-        log_con("xcopy /S /I /Y /H %ws %ws\n",folder2d,folder2d);
-        log_con("rd /S /Q %ws\nrd /S /Q %ws\n",folder1d,folder2d);
+        if(ismergeable&&sub==0)
+        {
+            //WCHAR rep[BUFLEN],*f1="",*f2="";
+
+            folder1a=folder1d;folder2a=folder2d;
+            while(wcschr(folder1a,L'/'))*wcschr(folder1a,L'/')=L'\\';
+            while(wcschr(folder2a,L'/'))*wcschr(folder2a,L'/')=L'\\';
+            wsprintf(folder3,L"%ws",folder1);
+
+            //printf(rep,L"_merge");
+            //if(StrStrIW(folder1,L"6x64")f1="6x64";
+            //strsub(folder3,L"6x64",L"merge");
+            //strsub(folder3,L"7x64",L"merge");
+
+            log_con("xcopy /S /I /Y /H %ws %ws\n",folder1,folder3);
+            log_con("xcopy /S /I /Y /H %ws %ws\n",folder2,folder3);
+            log_con("rd /S /Q %ws\nrd /S /Q %ws\n",folder1,folder2);
+        }
     }
     if(ismergeable&&!size)return 1;
     return ismergeable?size:0;

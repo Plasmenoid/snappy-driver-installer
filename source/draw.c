@@ -521,7 +521,7 @@ void drawpopup(int itembar,int type,int x,int y,HWND hwnd)
         tme.cbSize=sizeof(tme);
         tme.hwndTrack=hwnd;
         tme.dwFlags=TME_LEAVE|TME_HOVER;
-        tme.dwHoverTime=hintdelay;
+        tme.dwHoverTime=(ctrl_down||space_down)?1:hintdelay;
         TrackMouseEvent(&tme);
     }
     //ShowWindow(hPopup,type==FLOATING_NONE?SW_HIDE:SW_SHOWNOACTIVATE);
@@ -623,8 +623,7 @@ int panel_hitscan(panel_t *panel,int hx,int hy)
 
     if(!expertmode&&panel->items[0].type==TYPE_GROUP_BREAK)return -2;
     if(hx<0||hy<0||hx>XP(panel)-D(PNLITEM_OFSX)*2)return -3;
-    if(hy>=wy*(panel->items[0].action_id))return -4;
-
+    if(hy/wy>=panel->items[0].action_id)return -4;
     return hy/wy+1;
 }
 
@@ -737,7 +736,7 @@ void panel_draw(HDC hdc,panel_t *panel)
         switch(panel->items[i].type)
         {
             case TYPE_CHECKBOX:
-                drawcheckbox(hdc,x+ofsx-1,y+ofsy,D(CHKBOX_SIZE)-1,D(CHKBOX_SIZE)-1,panel->items[i].checked,i==cur_i);
+                drawcheckbox(hdc,x+ofsx,y+ofsy,D(CHKBOX_SIZE)-2,D(CHKBOX_SIZE)-2,panel->items[i].checked,i==cur_i);
                 SetTextColor(hdc,D(i==cur_i?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
                 TextOut(hdc,x+D(CHKBOX_TEXT_OFSX)+ofsx,y+ofsy,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
                 y+=D(PNLITEM_WY);
@@ -747,7 +746,7 @@ void panel_draw(HDC hdc,panel_t *panel)
                 if(panel->index>=8&&panel->index<=10&&D(PANEL_OUTLINE_WIDTH+idofs)<0)
                     box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_PANEL_H+panel->index*2+2:BOX_PANEL+panel->index*2+2);
                 else
-                    box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
+                    box_draw(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy-1,i==cur_i?BOX_BUTTON_H:BOX_BUTTON);
 
                 SetTextColor(hdc,D(CHKBOX_TEXT_COLOR));
                 if(i==1&&panel->index==8)
@@ -792,9 +791,9 @@ void panel_draw(HDC hdc,panel_t *panel)
             case TYPE_GROUP:
                 if(panel->index>=8&&panel->index<=10)break;
                 if(i)y+=D(PNLITEM_WY);
-                box_draw(hdc,x,y,x+XP(panel),y+(wy+1)*panel->items[i].action_id+ofsy*2,
+                box_draw(hdc,x,y,x+XP(panel),y+(wy)*panel->items[i].action_id+ofsy*2,
                          BOX_PANEL+panel->index*2+2);
-                rgn=CreateRectRgn(x,y,x+XP(panel),y+(wy+1)*panel->items[i].action_id+ofsy*2);
+                rgn=CreateRectRgn(x,y,x+XP(panel),y+(wy)*panel->items[i].action_id+ofsy*2);
                 SelectClipRgn(hdc,rgn);
                 break;
 

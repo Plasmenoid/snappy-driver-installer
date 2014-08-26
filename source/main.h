@@ -190,6 +190,8 @@ extern manager_t *manager_g;
 extern int volatile installmode;
 extern int driverpackpath;
 extern CRITICAL_SECTION sync;
+extern int ctrl_down;
+extern int space_down;
 
 // Window
 extern HINSTANCE ghInst;
