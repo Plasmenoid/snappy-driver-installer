@@ -57,8 +57,29 @@
 					<Add directory="../lib/DebugU" />
 				</Linker>
 			</Target>
+			<Target title="Win64 ReleaseU">
+				<Option output="../SDI_x64_R" prefix_auto="1" extension_auto="1" />
+				<Option working_dir=".." />
+				<Option object_output="../obj/Release64U" />
+				<Option type="1" />
+				<Option compiler="gcc_64" />
+				<Option use_console_runner="0" />
+				<Option parameters="-disableinstall -extractdir:temp1 -showconsole" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O1" />
+					<Add option="-m64" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-m64" />
+					<Add library="webp64" />
+					<Add directory="../lib/Release64U" />
+				</Linker>
+			</Target>
 			<Target title="Win64 DebugU">
-				<Option output="../SDI64_RD" prefix_auto="1" extension_auto="1" />
+				<Option output="../SDI_x64_RD" prefix_auto="1" extension_auto="1" />
 				<Option working_dir=".." />
 				<Option object_output="../obj/Debug64U" />
 				<Option type="1" />
@@ -74,6 +95,7 @@
 				<Linker>
 					<Add option="-pg -lgmon" />
 					<Add option="-m64" />
+					<Add library="webp64" />
 					<Add directory="../lib/Debug64U" />
 				</Linker>
 			</Target>

@@ -745,7 +745,7 @@ void state_scandevices(state_t *state)
         //log_file("%d,%d/%d\n",i,state->text_handle.used,state->text_handle.allocated);
         heap_refresh(&state->text_handle);
         device_t *cur_device=(device_t *)heap_allocitem_ptr(&state->devices_handle);
-        DeviceInfoData=&cur_device->DeviceInfoData;
+        DeviceInfoData=(SP_DEVINFO_DATA *)&cur_device->DeviceInfoData;
         memset(DeviceInfoData,0,sizeof(SP_DEVINFO_DATA));
         DeviceInfoData->cbSize=sizeof(SP_DEVINFO_DATA);
 
@@ -936,7 +936,7 @@ void state_scandevices(state_t *state)
                     infdata->cat=cur_driver->cat;
                     infdata->inf_pos=inf_pos;
                     sprintf(bufa,"%ws%ws",filename,state->text+cur_driver->MatchingDeviceId);
-                    hash_add(&inf_list,bufa,strlen(bufa),(int)infdata,HASH_MODE_INTACT);
+                    hash_add(&inf_list,bufa,strlen(bufa),(intptr_t)infdata,HASH_MODE_INTACT);
                 }
             }
             sskp:

@@ -272,21 +272,13 @@ void image_load(img_t *img,BYTE *data,int sz)
     int i;
 
     img->hasalpha=img->sx=img->sy=0;
-#ifdef _WIN64
-    UNREFERENCED_PARAMETER(data)
-    UNREFERENCED_PARAMETER(sz)
-    ret=0;
-#else
     ret=WebPGetInfo((PBYTE)data,sz,&img->sx,&img->sy);
-#endif
     if(!ret)
     {
         log_err("ERROR in image_load(): failed WebPGetInfo\n");
         return;
     }
-#ifndef _WIN64
     img->big=WebPDecodeBGRA((PBYTE)data,sz,&img->sx,&img->sy);
-#endif
     if(!img->big)
     {
         log_err("ERROR in image_load(): failed WebPDecodeBGRA\n");

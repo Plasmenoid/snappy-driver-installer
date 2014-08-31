@@ -73,6 +73,14 @@ typedef struct _infdata_t
     ofst cat;
 }infdata_t;
 
+typedef struct _SP_DEVINFO_DATA32
+{
+    DWORD     cbSize;
+    GUID      ClassGuid;
+    DWORD     DevInst;
+    int       Reserved;
+} SP_DEVINFO_DATA_32, *PSP_DEVINFO_DATA_32;
+
 typedef struct _device_t
 {
     int driver_index;
@@ -96,7 +104,7 @@ typedef struct _device_t
     int  PropertiesType[NUM_PROPS];
 #endif
 
-    SP_DEVINFO_DATA DeviceInfoData;     // ClassGuid,DevInst
+    SP_DEVINFO_DATA_32 DeviceInfoData;     // ClassGuid,DevInst
 }device_t;
 
 typedef struct _driver_t driver_t;
@@ -142,7 +150,8 @@ typedef struct _state_m_t
     int revision;
     char reserved[1024];
 
-    driverpack_t windirinf;
+    char reserved1[676];
+//    driverpack_t windirinf;
 }state_m_t;
 
 typedef struct _state_t
@@ -166,7 +175,8 @@ typedef struct _state_t
     int revision;
     char reserved[1024];
 
-    driverpack_t windirinf;
+    char reserved1[676];
+//    driverpack_t windirinf;
 
 /*    ofst *profile_list;
     heap_t profile_handle;

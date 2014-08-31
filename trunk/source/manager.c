@@ -1700,7 +1700,7 @@ void popup_about(HDC hdcMem)
     td.y+=td.wy*3;
     TextOutF(&td,td.col,L"%s%s",STR(STR_ABOUT_DEV_TITLE),STR(STR_ABOUT_DEV_LIST));
     TextOutF(&td,td.col,L"%s%s",STR(STR_ABOUT_TESTERS_TITLE),STR(STR_ABOUT_TESTERS_LIST));
-    td.y+=td.wy*(int)STR(STR_ABOUT_SIZE);
+    td.y+=td.wy*(intptr_t)STR(STR_ABOUT_SIZE);
 
     popup_resize(D(POPUP_WX),td.y+D(POPUP_OFSY));
 }
@@ -1811,6 +1811,7 @@ void format_size(WCHAR *buf,long long val,int isspeed)
     if(val<((long long)1<<40))swprintf(buf,L"%.03f %s",(double)val/(1<<30),STR(STR_UPD_BYTES+3));
 #else
     buf[0]=0;
+    UNREFERENCED_PARAMETER(val)
 #endif
     if(isspeed)wcscat(buf,STR(STR_UPD_SEC));
 }
@@ -1837,6 +1838,7 @@ void format_time(WCHAR *buf,long long val)
 
 void popup_download(HDC hdcMem)
 {
+#ifndef _WIN64
     textdata_t td;
     torrent_status_t t;
     int p0=D(POPUP_OFSX),p1=D(POPUP_OFSX)+10;
@@ -1851,7 +1853,6 @@ void popup_download(HDC hdcMem)
     td.maxsz=0;
     td.x=p0;
 
-#ifndef _WIN64
     //update_getstatus(&t);
     t=torrentstatus;
 
@@ -1888,7 +1889,9 @@ void popup_download(HDC hdcMem)
     TextOutSF(&td,STR(STR_DWN_WASTED),STR(STR_DWN_WASTED_F),num1,num2);
 
 //    TextOutSF(&td,L"Paused",L"%d,%d",t.sessionpaused,t.torrentpaused);
-#endif
     popup_resize((td.maxsz+POPUP_SYSINFO_OFS+p0+p1),td.y+D(POPUP_OFSY));
+#else
+    UNREFERENCED_PARAMETER(hdcMem)
+#endif
 }
 //}
