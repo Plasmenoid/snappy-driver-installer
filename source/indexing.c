@@ -1625,7 +1625,7 @@ void driverpack_indexinf_ansi(driverpack_t *drp,WCHAR const *drpdir,WCHAR const 
                 strlink.len=inf_len;
                 {
                     lnk_s=memcpy_alloc((char *)(&strlink),sizeof(sect_data_t));
-                    hash_add(section_list,p,sectnmend-p,(int)lnk_s,HASH_MODE_ADD);
+                    hash_add(section_list,p,sectnmend-p,(intptr_t)lnk_s,HASH_MODE_ADD);
                 }
                 p=p2;
                 break;
@@ -1651,7 +1651,7 @@ void driverpack_indexinf_ansi(driverpack_t *drp,WCHAR const *drpdir,WCHAR const 
             parse_getstr(&parse_info,&s1b,&s1e);
             read_field(&parse_info);
             parse_getstr(&parse_info,&s2b,&s2e);
-            hash_add(string_list,s1b,s1e-s1b,(int)memcpy_alloc(s2b,s2e-s2b),HASH_MODE_INTACT);
+            hash_add(string_list,s1b,s1e-s1b,(intptr_t)memcpy_alloc(s2b,s2e-s2b),HASH_MODE_INTACT);
         }
         lnk=(sect_data_t *)hash_findnext(section_list);
         if(lnk)log_index("NOTE: multiple [strings] in %ws%ws\n",drpdir,inffile);

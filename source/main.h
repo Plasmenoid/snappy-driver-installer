@@ -55,9 +55,7 @@ typedef WINBOOL (__cdecl *WINAPI5t_SRSetRestorePointW)(PRESTOREPOINTINFOW pResto
 #include "cli.h"
 #include "update.h"
 
-#ifndef _WIN64
 #include <webp\decode.h>
-#endif
 
 #include "7z.h"
 #include "7zAlloc.h"
