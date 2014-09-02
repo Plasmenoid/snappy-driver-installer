@@ -48,9 +48,11 @@ Settings.cfg
 /expertmode       Enable the expert mode.
 /license          Suppress the license dialog.
 /norestorepnt     Suppress creating of restore point.
-/showdrpnames     Shows driverpack names.
+/showdrpnames1    Shows driverpack names on the right.
+/showdrpnames2    Shows driverpack names above.
 /preservecfg      Prevents updating of settings.cfg.
 /checkupdates     Checks for updates online.
+/onlyupdates      Disables notification of missing driverpacks.
 /cfg:<FileName>   Custom .cfg file, if set "settings.cfg" not processed.
                   Other swithes processed
 ---------

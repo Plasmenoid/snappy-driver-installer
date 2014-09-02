@@ -25,6 +25,9 @@ WCHAR extractdir[BUFLEN];
 int instflag;
 int needreboot=0;
 
+long long totalinstalltime,totalextracttime;
+long long installtime,extracttime;
+
 // Clicker
 const wnddata_t clicktbl[NUM_CLICKDATA]=
 {
@@ -61,6 +64,18 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
 #else
         47,67,     // stop
         448,53     // stop
+#endif
+    },
+    // Windows 7 and Windows 8.1 (rare)
+    {
+        500,244,
+        500,244,
+#ifdef AUTOCLICKER_CONFIRM
+        47,126,  // continue
+        448,74   // continue
+#else
+        47,67,     // stop
+        448,59     // stop
 #endif
     },
     {
@@ -332,6 +347,7 @@ unsigned int __stdcall thread_install(void *arg)
         set_rstpnt(0);
         manager_g->items_list[SLOT_RESTORE_POINT].percent=0;
     }
+    totalextracttime=totalinstalltime=0;
 goaround:
     itembar=manager_g->items_list;
     for(i=0;i<manager_g->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
@@ -349,6 +365,7 @@ goaround:
         wsprintf(cmd,L"%s\\%S",extractdir,getdrp_infpath(hwidmatch));
 
         // Extract
+        extracttime=GetTickCount();
         wsprintf(inf,L"%s\\%S%S",
                 unpacked?getdrp_packpath(hwidmatch):extractdir,
                 getdrp_infpath(hwidmatch),
@@ -419,7 +436,8 @@ goaround:
             if(!itembar->checked)manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;
             //itembar->percent=manager_g->items_list[SLOT_EMPTY].percent;
             hwidmatch=itembar->hwidmatch;
-            log_con("Ret %d [%d]\n",r,installmode);
+            totalextracttime+=extracttime=GetTickCount()-extracttime;
+            log_con("Ret %d, %ld secs\n",r,extracttime/1000);
             if(r&&itembar->install_status!=STR_INST_STOPPING)
             {
                 itembar->install_status=STR_EXTR_FAILED;
@@ -445,16 +463,18 @@ goaround:
             itembar->install_status=STR_INST_INSTALL;
             redrawfield();
 
+            installtime=GetTickCount();
             LeaveCriticalSection(&sync);
             if(installmode==MODE_INSTALLING)
                 driver_install(hwid,inf,&ret,&needrb);
             else
                 ret=1;
             EnterCriticalSection(&sync);
+            totalinstalltime+=installtime=GetTickCount()-installtime;
             itembar=&manager_g->items_list[itembar_act];
 
             if(ret==1)installed++;else failed++;
-            log_con("Ret %d(%X),%d\n\n",ret,ret,needrb);
+            log_con("Ret %d(0x%X),%s,%ld secs\n\n",ret,ret,needrb?"rb":"norb",installtime/1000);
             if(installmode==MODE_STOPPING)
             {
                 itembar->install_status=STR_INST_STOPPING;
@@ -528,7 +548,8 @@ goaround:
         FlashWindowEx(&fi);
     }
     itembar_act=0;
-    log_con("Mode:%d\n",installmode);
+    log_con("Exctract: %ld secs\n",totalextracttime/1000);
+    log_con("Install: %ld secs\n",totalinstalltime/1000);
     ret_global=installed+(failed<<16);
     if(needreboot)ret_global|=0x40<<24;
     LeaveCriticalSection(&sync);

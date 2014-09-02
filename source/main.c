@@ -175,10 +175,12 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
         if(!wcscmp(pr,L"-nofeaturescore"))flags|=FLAG_NOFEATURESCORE;else
-        if(!wcscmp(pr,L"-showdrpnames")) flags|=FLAG_SHOWDRPNAMES;else
+        if(!wcscmp(pr,L"-showdrpnames1"))flags|=FLAG_SHOWDRPNAMES1;else
+        if(!wcscmp(pr,L"-showdrpnames2"))flags|=FLAG_SHOWDRPNAMES2;else
         if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
         if(!wcscmp(pr,L"-showconsole"))  flags|=FLAG_SHOWCONSOLE;else
         if(!wcscmp(pr,L"-checkupdates")) flags|=FLAG_CHECKUPDATES;else
+        if(!wcscmp(pr,L"-onlyupdates"))  flags|=FLAG_ONLYUPDATES;else
         if(!wcscmp(pr,L"-7z"))
         {
             WCHAR cmd[BUFLEN];
@@ -278,9 +280,11 @@ void settings_save()
     if(expertmode)fwprintf(f,L"-expertmode ");
     if(flags&FLAG_NORESTOREPOINT)fwprintf(f,L"-norestorepnt ");
     if(flags&FLAG_NOFEATURESCORE)fwprintf(f,L"-nofeaturescore ");
-    if(flags&FLAG_SHOWDRPNAMES)fwprintf(f,L"-showdrpnames ");
+    if(flags&FLAG_SHOWDRPNAMES1)fwprintf(f,L"-showdrpnames1 ");
+    if(flags&FLAG_SHOWDRPNAMES2)fwprintf(f,L"-showdrpnames2 ");
     if(flags&FLAG_SHOWCONSOLE)fwprintf(f,L"-showconsole ");
     if(flags&FLAG_CHECKUPDATES)fwprintf(f,L"-checkupdates ");
+    if(flags&FLAG_ONLYUPDATES)fwprintf(f,L"-onlyupdates ");
     fclose(f);
 }
 
@@ -878,13 +882,21 @@ void gui(int nCmd)
     if(!license)
         DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG1),0,(DLGPROC)LicenseProcedure);
 
-    if(license==2&&(lang_set(0),MessageBox(0,STR(STR_UPD_DIALOG_MSG),STR(STR_UPD_DIALOG_TITLE),MB_YESNO|MB_ICONQUESTION)==IDYES))
+    if(license==2)
     {
-        flags|=FLAG_CHECKUPDATES;
-        checkupdates();
+        int f;
+        f=lang_enum(hLang,L"langs",manager_g->matcher->state->locale);
+        log_con("lang %d\n",f);
+        lang_set(f);
+
+        if(MessageBox(0,STR(STR_UPD_DIALOG_MSG),STR(STR_UPD_DIALOG_TITLE),MB_YESNO|MB_ICONQUESTION)==IDYES)
+        {
+            flags|=FLAG_CHECKUPDATES;
+            checkupdates();
 #ifndef _WIN64
-        if(canWrite(L"update"))SetEvent(downloadmangar_event);
+            if(canWrite(L"update"))SetEvent(downloadmangar_event);
 #endif
+        }
     }
 
     if(license)
@@ -1453,12 +1465,27 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             }
             if(wParam==VK_F8)
             {
-                flags^=FLAG_SHOWDRPNAMES;
-                /*if(ctrl_down)
+                switch(flags&(FLAG_SHOWDRPNAMES1|FLAG_SHOWDRPNAMES2))
                 {
-                    flags|=FLAG_SHOWDRPNAMES;
-                    manager_sort(manager_g);
-                }*/
+                    case FLAG_SHOWDRPNAMES1:
+                        flags^=FLAG_SHOWDRPNAMES1;
+                        flags^=FLAG_SHOWDRPNAMES2;
+                        break;
+
+                    case FLAG_SHOWDRPNAMES2:
+                        flags^=FLAG_SHOWDRPNAMES2;
+                        break;
+
+                    case 0:
+                        flags^=FLAG_SHOWDRPNAMES1;
+                        break;
+
+                    default:
+                        break;
+                }
+                //flags^=FLAG_SHOWDRPNAMES1;
+                manager_filter(manager_g,filters);
+                manager_setpos(manager_g);
                 redrawfield();
             }
             break;

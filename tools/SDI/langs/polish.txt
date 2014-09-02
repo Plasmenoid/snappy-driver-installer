@@ -253,6 +253,7 @@ STR_UPD_BTN_ALL         = "Zaznacz wszystkie"
 STR_UPD_BTN_NONE        = "Odznacz wszystkie"
 STR_UPD_BTN_THISPC      = "Sprawdź tylko potrzebne dla tego komputera"
 // STR_UPD_BTN_THISPC_H    = "" // Translate
+//STR_UPD_ONLYUPDATES     = "" // translate
 STR_UPD_TOTALSIZE       = "Całkowity rozmiar pobierania: %d MB"
 STR_UPD_BTN_OK          = "OK"
 STR_UPD_BTN_CANCEL      = "Anuluj"

@@ -123,6 +123,8 @@ void manager_populate(manager_t *manager)
         for(j=0;j<devicematch->num_matches;j++,hwidmatch++)
         {
             itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,hwidmatch,i+RES_SLOTS,
+                remap[i],j?2:3);
+            itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,hwidmatch,i+RES_SLOTS,
                 remap[i],j?0:1);
 
             id++;
@@ -138,23 +140,31 @@ void manager_populate(manager_t *manager)
 void manager_filter(manager_t *manager,int options)
 {
     devicematch_t *devicematch;
-    itembar_t *itembar,*itembar1;
+    itembar_t *itembar,*itembar1,*itembar_drp=0,*itembar_drpcur=0;
     int i,j,k;
     int cnt[NUM_STATUS+1];
     int o1=options&FILTER_SHOW_ONE;
 
     itembar=&manager->items_list[RES_SLOTS];
+
     for(i=RES_SLOTS;i<manager->items_handle.items;)
     {
         devicematch=itembar->devicematch;
         memset(cnt,0,sizeof(cnt));
-        if(!devicematch)continue;
+        if(!devicematch){itembar++;i++;continue;}
         for(j=0;j<devicematch->num_matches;j++,itembar++,i++)
         {
             itembar->isactive=0;
             if(!itembar)log_con("ERROR a%d\n",j);
             //if(!itembar->hwidmatch)log_con("ERROR %d,%d\n",itembar->index,j);
             if(!itembar->hwidmatch)continue;
+
+            if(itembar->first&2)
+            {
+                itembar->isactive=0;
+                itembar_drp=itembar;
+                continue;
+            }
 
             if(itembar->checked||itembar->install_status)itembar->isactive=1;
 
@@ -207,6 +217,19 @@ void manager_filter(manager_t *manager,int options)
                 itembar->isactive=1;
             }
 
+
+            if(itembar->isactive&&flags&FLAG_SHOWDRPNAMES2)
+            {
+                if(itembar_drp)
+                {
+                    if(!itembar_drpcur||(wcscmp(getdrp_packname(itembar_drp->hwidmatch),getdrp_packname(itembar_drpcur->hwidmatch))!=0))
+                    {
+                        itembar_drp->isactive=1;
+                        itembar_drpcur=itembar_drp;
+                    }
+                }
+            }
+
             if(!getdrp_packontorrent(itembar->hwidmatch))
                 if(o1&&itembar->hwidmatch->status&STATUS_CURRENT)
                     cnt[NUM_STATUS]++;
@@ -226,6 +249,7 @@ void manager_filter(manager_t *manager,int options)
         if(itembar->isactive&&itembar->hwidmatch)i++;else itembar->checked=0;
 
     manager->items_list[SLOT_NOUPDATES].isactive=
+        manager->matcher->col->driverpack_handle.items<RES_SLOTS||
         (i==0&&statemode==0&&manager->matcher->col->driverpack_handle.items>1)?1:0;
 
     manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==
@@ -292,7 +316,7 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
     if(x<0||x>wx)return;
     itembar=manager->items_list;
     for(i=0;i<manager->items_handle.items;i++,itembar++)
-    if(itembar->isactive)
+    if(itembar->isactive&&(itembar->first&2)==0)
     {
         pos=itembar->curpos>>16;
         if(i>=SLOT_RESTORE_POINT&&y<cutoff)continue;
@@ -301,7 +325,7 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
         {
             x-=D(ITEM_CHECKBOX_OFS_X);
             y-=D(ITEM_CHECKBOX_OFS_Y)+pos;
-            ofs=(itembar->first)?0:D(DRVITEM_LINE_INTEND);
+            ofs=(itembar->first&1)?0:D(DRVITEM_LINE_INTEND);
             if(x-ofs>0)*r=i;
             if(x-ofs>0&&x-ofs<D(ITEM_CHECKBOX_SIZE)&&y>0&&y<D(ITEM_CHECKBOX_SIZE))*zone=1;
             if(x>wx-50&&!ofs)*zone=expertmode?2:2;
@@ -485,7 +509,7 @@ void manager_selectall(manager_t *manager)
     for(i=RES_SLOTS;i<manager->items_handle.items;i++,itembar++)
     {
         itembar->checked=0;
-        if(itembar->isactive&&group!=itembar->index&&itembar->hwidmatch)
+        if(itembar->isactive&&group!=itembar->index&&itembar->hwidmatch&&(itembar->first&2)==0)
         {
             if(itembar->install_status==0)itembar->checked=1;
             group=itembar->index;
@@ -645,6 +669,9 @@ int box_status(int index)
     if(itembar->hwidmatch)
     {
         int status=itembar->hwidmatch->status;
+
+        if(itembar->first&2)return BOX_DRVITEM_PN;
+
         if(status&STATUS_INVALID)
             return BOX_DRVITEM_IN;
         else
@@ -822,11 +849,11 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
     int pos=(itembar->curpos>>16)-D(DRVITEM_DIST_Y0);
     if(index>=SLOT_RESTORE_POINT)pos-=ofsy;
 
-    if(!itembar->first)
+    if(!(itembar->first&1))
     {
         int i=index;
 
-        while(i>=0&&!(manager->items_list[i].first&&manager->items_list[i].isactive))i--;
+        while(i>=0&&!(manager->items_list[i].first&1&&manager->items_list[i].isactive))i--;
         if(manager->items_list[i].index==itembar->index)intend=i;
         //itembar->index=intend;
     }
@@ -848,7 +875,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
     if(index==SLOT_EXTRACTING&&itembar->install_status&&installmode==MODE_NONE)
         cl=((GetTickCount()-manager->animstart)/200)%2;
     SelectClipRgn(hdc,hrgn2);
-    if(intend&&D(DRVITEM_LINE_WIDTH))
+    if(intend&&D(DRVITEM_LINE_WIDTH)&&!(itembar->first&2))
     {
         HPEN oldpen,newpen;
 
@@ -989,6 +1016,18 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
             break;
 
         default:
+            if(itembar->first&2)
+            {
+                    /*wsprintf(bufw,L"%ws",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
+                    SetTextColor(hdc,D(boxindex[box_status(index)]+14));
+                    TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));*/
+
+                    //str_status(bufw,itembar);
+                    wsprintf(bufw,L"%ws",getdrp_packname(itembar->hwidmatch));
+                    SetTextColor(hdc,D(boxindex[box_status(index)]+15));
+                    TextOut(hdc,x+D(ITEM_CHECKBOX_OFS_X),pos+D(ITEM_TEXT_DIST_Y)+5,bufw,wcslen(bufw));
+                    break;
+            }
             if(itembar->hwidmatch)
             {
                 // Checkbox
@@ -1028,7 +1067,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
                 }
                 TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
 
-                if(flags&FLAG_SHOWDRPNAMES)
+                if(flags&FLAG_SHOWDRPNAMES1)
                 {
                     int len=wcslen(manager->matcher->col->driverpack_dir);
                     int lnn=len-wcslen(getdrp_packpath(itembar->hwidmatch));
@@ -1063,7 +1102,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
             }
 
             // Expand icon
-            if(groupsize(manager,itembar->index)>1&&itembar->first)
+            if(groupsize(manager,itembar->index)>1&&itembar->first&1)
             {
                 int xo=x+wx-D(ITEM_ICON_SIZE)*2+10;
                 image_draw(hdc,&icon[(itembar->isactive&2?0:2)+(zone==2?1:0)],xo,pos,xo+32,pos+32,0,HSTR|VSTR);

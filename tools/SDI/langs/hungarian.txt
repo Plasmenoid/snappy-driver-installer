@@ -254,6 +254,7 @@ STR_UPD_BTN_ALL         = "Mind ellenõrzése"
 STR_UPD_BTN_NONE        = "Nincs ellenõrzés"
 STR_UPD_BTN_THISPC      = "Csak ehhez a PC-hez szükséges megtekintése"
 STR_UPD_BTN_THISPC_H    = "Csak ehhez a PC-hez szükséges megtekintése"
+//STR_UPD_ONLYUPDATES     = "" // translate
 STR_UPD_TOTALSIZE       = "Összes letöltés mérete: %d MB"
 STR_UPD_BTN_OK          = "OK"
 STR_UPD_BTN_CANCEL      = "Mégse"
