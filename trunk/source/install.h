@@ -21,7 +21,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #define RESTOREPOS          4
 
 // Autoclicker
-#define NUM_CLICKDATA 4
+#define NUM_CLICKDATA 5
 #define AUTOCLICKER_CONFIRM
 
 typedef struct _wnddata_t
@@ -39,6 +39,7 @@ extern long long ar_total,ar_proceed;
 extern int instflag;
 extern int itembar_act;
 extern int needreboot;
+extern long long totalinstalltime,totalextracttime;
 
 int showpercent(int a);
 void updateoverall(manager_t *manager);

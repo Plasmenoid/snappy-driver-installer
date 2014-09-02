@@ -76,7 +76,7 @@ void vault_loadfromfile(vault_t *v,WCHAR *filename);
 void vault_loadfromres(vault_t *v,int id);
 
 // Lang/theme
-void lang_enum(HWND hwnd,WCHAR *path,int locale);
+int  lang_enum(HWND hwnd,WCHAR *path,int locale);
 void theme_enum(HWND hwnd,WCHAR *path);
 void lang_set(int i);
 void theme_set(int i);

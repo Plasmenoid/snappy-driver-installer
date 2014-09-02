@@ -144,6 +144,7 @@ void upddlg_updatelang()
     wsprintf(buf,STR(STR_UPD_TOTALSIZE),totalsize);
 
     SetWindowText(hwnd,STR(STR_UPD_TITLE));
+    SetWindowText(GetDlgItem(hwnd,IDONLYUPDATE),STR(STR_UPD_ONLYUPDATES));
     SetWindowText(GetDlgItem(hwnd,IDCHECKALL),STR(STR_UPD_BTN_ALL));
     SetWindowText(GetDlgItem(hwnd,IDUNCHECKALL),STR(STR_UPD_BTN_NONE));
     SetWindowText(GetDlgItem(hwnd,IDCHECKTHISPC),STR(STR_UPD_BTN_THISPC));
@@ -422,7 +423,11 @@ int upddlg_populatelist(HWND hList,int update)
             newver=getnewver(filenamefull);
             oldver=getcurver(filename);
 
-            if(newver>oldver)ret++;
+            if(flags&FLAG_ONLYUPDATES)
+                {if(newver>oldver&&oldver)ret++;}
+            else
+                if(newver>oldver)ret++;
+
             if(newver>oldver&&hList)
             {
                 lvI.lParam=i;
@@ -755,12 +760,13 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
 {
     UNREFERENCED_PARAMETER(lParam);
     LVCOLUMN lvc;
-    HWND thispcbut;
+    HWND thispcbut,chk;
     WCHAR buf[32];
     int i;
 
     hListg=GetDlgItem(hwnd,IDLIST);
     thispcbut=GetDlgItem(hwnd,IDCHECKTHISPC);
+    chk=GetDlgItem(hwnd,IDONLYUPDATE);
 
     switch(Message)
     {
@@ -781,9 +787,10 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
             upddlg_populatelist(hListg,0);
             upddlg_updatelang();
             upddlg_setcheckboxes(hListg);
+            if(flags&FLAG_ONLYUPDATES)SendMessage(chk,BM_SETCHECK,BST_CHECKED,0);
 
             wpOrigButtonProc=(WNDPROC)SetWindowLong(thispcbut,GWLP_WNDPROC,(LONG)NewButtonProc);
-            SetTimer(hwnd,1,500,0);
+            SetTimer(hwnd,1,2000,0);
 
             return TRUE;
 
@@ -802,7 +809,7 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
             break;
 
         case WM_TIMER:
-            upddlg_populatelist(hListg,1);
+            if(sessionhandle&&sessionhandle->is_paused()==0)upddlg_populatelist(hListg,1);
             //log_con(".");
             break;
 
@@ -812,12 +819,16 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                 case IDOK:
                     hUpdate=0;
                     upddlg_setpriorities(hListg);
+                    flags&=~FLAG_ONLYUPDATES;
+                    if(SendMessage(chk,BM_GETCHECK,0,0))flags|=FLAG_ONLYUPDATES;
                     update_resume();
                     EndDialog(hwnd,IDOK);
                     return TRUE;
 
                 case IDACCEPT:
                     upddlg_setpriorities(hListg);
+                    flags&=~FLAG_ONLYUPDATES;
+                    if(SendMessage(chk,BM_GETCHECK,0,0))flags|=FLAG_ONLYUPDATES;
                     update_resume();
                     return TRUE;
 

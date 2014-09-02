@@ -339,7 +339,7 @@ void theme_set(int i)
     icon_init(&icon[7],BUTTON_BITMAP_CHECKED_H);
 }
 
-void lang_enum(HWND hwnd,WCHAR *path,int locale)
+int lang_enum(HWND hwnd,WCHAR *path,int locale)
 {
     WCHAR buf[4096];
     WCHAR langauto[4096];
@@ -348,7 +348,7 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
     WIN32_FIND_DATA FindFileData;
     int i=0;
 
-    if(flags&FLAG_NOGUI)return;
+    if(flags&FLAG_NOGUI)return 0;
     //SendMessage(hwnd,CB_ADDSTRING,0,(int)L"Default (English)");langs=1;
     langauto[0]=0;
     wcscpy(langauto2,L"Auto");
@@ -378,12 +378,13 @@ void lang_enum(HWND hwnd,WCHAR *path,int locale)
         SendMessage(hwnd,CB_ADDSTRING,0,(LPARAM)langauto2);
         wcscpy(vLang.namelist[i],langauto);
         i++;
-    }
-    if(!i)
+    }else
     {
         SendMessage(hwnd,CB_ADDSTRING,0,(LPARAM)L"English");
         vLang.namelist[i][0]=0;
+        i++;
     }
+    return i-1;
 }
 
 void theme_enum(HWND hwnd,WCHAR *path)

@@ -40,3 +40,4 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #define IDCHECKTHISPC 307
 #define IDLIST        308
 #define IDTOTALSIZE   309
+#define IDONLYUPDATE  310
