@@ -123,7 +123,7 @@ void manager_populate(manager_t *manager)
         for(j=0;j<devicematch->num_matches;j++,hwidmatch++)
         {
             itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,hwidmatch,i+RES_SLOTS,
-                remap[i],j?2:3);
+                remap[i],j?2:2);
             itembar_init(heap_allocitem_ptr(&manager->items_handle),devicematch,hwidmatch,i+RES_SLOTS,
                 remap[i],j?0:1);
 
@@ -163,6 +163,7 @@ void manager_filter(manager_t *manager,int options)
             {
                 itembar->isactive=0;
                 itembar_drp=itembar;
+                j--;
                 continue;
             }
 
@@ -178,6 +179,8 @@ void manager_filter(manager_t *manager,int options)
             {
                 itembar1=&manager->items_list[i];
                 for(k=0;k<devicematch->num_matches-j;k++,itembar1++)
+                    if(itembar1->first&2)k--;
+                        else
                     if(itembar1->isactive&&
                        itembar1->index==itembar->index&&
                        getdrp_infcrc(itembar1->hwidmatch)==getdrp_infcrc(itembar->hwidmatch))
@@ -240,6 +243,11 @@ void manager_filter(manager_t *manager,int options)
             if(options&FILTER_SHOW_NF_STANDARD&&devicematch->status&STATUS_NF_STANDARD)itembar->isactive=1;
             if(options&FILTER_SHOW_NF_UNKNOWN&&devicematch->status&STATUS_NF_UNKNOWN)itembar->isactive=1;
             if(options&FILTER_SHOW_NF_MISSING&&devicematch->status&STATUS_NF_MISSING)itembar->isactive=1;
+            if(itembar->first&2)
+            {
+                itembar->isactive=0;
+                itembar_drp=itembar;
+            }
             itembar++;i++;
         }
     }
@@ -277,7 +285,7 @@ void manager_print(manager_t *manager)
 
     itembar=&manager->items_list[RES_SLOTS];
     for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
-        if(itembar->isactive)
+        if(itembar->isactive&&(itembar->first&2)==0)
         {
             log_file("$%04d|",k);
             if(itembar->hwidmatch)
@@ -456,7 +464,7 @@ void manager_expand(manager_t *manager,int index)
     if((itembar1->isactive&2)==0)// collapsed
     {
         for(i=0;i<manager->items_handle.items;i++,itembar++)
-            if(itembar->index==group&&itembar->hwidmatch&&(itembar->hwidmatch->status&STATUS_INVALID)==0)
+            if(itembar->index==group&&itembar->hwidmatch&&(itembar->hwidmatch->status&STATUS_INVALID)==0&&(itembar->first&2)==0)
                 {
                     itembar->isactive|=2; // expand
                 }
@@ -464,7 +472,7 @@ void manager_expand(manager_t *manager,int index)
     else
     {
         for(i=0;i<manager->items_handle.items;i++,itembar++)
-            if(itembar->index==group)
+            if(itembar->index==group&&(itembar->first&2)==0)
             {
                 itembar->isactive&=1; //collapse
                 if(itembar->checked)itembar->isactive|=4;
@@ -819,7 +827,7 @@ int groupsize(manager_t *manager,int index)
 
     itembar=manager->items_list;
     for(i=0;i<manager->items_handle.items;i++,itembar++)
-        if(itembar->index==index&&itembar->hwidmatch&&(itembar->hwidmatch->status&STATUS_INVALID)==0)
+        if(itembar->index==index&&itembar->hwidmatch&&(itembar->hwidmatch->status&STATUS_INVALID)==0&&(itembar->first&2)==0)
             num++;
 
     return num;
@@ -1488,7 +1496,7 @@ void popup_driverlist(manager_t *manager,HDC hdcMem,RECT rect,int i)
 
     itembar=manager->items_list;
     for(k=0;k<manager->items_handle.items;k++,itembar++)
-        if(itembar->index==group&&itembar->hwidmatch)
+        if(itembar->index==group&&itembar->hwidmatch&&(itembar->first&2)==0)
     {
         if(k==i)
         {

@@ -1,9 +1,9 @@
-﻿// Translated by Pan3o
+﻿// Translated by Łukasz Sumera
 
 STR_EMPTY               = ""
 STR_EMPTY_H             = ""
 
-STR_LANG_NAME           = "Polski"
+STR_LANG_NAME           = "Polish"
 STR_LANG_CODE           = 0x15
 
 // left panel
@@ -69,7 +69,7 @@ STR_SHOW_INVALID_H      = "Pokaż sterowniki, które są niezgodne z bieżącym 
 STR_OPTIONS             = "Opcje"
 STR_OPTIONS_H           = ""
 STR_REBOOT              = "Uruchom ponownie komputer po instalacji"
-STR_REBOOT_H            = "Uruchom ponownie komputer(jeśli wymagane) po zakończeniu instalacji(Ctrl+R).\n\nWSKAZÓWKA: W każdej chwili możesz anulować ponowne uruchomienie komputera odznaczając pole wyboru."
+STR_REBOOT_H            = "Restart PC (jeśli wymagany) po instalacji (Ctrl"
 
 // Sysinfo
 STR_SYSINF_WINDOWS      = "Windows"
@@ -121,7 +121,7 @@ STR_ABOUT_DEV_TITLE     = "Deweloper: "
 //STR_ABOUT_DEV_LIST      = ""
 STR_ABOUT_TESTERS_TITLE = "Testerzy: "
 //STR_ABOUT_TESTERS_LIST  = ""
-STR_ABOUT_LICENSE       = "Snappy Driver Installer jest licencjonowany zgodnie z warunkami GNU General Public License w wersji 3\n\n\n\nPolish translation: Pan3o\n\nSnappy Driver Installer korzysta z następujących technologii:\n* WebP jest rozprowadzany na zasadach licencji BSD\n* libtorrent jest rozprowadzany za zasadach licencji BSD\n* Backtrace jest rozprowadzany za zasadach licencji BSD\n* 7-Zip jest licencjonowany zgodnie z warunkami GNU Library lub Lesser General Public License w wersji 2\n\nSnappy Driver Installer jest obsługiwany przez DriverPacks, opracowany przez zespół DriverPacks.\n\n(Kliknij teraz, aby odwiedzić stronę internetową)"
+STR_ABOUT_LICENSE       = "Snappy Driver Installer jest licencjonowany zgodnie z warunkami GNU General Public License w wersji 3\n\n\n\nPolish translation: Łukasz Sumera\n\nSnappy Driver Installer korzysta z następujących technologii:\n* WebP jest rozprowadzany na zasadach licencji BSD\n* libtorrent jest rozprowadzany za zasadach licencji BSD\n* Backtrace jest rozprowadzany za zasadach licencji BSD\n* 7-Zip jest licencjonowany zgodnie z warunkami GNU Library lub Lesser General Public License w wersji 2\n\nSnappy Driver Installer jest obsługiwany przez DriverPacks, opracowany przez zespół DriverPacks.\n\n(Kliknij teraz, aby odwiedzić stronę internetową)"
 STR_ABOUT_SIZE          = 13
 
 // Popup on drivers(while holding Ctrl or spacebar)
@@ -244,15 +244,16 @@ STR_SYS_DISINSTALL      = "Wyłącz instalację"
 STR_SYS_DISRESTPNT      = "Wyłącz punkty przywracania"
 
 // Update
-//STR_UPD_DIALOG_TITLE    = "" // translate
-//STR_UPD_DIALOG_MSG      = "" // translate
-//STR_UPD_DIALOG_INDEX    = "" // translate
+STR_UPD_DIALOG_TITLE    = "Sprawdzanie aktualizacji"
+STR_UPD_DIALOG_MSG      = "Chcesz włączyć automatyczne sprawdzanie nowych wersji pakietów ze sterownikami i programu?"
+STR_UPD_DIALOG_INDEX    = "Chcesz pobrać najnowsze indeksy, aby można było określić, które pakiety ze sterownikami należy pobrać?"
 
 STR_UPD_TITLE           = "Aktualizacja"
 STR_UPD_BTN_ALL         = "Zaznacz wszystkie"
 STR_UPD_BTN_NONE        = "Odznacz wszystkie"
 STR_UPD_BTN_THISPC      = "Sprawdź tylko potrzebne dla tego komputera"
-// STR_UPD_BTN_THISPC_H    = "" // Translate
+STR_UPD_BTN_THISPC_H    = "Aby móc określić jakie pakiety ze sterownikami potrzebujesz, musisz najpierw pobrać indeksy."
+STR_UPD_ONLYUPDATES     = "Nie powiadamiaj o brakujących pakietach ze sterownikami"
 //STR_UPD_ONLYUPDATES     = "" // translate
 STR_UPD_TOTALSIZE       = "Całkowity rozmiar pobierania: %d MB"
 STR_UPD_BTN_OK          = "OK"
@@ -262,13 +263,13 @@ STR_UPD_COL_NAME        = "Pakiet sterowników"
 STR_UPD_COL_SIZE        = "Rozmiar"
 STR_UPD_COL_PER         = "%"
 STR_UPD_COL_NEW         = "Nowy"
-STR_UPD_COL_CUR         = "Obecne"
+STR_UPD_COL_CUR         = "Obecny"
 STR_UPD_COL_THISPC      = "Dla tego komputera?"
 STR_UPD_WEBSTATUS       = " (Internet)"
 STR_UPD_YES             = "Tak"
 STR_UPD_NO              = "Nie"
 STR_UPD_UNKNOWN         = "Nieznane"
-// STR_UPD_MISSING         = "" // Translate
+STR_UPD_MISSING         = "Brakuje"
 STR_UPD_BYTES           = "bajtów"
 STR_UPD_KB              = "KB"
 STR_UPD_MB              = "MB"
@@ -280,7 +281,7 @@ STR_UPD_THOUR           = "godziny"
 STR_UPD_TDAY            = "dni"
 STR_UPD_BASEFILES       = "Aplikacja+indeksy"
 STR_UPD_APP             = "Aplikacja"
-STR_UPD_INDEXES         = "indeksy"
+STR_UPD_INDEXES         = "Indeksy"
 STR_UPD_UPDATEHINT1     = "Wskazówka"
 STR_UPD_UPDATEHINT2     = "Aby użyć tej funkcji, należy najpierw zaktualizować bazę."
 
