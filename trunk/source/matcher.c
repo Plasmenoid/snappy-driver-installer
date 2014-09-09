@@ -318,6 +318,18 @@ intptr_t isvalid_usb30hub(hwidmatch_t *hwidmatch,state_t *state,WCHAR *str)
     return (intptr_t)StrStrI((WCHAR *)(state->text+hwidmatch->devicematch->device->HardwareID),str);
 }
 
+int isblacklisted(hwidmatch_t *hwidmatch,state_t *state,WCHAR *hwid,char *section)
+{
+    char buf[BUFLEN];
+
+    if(StrStrI((WCHAR *)(state->text+hwidmatch->devicematch->device->HardwareID),hwid))
+    {
+        getdrp_drvsection(hwidmatch,buf);
+        if(StrStrIA(buf,section))return 1;
+    }
+    return 0;
+}
+
 int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state)
 {
     version_t *v;
@@ -379,6 +391,8 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
        StrStrIA(getdrp_infpath(hwidmatch),"L\\Realtek\\")||
        StrStrIA(getdrp_infpath(hwidmatch),"L\\R\\"))
         if(!isvalid_ver(hwidmatch,state))return 0;
+
+    if(isblacklisted(hwidmatch,state,L"VEN_168C&DEV_002B&SUBSYS_30A117AA","Realtek"))return 0;
 
     if(StrStrIA(getdrp_infpath(hwidmatch),"matchmarker\\"))
         if((calc_markerscore(state,getdrp_infpath(hwidmatch))&7)!=7)return 0;

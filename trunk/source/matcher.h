@@ -84,6 +84,7 @@ int calc_secttype(const char *s);
 int calc_decorscore(int id,state_t *state);
 int calc_markerscore(state_t *state,char *path);
 intptr_t isvalid_usb30hub(hwidmatch_t *hwidmatch,state_t *state,WCHAR *str);
+int isblacklisted(hwidmatch_t *hwidmatch,state_t *state,WCHAR *hwid,char *section);
 int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state);
 int calc_notebook(hwidmatch_t *hwidmatch);
 int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore);
