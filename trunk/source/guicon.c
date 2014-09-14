@@ -86,7 +86,7 @@ void gen_timestamp()
              ti->tm_hour,ti->tm_min,ti->tm_sec,pcname);
 }
 
-void log_start(WCHAR *log_dir)
+void log_start(WCHAR *logdir)
 {
     WCHAR filename[BUFLEN];
 
@@ -96,18 +96,18 @@ void log_start(WCHAR *log_dir)
     gen_timestamp();
 
     wcscpy(filename,L"log.txt");
-    wsprintf(filename,L"%s\\%slog.txt",log_dir,timestamp);
+    wsprintf(filename,L"%s\\%slog.txt",logdir,timestamp);
     if(!canWrite(filename))
     {
         log_err("ERROR in log_start(): Write-protected,'%ws'\n",filename);
 //        GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
 //        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
-        GetEnvironmentVariable(L"TEMP",log_dir,BUFLEN);
-        wcscat(log_dir,L"\\SDI_logs");
-        wsprintf(filename,L"%s\\%slog.txt",log_dir,timestamp);
+        GetEnvironmentVariable(L"TEMP",logdir,BUFLEN);
+        wcscat(logdir,L"\\SDI_logs");
+        wsprintf(filename,L"%s\\%slog.txt",logdir,timestamp);
     }
 
-    mkdir_r(log_dir);
+    mkdir_r(logdir);
     if(flags&FLAG_NOLOGFILE)return;
     logfile=_wfopen(filename,L"wb");
     if(!logfile)
@@ -115,10 +115,10 @@ void log_start(WCHAR *log_dir)
         log_err("ERROR in log_start(): Write-protected,'%ws'\n",filename);
 //        GetEnvironmentVariable(L"HOMEDRIVE",log_dir,BUFLEN);
 //        GetEnvironmentVariable(L"HOMEPATH",log_dir+2,BUFLEN);
-        GetEnvironmentVariable(L"TEMP",log_dir,BUFLEN);
-        wcscat(log_dir,L"\\SDI_logs");
-        wsprintf(filename,L"%s\\%slog.txt",log_dir,timestamp);
-        mkdir_r(log_dir);
+        GetEnvironmentVariable(L"TEMP",logdir,BUFLEN);
+        wcscat(logdir,L"\\SDI_logs");
+        wsprintf(filename,L"%s\\%slog.txt",logdir,timestamp);
+        mkdir_r(logdir);
         logfile=_wfopen(filename,L"wb");
     }
     log_file("{start logging\n");

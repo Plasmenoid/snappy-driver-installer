@@ -348,6 +348,8 @@ unsigned int __stdcall thread_install(void *arg)
         manager_g->items_list[SLOT_RESTORE_POINT].percent=0;
     }
     totalextracttime=totalinstalltime=0;
+    wsprintf(buf,L"%ws\\SetupAPI.dev.log1",manager_g->matcher->state->text+manager_g->matcher->state->windir);
+    _wremove(buf);
 goaround:
     itembar=manager_g->items_list;
     for(i=0;i<manager_g->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
@@ -487,6 +489,9 @@ goaround:
                     itembar->install_status=needrb?STR_INST_REBOOT:STR_INST_OK;
                 else
                 {
+                    if((itembar->isactive&2)==0)// collapsed
+                        manager_expand(manager_g,i);
+
                     itembar->install_status=STR_INST_FAILED;
                     itembar->val1=ret;
                     log_err("ERROR: installation failed\n");
@@ -508,6 +513,9 @@ goaround:
                 goto goaround;
     }
     // Instalation competed by this point
+    wsprintf(buf,L"%ws\\SetupAPI.dev.log1",manager_g->matcher->state->text+manager_g->matcher->state->windir);
+    wsprintf(cmd,L"%s\\%ssetupAPI.log",log_dir,timestamp);
+    if(!(flags&FLAG_NOLOGFILE))CopyFile(buf,cmd,0);
 
     if(instflag&OPENFOLDER)
     {

@@ -41,11 +41,8 @@ rem Build libtorrent.a
 cd "%LIBTORRENT_PATH%"
 if /I exist "%LIBTORRENT_PATH%\bin\gcc-mingw-%GCC_VERSION%\myrelease\exception-handling-off\libtorrent.a" (echo Skipping Build libtorrent & goto skipbuildlibtorrent)
 cd examples
-xcopy "%LIBTORRENT_PATH%\examples\Jamfile_fixed" "%LIBTORRENT_PATH%\examples\Jamfile" /Y
-xcopy "%LIBTORRENT_PATH%\src\gzip_fixed.cpp" "%LIBTORRENT_PATH%\src\gzip.cpp" /Y
-xcopy "%LIBTORRENT_PATH%\src\udp_socket_fixed.cpp" "%LIBTORRENT_PATH%\src\udp_socket.cpp" /Y
-xcopy "%LIBTORRENT_PATH%\src\kademlia\item_fixed.cpp" "%LIBTORRENT_PATH%\src\kademlia\item.cpp" /Y
-bjam client_test -j%NUMBER_OF_PROCESSORS% toolset=gcc myrelease exception-handling=off "-sBUILD=<define>BOOST_NO_EXCEPTIONS" "-sBUILD=<define>BOOST_EXCEPTION_DISABLE" "cxxflags=-fexpensive-optimizations -fomit-frame-pointer"
+copy "%LIBTORRENT_PATH%\Jamfile_fixed" "%LIBTORRENT_PATH%\examples\Jamfile" /Y
+bjam client_test -j%NUMBER_OF_PROCESSORS% toolset=gcc myrelease exception-handling=off "-sBUILD=<define>BOOST_NO_EXCEPTIONS" "-sBUILD=<define>BOOST_EXCEPTION_DISABLE" "cxxflags=-fexpensive-optimizations -fomit-frame-pointer -D IPV6_TCLASS=30"
 cd ..
 if /I not exist "%LIBTORRENT_PATH%\bin\gcc-mingw-%GCC_VERSION%\myrelease\exception-handling-off\libtorrent.a" (echo ERROR: failed to build libtorrent.a & goto EOF)
 xcopy bin\gcc-mingw-%GCC_VERSION%\myrelease\exception-handling-off\libtorrent.a %GCC_PATH%\lib /Y
