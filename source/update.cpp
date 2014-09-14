@@ -16,7 +16,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _WIN64
-
+#define IPV6_TCLASS 30
 #include "libtorrent/config.hpp"
 #include "libtorrent/entry.hpp"
 #include "libtorrent/bencode.hpp"

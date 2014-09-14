@@ -17,7 +17,7 @@ STR_SELECT_ALL_H        = ""
 STR_SELECT_NONE         = "  - Visszavonás -"
 STR_SELECT_NONE_H       = ""
 
-STR_LANG                = "Nyelv kiválasztása"
+STR_LANG                = "Nyelv kiválasztása(Language)"
 STR_LANG_H              = ""
 STR_THEME               = "Felület (skin) kiválasztása"
 STR_THEME_H             = ""

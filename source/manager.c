@@ -257,7 +257,6 @@ void manager_filter(manager_t *manager,int options)
         if(itembar->isactive&&itembar->hwidmatch)i++;else itembar->checked=0;
 
     manager->items_list[SLOT_NOUPDATES].isactive=
-        manager->matcher->col->driverpack_handle.items<RES_SLOTS||
         (i==0&&statemode==0&&manager->matcher->col->driverpack_handle.items>1)?1:0;
 
     manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==
