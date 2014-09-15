@@ -257,6 +257,7 @@ void manager_filter(manager_t *manager,int options)
         if(itembar->isactive&&itembar->hwidmatch)i++;else itembar->checked=0;
 
     manager->items_list[SLOT_NOUPDATES].isactive=
+        manager->items_handle.items==RES_SLOTS||
         (i==0&&statemode==0&&manager->matcher->col->driverpack_handle.items>1)?1:0;
 
     manager->items_list[SLOT_RESTORE_POINT].isactive=statemode==
@@ -1585,8 +1586,6 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int index)
     td.wy=D(POPUP_WY);
     td.hdcMem=hdcMem;
     td.maxsz=0;
-
-    if(!devicematch_f||!devicematch_f->device)MessageBox(0,L"Derp",L"Derp",0);
 
     if(devicematch_f->device->driver_index>=0)
     {
