@@ -161,7 +161,6 @@
 			<Add directory="../external" />
 		</Linker>
 		<ExtraCommands>
-			<Add before="..\resources\delres.bat" />
 			<Add before="..\SubWCRev32.exe .. ..\source\svnrev_template.h ..\source\svnrev.h" />
 		</ExtraCommands>
 		<Unit filename="../resources/cli.txt" />

@@ -820,6 +820,7 @@ void mkdir_r(const WCHAR *path)
     WCHAR buf[BUFLEN];
     WCHAR *p;
 
+    if(path[1]==L':'&&path[2]==0)return;
     if(!canWrite(path))
     {
         log_err("ERROR in mkdir_r(): Write-protected,'%ws'\n",path);
