@@ -1,4 +1,4 @@
-﻿// Translated by JumbErNumber311R
+﻿// Translated by JumpErNumber311R
 
 STR_EMPTY               = ""
 STR_EMPTY_H             = ""
@@ -24,7 +24,7 @@ STR_THEME_H             = ""
 STR_EXPERT              = "Ekspert rejimi"
 STR_EXPERT_H            = "Ekspert rejiminin qoşulması.\n\nMƏSLƏHƏT: Drayver haqqında əlavə məlumat almaq üçün onun üstündə Ctrl yaxud Space düyməsini sıxın.."
 
-STR_OPENLOGS            = "Logları açmaq"
+STR_OPENLOGS            = "Loqları açmaq"
 STR_OPENLOGS_H          = "Şəkil və Loglar qovluqunu açmaq.\n\nBu faylları hər hansısa bir problem yaranan zaman başqa istfadəçilərdən kömək almaq üçün forumlarda yerləşdirmək tövsiyyə olunur."
 STR_SNAPSHOT            = "Şəkili yükləmək..."
 STR_SNAPSHOT_H          = "Özgə sistemin şəkilini yükləmək.\n\nŞəkillər avtomatik olaraq loglar olan qovluqda yaranır və özündə quraşdırılan qurğular, drayverlər, Windows-un versiyaları, akumulyator və monitor parametrləri haqqında məlumatı əks etdirir.\n\nŞəkillər özgə sistemin driverpackında tapılan drayverlər haqqında məlumatı əks etdirmir.\n\nBeləliklə şəkilin yüklənməsi özgə sistemin emulyasiyasına imkan yaradır, lakin bu zaman drayverlər lokal sistemin driverpackında axtarılır."
@@ -71,7 +71,7 @@ STR_OPTIONS_H           = ""
 STR_REBOOT              = "Qurtarandan sonra restart vermək"
 STR_REBOOT_H            = "Drayverlərin quraşdırılmasının sonunda kompüterə restart vermək (əgər lazımdırsa)(Ctrl+R).\n\nMƏSLƏHƏT: Bu quşu götürərək siz istənilən vaxt restart-ı təxirə sala bilərsiz."
 
-// Sistem barədə məlumat
+// Sistem haqqında məlumat
 STR_SYSINF_WINDOWS      = "Windows"
 STR_SYSINF_VERSION      = "Versiya"
 STR_SYSINF_PLATFORM     = "Platforma"
@@ -121,8 +121,7 @@ STR_ABOUT_DEV_TITLE     = "İstehsalçı: "
 //STR_ABOUT_DEV_LIST
 STR_ABOUT_TESTERS_TITLE = "Test edənlər: "
 //STR_ABOUT_TESTERS_LIST
-STR_ABOUT_LICENSE       = "Snappy Driver Installer GNU General Public License version 3 lisenziya şərtləri əsasında yayılır\n\n\n\nTranslated by JumbErNumber311R\n\nSnappy Driver Installer-də bu texnologiyalar istfadə olunur :\n* WebP (BSD license)\n* libtorrent (BSD license)\n* Backtrace (BSD license)\n* 7-Zip (GNU Library or Lesser General Public License\n version 2)\n\nSnappy Driver Installer drayverpak texnologiyasından istfadə edir, hansıki DriverPacks.net komandası tətbiq edir.\n\n(Saytları açmaq üçün siçanın sol düyməciyini sıxın)"
-STR_ABOUT_SIZE          = 13
+STR_ABOUT_LICENSE       = "Snappy Driver Installer GNU General Public License version 3 lisenziya şərtləri əsasında yayılır\n\n\n\n\nAzerbaijan translation: JumpErNumber311R\n\nSnappy Driver Installer-də bu texnologiyalar istfadə olunur :\n* WebP (BSD license)\n* libtorrent (BSD license)\n* Backtrace (BSD license)\n* 7-Zip (GNU Library or Lesser General Public License\n version 2)\n\nSnappy Driver Installer drayverpak texnologiyasından istfadə edir, hansıki DriverPacks.net komandası tətbiq edir.\n\n(Saytları açmaq üçün siçanın sol düyməciyini sıxın)"
 
 // Всплывающее окно (при удерживании Ctrl или пробела)
 STR_HINT_UNKNOWN        = "naməlum"
@@ -224,7 +223,7 @@ STR_INDEXING            = "İndeksasiya..."
 STR_INDEXLZMA           = "İndekslərin sıxılması..."
 STR_OF                  = " из "
 
-STR_RESTOREPOINT        = "Bərpa nöqtəsini yaradmaq"
+STR_RESTOREPOINT        = "Bərpa nöqtəsini yaratmaq"
 STR_RESTOREPOINT_H      = "Bərpa nöqtələrinin yaradılmasl sizə sistemin çöxməsi halı ilə rastlaşma vaxtı onu əvvəlki vəziyyətə qaytarmaqa imkan yaradır(Ctrl+P).\n\nMƏSLƏHƏT: Sistemi bərpa etmək üçün siçanın sağ düyməsi ilə bura klik edin."
 STR_REST_SCHEDULE       = "Bərpa nöqtəsinin yaradılmasını planlaşdırmaq"
 STR_REST_ROLLBACK       = "Sistemi daha əvvəlki vəziyyətə qaytarmaq..." 
@@ -251,8 +250,8 @@ STR_UPD_DIALOG_INDEX    = "Siz istərdizmi ən yeni indeksləri yükləmək, han
 STR_UPD_TITLE           = "Yenilənmə"
 STR_UPD_BTN_ALL         = "Hamısını qeyd etmək"
 STR_UPD_BTN_NONE        = "Qeydləri çıxartmaq"
-STR_UPD_BTN_THISPC      = "Yalnız bu personal kompüter üçün qeyd etmək"
-STR_UPD_BTN_THISPC_H    = "Drayverpackda bu Personal kompüter üçün hansı yenilənmələr var təyin etmək üçün ilk növbədə indeksləri yükləmək lazım."
+STR_UPD_BTN_THISPC      = "Yalnız bu PK üçün qeyd etmək"
+STR_UPD_BTN_THISPC_H    = "Drayverpacda bu PK üçün hansı yenilənmələr var təyin etmək üçün ilk növbədə indeksləri yükləmək lazım."
 STR_UPD_ONLYUPDATES     = "Olmayan drayverlər haqqında xəbər verməmək"
 STR_UPD_TOTALSIZE       = "Yenilənmələrin ümumi həcmi: %d MB"
 STR_UPD_BTN_OK          = "OK"
