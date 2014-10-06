@@ -159,15 +159,16 @@ typedef WINBOOL (__cdecl *WINAPI5t_SRSetRestorePointW)(PRESTOREPOINTINFOW pResto
 #define ID_WIN_7           35
 #define ID_WIN_8           36
 #define ID_WIN_81          37
+#define ID_WIN_10          38
 
-#define ID_RESTPNT         38
-#define ID_REBOOT          39
+#define ID_RESTPNT         39
+#define ID_REBOOT          40
 
-#define ID_URL0            40
-#define ID_URL1            41
-#define ID_URL2            42
-#define ID_URL3            43
-#define ID_URL4            44
+#define ID_URL0            41
+#define ID_URL1            42
+#define ID_URL2            43
+#define ID_URL3            44
+#define ID_URL4            45
 
 #define ID_HWID_CLIP      100
 #define ID_HWID_WEB       200

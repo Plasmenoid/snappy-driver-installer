@@ -33,7 +33,7 @@ const wnddata_t clicktbl[NUM_CLICKDATA]=
 {
     // Windows XP
     {
-        396,315,
+        396,-1,
         390,283,
 #ifdef AUTOCLICKER_CONFIRM
         107,249,// continue
