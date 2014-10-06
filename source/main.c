@@ -114,7 +114,7 @@ int filters=
 int virtual_os_version=0;
 int virtual_arch_type=0;
 
-#define NUM_OS 7
+#define NUM_OS 8
 const WCHAR *windows_name[NUM_OS]=
 {
     L"Windows 2000",
@@ -123,9 +123,10 @@ const WCHAR *windows_name[NUM_OS]=
     L"Windows 7",
     L"Windows 8",
     L"Windows 8.1",
+    L"Windows 10",
     L"Unknown OS"
 };
-int windows_ver[NUM_OS]={50,51,60,61,62,63,0};
+int windows_ver[NUM_OS]={50,51,60,61,62,63,64,0};
 //}
 
 void panel_setfilters(panel_t *panel)
@@ -1703,7 +1704,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             {
                 RunSilent(L"open",menu3url[wp-ID_URL0],SW_SHOWNORMAL,0);
             }
-            if(wp>=ID_WIN_2000&&wp<=ID_WIN_81)
+            if(wp>=ID_WIN_2000&&wp<=ID_WIN_10)
             {
                 virtual_os_version=windows_ver[wp-ID_WIN_2000];
                 PostMessage(hMain,WM_DEVICECHANGE,7,2);

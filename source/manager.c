@@ -1815,7 +1815,7 @@ void popup_sysinfo(manager_t *manager,HDC hdcMem)
     TextOutSF(&td,STR(STR_SYSINF_FLAGS),L"%s",bufw);
 
     if(battery->BatteryLifePercent!=255)
-        TextOutSF(&td,STR(STR_SYSINF_CHARGED),L"%d",battery->BatteryLifePercent);
+        TextOutSF(&td,STR(STR_SYSINF_CHARGED),L"%d%%",battery->BatteryLifePercent);
     if(battery->BatteryLifeTime!=0xFFFFFFFF)
         TextOutSF(&td,STR(STR_SYSINF_LIFETIME),L"%d %s",battery->BatteryLifeTime/60,STR(STR_SYSINF_MINS));
     if(battery->BatteryFullLifeTime!=0xFFFFFFFF)
