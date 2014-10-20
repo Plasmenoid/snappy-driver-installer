@@ -495,11 +495,12 @@ unsigned int __stdcall thread_scandevices(void *arg)
 {
     bundle_t *bundle=(bundle_t *)arg;
     state_t *state=&bundle->state;
-
+    //log_con("{thread_scandevices\n");
     if(statemode==0)
         state_scandevices(state);else
     if(statemode==STATEMODE_LOAD)
         state_load(state,state_file);
+    //log_con("}thread_scandevices\n");
     return 0;
 }
 
@@ -508,10 +509,12 @@ unsigned int __stdcall thread_loadindexes(void *arg)
     bundle_t *bundle=(bundle_t *)arg;
     collection_t *collection=&bundle->collection;
 
+    //log_con("{thread_loadindexes\n");
     if(manager_g->items_list[SLOT_EMPTY].curpos==1)*drpext_dir=0;
     collection->driverpack_dir=*drpext_dir?drpext_dir:drp_dir;
     //printf("'%ws'\n",collection->driverpack_dir);
     collection_load(collection);
+    //log_con("}thread_loadindexes\n");
     return 0;
 }
 
@@ -520,7 +523,9 @@ unsigned int __stdcall thread_getsysinfo(void *arg)
     bundle_t *bundle=(bundle_t *)arg;
     state_t *state=&bundle->state;
 
+    //log_con("{thread_getsysinfo\n");
     if(statemode!=STATEMODE_LOAD)state_getsysinfo_slow(state);
+    //log_con("}thread_getsysinfo\n");
     return 0;
 }
 
@@ -603,6 +608,7 @@ void bundle_load(bundle_t *bundle)
 {
     HANDLE thandle[3];
 
+    //log_con("{bundle_load\n");
     thandle[0]=(HANDLE)_beginthreadex(0,0,&thread_scandevices,bundle,0,0);
     thandle[1]=(HANDLE)_beginthreadex(0,0,&thread_loadindexes,bundle,0,0);
     thandle[2]=(HANDLE)_beginthreadex(0,0,&thread_getsysinfo,bundle,0,0);
@@ -611,9 +617,13 @@ void bundle_load(bundle_t *bundle)
     CloseHandle_log(thandle[1],L"bundle_load",L"1");
     CloseHandle_log(thandle[2],L"bundle_load",L"2");
 
+    //log_con("-isnotebook_a\n");
     isnotebook_a(&bundle->state);
+    //log_con("-matcher_populate\n");
     matcher_populate(&bundle->matcher);
+    //log_con("-matcher_populate\n");
     matcher_sort(&bundle->matcher);
+    //log_con("}bundle_load\n");
 }
 
 void bundle_lowprioirity(bundle_t *bundle)

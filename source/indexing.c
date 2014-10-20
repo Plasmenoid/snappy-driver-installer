@@ -562,6 +562,7 @@ void collection_updatedindexes(collection_t *col)
 
         drp=&col->driverpack_list[index];
         driverpack_init(drp,col->driverpack_dir,filename,col);
+//        log_con("Load '%ws'\n",filename);
         driverpack_loadindex(drp);
     }
     FindClose(hFind);
@@ -581,10 +582,13 @@ void collection_load(collection_t *col)
     int i;
     HANDLE thr;
     col->inflist=malloc(LSTCNT*sizeof(inflist_t));
+    if(!col->inflist){log_con("ERROR 1\n");return;}
     for(i=0;i<LSTCNT;i++)
     {
         col->inflist[i].dataready=CreateEvent(0,0,0,0);
         col->inflist[i].slotvacant=CreateEvent(0,0,1,0);
+        if(!col->inflist[i].dataready){log_con("ERROR 2\n");return;}
+        if(!col->inflist[i].slotvacant){log_con("ERROR 3\n");return;}
     }
     col->pos_in=col->pos_out=0;
     thr=(HANDLE)_beginthreadex(0,0,&thread_indexinf,col,0,0);
