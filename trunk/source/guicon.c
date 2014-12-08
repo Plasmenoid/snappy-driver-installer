@@ -322,7 +322,7 @@ void CALLBACK viruscheck(LPTSTR szFile,DWORD action,LPARAM lParam)
                 fread(buf,BUFLEN,1,f);
                 fclose(f);
                 buf[BUFLEN-1]=0;
-                if(!strstr(buf,"[NOT_A_VIRUS]"))
+                if(!strstr(buf,"[NOT_A_VIRUS]")&&StrStrIA(buf,"open"))
                     manager_g->items_list[SLOT_VIRUS_AUTORUN].isactive=update=1;
             }
             else

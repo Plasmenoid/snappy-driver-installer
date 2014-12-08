@@ -202,7 +202,7 @@ void manager_filter(manager_t *manager,int options)
                 if((!o1||!cnt[NUM_STATUS])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
             {
                 if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&(options&FILTER_SHOW_INVALID)==0&&
-                   devicematch->device->problem==0&&itembar->hwidmatch->altsectscore<2)continue;
+                   devicematch->device->problem==0&&devicematch->driver&&itembar->hwidmatch->altsectscore<2)continue;
 
                 // hide if
                 //[X] Newer
@@ -210,7 +210,7 @@ void manager_filter(manager_t *manager,int options)
                 //worse, no problem
                 if((options&FILTER_SHOW_NEWER)!=0
                    &&(options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&(options&FILTER_SHOW_INVALID)==0
-                   &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0)continue;
+                   &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0&&devicematch->driver)continue;
 
                 if(!getdrp_packontorrent(itembar->hwidmatch))
                 {
