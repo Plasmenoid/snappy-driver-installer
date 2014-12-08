@@ -47,6 +47,7 @@ session *sessionhandle=0;
 torrent_handle updatehandle;
 
 volatile int downloadmangar_exitflag=0;
+int torrentport=50171;
 HANDLE downloadmangar_event=0;
 HANDLE thandle_download=0;
 long long torrenttime=0;
@@ -477,10 +478,8 @@ void update_start()
     sessionhandle->start_lsd();
     sessionhandle->start_upnp();
     sessionhandle->start_natpmp();
-    int port=50171;
-    //port=0;
 
-    sessionhandle->listen_on(std::make_pair(port,port),ec);
+    sessionhandle->listen_on(std::make_pair(torrentport,torrentport),ec);
     if(ec)
     {
         log_con("failed to open listen socket: %s\n",ec.message().c_str());
@@ -490,9 +489,9 @@ void update_start()
     dht.privacy_lookups=true;
     sessionhandle->set_dht_settings(dht);
     settings.use_dht_as_fallback = false;
-    sessionhandle->add_dht_router(std::make_pair(std::string("router.bittorrent.com"),port));
-    sessionhandle->add_dht_router(std::make_pair(std::string("router.utorrent.com"),port));
-    sessionhandle->add_dht_router(std::make_pair(std::string("router.bitcomet.com"),port));
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.bittorrent.com"),torrentport));
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.utorrent.com"),torrentport));
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.bitcomet.com"),torrentport));
     sessionhandle->start_dht();
     sessionhandle->set_alert_mask(alert::error_notification|alert::storage_notification);
 

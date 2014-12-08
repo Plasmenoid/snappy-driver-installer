@@ -126,7 +126,7 @@ const WCHAR *windows_name[NUM_OS]=
     L"Windows 10",
     L"Unknown OS"
 };
-int windows_ver[NUM_OS]={50,51,60,61,62,63,64,0};
+int windows_ver[NUM_OS]={50,51,60,61,62,63,100,0};
 //}
 
 void panel_setfilters(panel_t *panel)
@@ -172,6 +172,7 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-theme:"))       wcscpy(curtheme,pr+7);else
         if(!wcscmp(pr,L"-expertmode"))   expertmode=1;else
         if( wcsstr(pr,L"-hintdelay:"))   hintdelay=_wtoi(pr+11);else
+        if( wcsstr(pr,L"-port:"))        torrentport=_wtoi(pr+6);else
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
@@ -271,11 +272,11 @@ void settings_save()
     fwprintf(f,L"\"-drp_dir:%s\" \"-index_dir:%s\" \"-output_dir:%s\" "
               "\"-data_dir:%s\" \"-log_dir:%s\" "
               "\"-finish_cmd:%s\" \"-finishrb_cmd:%s\" "
-              "-hintdelay:%d -filters:%d \"-lang:%s\" \"-theme:%s\" ",
+              "-hintdelay:%d -port:%d -filters:%d \"-lang:%s\" \"-theme:%s\" ",
             drp_dir,index_dir,output_dir,
             data_dir,logO_dir,
             finish,finish_rb,
-            hintdelay,filters,curlang,curtheme);
+            hintdelay,torrentport,filters,curlang,curtheme);
 
     if(license)fwprintf(f,L"-license ");
     if(expertmode)fwprintf(f,L"-expertmode ");
