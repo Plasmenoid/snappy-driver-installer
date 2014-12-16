@@ -53,6 +53,7 @@ Settings.cfg
 /preservecfg      Prevents updating of settings.cfg.
 /checkupdates     Checks for updates online.
 /onlyupdates      Disables notification of missing driverpacks.
+/port:<num>       Port for torrent client
 /cfg:<FileName>   Custom .cfg file, if set "settings.cfg" not processed.
                   Other swithes processed
 ---------

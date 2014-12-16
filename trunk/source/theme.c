@@ -251,17 +251,23 @@ void vault_parse(vault_t *val,WCHAR *data)
                     for(i=0;i<l;i++)if(tmp[i]==1)tmp[i]=0;
                 }
                 v=(intptr_t)tmp;
+                val->entry[r].init=1;
             }
             else if(r2>=0)      // Var
+            {
                 v=val->entry[r2].val;
+                val->entry[r].init=10+r2;
+            }
             else                // Number
+            {
                 v=vault_readvalue(rhs);
+                val->entry[r].init=2;
+            }
 
             //if(r2<0)printf("-RHS:'%ws'\n",L"",rhs);
             //if(r2>=0)printf("+RHS:'%ws'\n",L"",rhs);
             //log("%d,%d,%X,{%ws|%ws}\n",r2,v,v,lhs,rhs);
             val->entry[r].val=v;
-            val->entry[r].init=1;
         }
         lhs=le+1;
     }
@@ -273,7 +279,7 @@ void vault_parse(vault_t *val,WCHAR *data)
 void vault_loadfromfile(vault_t *v,WCHAR *filename)
 {
     WCHAR *data;
-    int sz;
+    int sz,i;
 
     if(!filename[0])return;
     //printf("{%ws\n",filename);
@@ -287,6 +293,9 @@ void vault_loadfromfile(vault_t *v,WCHAR *filename)
     }
     data[sz]=0;
     vault_parse(v,data);
+
+    for(i=0;i<v->num;i++)
+        if(v->entry[i].init>=10)v->entry[i].val=v->entry[v->entry[i].init-10].val;
 }
 
 void vault_loadfromres(vault_t *v,int id)

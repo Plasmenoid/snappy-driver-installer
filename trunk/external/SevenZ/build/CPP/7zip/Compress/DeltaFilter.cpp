@@ -61,23 +61,23 @@ STDMETHODIMP CDeltaEncoder::SetCoderProperties(const PROPID *propIDs, const PROP
   UInt32 delta = _delta;
   for (UInt32 i = 0; i < numProps; i++)
   {
-	const PROPVARIANT &prop = props[i];
-	PROPID propID = propIDs[i];
-	if (propID >= NCoderPropID::kReduceSize)
-	  continue;
-	if (prop.vt != VT_UI4)
-	  return E_INVALIDARG;
-	switch (propID)
-	{
-	  case NCoderPropID::kDefaultProp:
-		delta = (UInt32)prop.ulVal;
-		if (delta < 1 || delta > 256)
-		  return E_INVALIDARG;
-		break;
-	  case NCoderPropID::kNumThreads: break;
-	  case NCoderPropID::kLevel: break;
-	  default: return E_INVALIDARG;
-	}
+    const PROPVARIANT &prop = props[i];
+    PROPID propID = propIDs[i];
+    if (propID >= NCoderPropID::kReduceSize)
+      continue;
+    if (prop.vt != VT_UI4)
+      return E_INVALIDARG;
+    switch (propID)
+    {
+      case NCoderPropID::kDefaultProp:
+        delta = (UInt32)prop.ulVal;
+        if (delta < 1 || delta > 256)
+          return E_INVALIDARG;
+        break;
+      case NCoderPropID::kNumThreads: break;
+      case NCoderPropID::kLevel: break;
+      default: return E_INVALIDARG;
+    }
   }
   _delta = delta;
   return S_OK;
@@ -104,7 +104,7 @@ STDMETHODIMP_(UInt32) CDeltaDecoder::Filter(Byte *data, UInt32 size)
 STDMETHODIMP CDeltaDecoder::SetDecoderProperties2(const Byte *props, UInt32 size)
 {
   if (size != 1)
-	return E_INVALIDARG;
+    return E_INVALIDARG;
   _delta = (unsigned)props[0] + 1;
   return S_OK;
 }

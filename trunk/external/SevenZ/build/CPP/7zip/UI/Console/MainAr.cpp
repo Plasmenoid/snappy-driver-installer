@@ -2,11 +2,11 @@
 
 #include "StdAfx.h"
 
-#include "Common/MyException.h"
-#include "Common/StdOutStream.h"
+#include "../../../Common/MyException.h"
+#include "../../../Common/StdOutStream.h"
 
-#include "Windows/Error.h"
-#include "Windows/NtCheck.h"
+#include "../../../Windows/ErrorMsg.h"
+#include "../../../Windows/NtCheck.h"
 
 #include "../Common/ArchiveCommandLine.h"
 #include "../Common/ExitCode.h"
@@ -21,6 +21,7 @@ extern int Main2(
   WCHAR *command_line
 );
 
+static const char *kException_CmdLine_Error_Message = "\n\nCommand Line Error:\n";
 static const char *kExceptionErrorMessage = "\n\nError:\n";
 static const char *kUserBreak  = "\nBreak signaled\n";
 static const char *kMemoryExceptionMessage = "\n\nERROR: Can't allocate required memory!\n";
@@ -53,72 +54,71 @@ extern "C" int Extract7z(WCHAR *str)
   }
   catch(const CNewException &)
   {
-	(*g_StdStream) << kMemoryExceptionMessage;
-	return (NExitCode::kMemoryError);
+    (*g_StdStream) << kMemoryExceptionMessage;
+    return (NExitCode::kMemoryError);
   }
   catch(const NConsoleClose::CCtrlBreakException &)
   {
-	(*g_StdStream) << endl << kUserBreak;
-	return (NExitCode::kUserBreak);
+    (*g_StdStream) << endl << kUserBreak;
+    return (NExitCode::kUserBreak);
   }
-  catch(const CArchiveCommandLineException &e)
+  catch(const CArcCmdLineException &e)
   {
-	(*g_StdStream) << kExceptionErrorMessage << e << endl;
-	return (NExitCode::kUserError);
+    (*g_StdStream) << kException_CmdLine_Error_Message << e << endl;
+    return (NExitCode::kUserError);
   }
   catch(const CSystemException &systemError)
   {
-	if (systemError.ErrorCode == E_OUTOFMEMORY)
-	{
-	  (*g_StdStream) << kMemoryExceptionMessage;
-	  return (NExitCode::kMemoryError);
-	}
-	if (systemError.ErrorCode == E_ABORT)
-	{
-	  (*g_StdStream) << endl << kUserBreak;
-	  return (NExitCode::kUserBreak);
-	}
-	UString message;
-//  NError::MyFormatMessage(systemError.ErrorCode, message);
-	(*g_StdStream) << endl << endl << "System error:" << endl << message << endl;
-	return (NExitCode::kFatalError);
+    if (systemError.ErrorCode == E_OUTOFMEMORY)
+    {
+      (*g_StdStream) << kMemoryExceptionMessage;
+      return (NExitCode::kMemoryError);
+    }
+    if (systemError.ErrorCode == E_ABORT)
+    {
+      (*g_StdStream) << endl << kUserBreak;
+      return (NExitCode::kUserBreak);
+    }
+    (*g_StdStream) << endl << endl << "System error:" << endl <<
+        NError::MyFormatMessage(systemError.ErrorCode) << endl;
+    return (NExitCode::kFatalError);
   }
   catch(NExitCode::EEnum &exitCode)
   {
-	(*g_StdStream) << kInternalExceptionMessage << exitCode << endl;
-	return (exitCode);
+    (*g_StdStream) << kInternalExceptionMessage << exitCode << endl;
+    return (exitCode);
   }
   /*
   catch(const NExitCode::CMultipleErrors &multipleErrors)
   {
-	(*g_StdStream) << endl << multipleErrors.NumErrors << " errors" << endl;
-	return (NExitCode::kFatalError);
+    (*g_StdStream) << endl << multipleErrors.NumErrors << " errors" << endl;
+    return (NExitCode::kFatalError);
   }
   */
   catch(const UString &s)
   {
-	(*g_StdStream) << kExceptionErrorMessage << s << endl;
-	return (NExitCode::kFatalError);
+    (*g_StdStream) << kExceptionErrorMessage << s << endl;
+    return (NExitCode::kFatalError);
   }
   catch(const AString &s)
   {
-	(*g_StdStream) << kExceptionErrorMessage << s << endl;
-	return (NExitCode::kFatalError);
+    (*g_StdStream) << kExceptionErrorMessage << s << endl;
+    return (NExitCode::kFatalError);
   }
   catch(const char *s)
   {
-	(*g_StdStream) << kExceptionErrorMessage << s << endl;
-	return (NExitCode::kFatalError);
+    (*g_StdStream) << kExceptionErrorMessage << s << endl;
+    return (NExitCode::kFatalError);
   }
   catch(int t)
   {
-	(*g_StdStream) << kInternalExceptionMessage << t << endl;
-	return (NExitCode::kFatalError);
+    (*g_StdStream) << kInternalExceptionMessage << t << endl;
+    return (NExitCode::kFatalError);
   }
   catch(...)
   {
-	(*g_StdStream) << kUnknownExceptionMessage;
-	return (NExitCode::kFatalError);
+    (*g_StdStream) << kUnknownExceptionMessage;
+    return (NExitCode::kFatalError);
   }
-  return  res;
+  return res;
 }
