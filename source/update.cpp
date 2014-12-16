@@ -43,11 +43,13 @@ int cxn[]=
     90,
 };
 
+int torrentport=50171;
+int downlimit=0,uplimit=0;
+
 session *sessionhandle=0;
 torrent_handle updatehandle;
 
 volatile int downloadmangar_exitflag=0;
-int torrentport=50171;
 HANDLE downloadmangar_event=0;
 HANDLE thandle_download=0;
 long long torrenttime=0;
@@ -484,7 +486,9 @@ void update_start()
     {
         log_con("failed to open listen socket: %s\n",ec.message().c_str());
     }
-    log_con("Listen %d,%d\n",sessionhandle->is_listening(),sessionhandle->listen_port());
+    log_con("Listen port: %d (%s)\nDownload limit: %dKb\nUpload limit: %dKb\n",
+            sessionhandle->listen_port(),sessionhandle->is_listening()?"connected":"disconnected",
+            downlimit,uplimit);
 
     dht.privacy_lookups=true;
     sessionhandle->set_dht_settings(dht);
@@ -516,6 +520,8 @@ void update_start()
         log_con("failed to add torrent: %s\n",ec.message().c_str());
     }
     sessionhandle->pause();
+    updatehandle.set_download_limit(downlimit*1024);
+    updatehandle.set_upload_limit(uplimit*1024);
     updatehandle.resume();
     log_con("Waiting for torrent");
     for(i=0;i<100;i++)

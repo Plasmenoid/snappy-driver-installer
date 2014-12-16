@@ -16,7 +16,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define NUM_DECS 11*4
-#define NUM_MARKERS 21
+#define NUM_MARKERS 28
 
 #define STATUS_BETTER       0x001
 #define STATUS_SAME         0x002
