@@ -2,12 +2,12 @@
 <CodeBlocks_workspace_file>
 	<Workspace title="MyPrg">
 		<Project filename="Drivers.cbp">
-			<Depends filename="../external/SevenZ/build/CPP/7zip/Bundles/Alone7z/lib.cbp" />
 			<Depends filename="install64/install64.cbp" />
 			<Depends filename="baseboard/baseboard.cbp" />
+			<Depends filename="7zip/lib.cbp" />
 		</Project>
-		<Project filename="../external/SevenZ/build/CPP/7zip/Bundles/Alone7z/lib.cbp" />
 		<Project filename="install64/install64.cbp" />
 		<Project filename="baseboard/baseboard.cbp" />
+		<Project filename="7zip/lib.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

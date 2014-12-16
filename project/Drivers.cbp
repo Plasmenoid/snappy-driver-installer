@@ -120,7 +120,6 @@
 			<Add option="-fexceptions" />
 			<Add option="-Wno-format" />
 			<Add option="-fno-builtin-log" />
-			<Add option="-I..\source\lzma" />
 			<Add option="-m32" />
 			<Add option="-finput-charset=CP1251" />
 			<Add option="-DWIN32" />
@@ -201,40 +200,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../source/langlist.h" />
-		<Unit filename="../source/lzma/Alloc.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../source/lzma/Alloc.h" />
-		<Unit filename="../source/lzma/Bra.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../source/lzma/Bra.h" />
-		<Unit filename="../source/lzma/LzFind.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../source/lzma/LzFind.h" />
-		<Unit filename="../source/lzma/LzFindMt.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../source/lzma/LzFindMt.h" />
-		<Unit filename="../source/lzma/LzHash.h" />
-		<Unit filename="../source/lzma/Lzma2Enc.h" />
-		<Unit filename="../source/lzma/Lzma86.h" />
-		<Unit filename="../source/lzma/Lzma86Dec.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../source/lzma/Lzma86Enc.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../source/lzma/LzmaDec.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../source/lzma/LzmaDec.h" />
-		<Unit filename="../source/lzma/LzmaEnc.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../source/lzma/LzmaEnc.h" />
-		<Unit filename="../source/lzma/Types.h" />
 		<Unit filename="../source/main.c">
 			<Option compilerVar="CC" />
 		</Unit>

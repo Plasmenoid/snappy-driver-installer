@@ -1361,13 +1361,12 @@ int driverpack_genindex(driverpack_t *drp)
         Byte *outBuffer=0; /* it must be 0 before first call for each new archive. */
         size_t outBufferSize=0;  /* it can have any value before first call (if outBuffer = 0) */
 
-        for(i=0;i<db.db.NumFiles;i++)
+        for(i=0;i<db.NumFiles;i++)
         {
             size_t offset=0;
             size_t outSizeProcessed=0;
-            const CSzFileItem *f=db.db.Files+i;
             size_t len;
-            if (f->IsDir)continue;
+            if(SzArEx_IsDir(&db,i))continue;
 
             len=SzArEx_GetFileNameUtf16(&db,i,NULL);
             if(len>tempSize)
