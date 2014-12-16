@@ -172,9 +172,11 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-theme:"))       wcscpy(curtheme,pr+7);else
         if(!wcscmp(pr,L"-expertmode"))   expertmode=1;else
         if( wcsstr(pr,L"-hintdelay:"))   hintdelay=_wtoi(pr+11);else
+#ifndef _WIN64
         if( wcsstr(pr,L"-port:"))        torrentport=_wtoi(pr+6);else
         if( wcsstr(pr,L"-downlimit:"))   downlimit=_wtoi(pr+11);else
         if( wcsstr(pr,L"-uplimit:"))     uplimit=_wtoi(pr+9);else
+#endif
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
@@ -280,7 +282,13 @@ void settings_save()
             data_dir,logO_dir,
             finish,finish_rb,
             curlang,curtheme,
-            hintdelay,torrentport,downlimit,uplimit,filters);
+            hintdelay,
+#ifndef _WIN64
+            torrentport,downlimit,uplimit,
+#else
+            50171,0,0,
+#endif
+            filters);
 
     if(license)fwprintf(f,L"-license ");
     if(expertmode)fwprintf(f,L"-expertmode ");
