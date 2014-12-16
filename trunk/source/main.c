@@ -173,6 +173,8 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-expertmode"))   expertmode=1;else
         if( wcsstr(pr,L"-hintdelay:"))   hintdelay=_wtoi(pr+11);else
         if( wcsstr(pr,L"-port:"))        torrentport=_wtoi(pr+6);else
+        if( wcsstr(pr,L"-downlimit:"))   downlimit=_wtoi(pr+11);else
+        if( wcsstr(pr,L"-uplimit:"))     uplimit=_wtoi(pr+9);else
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
@@ -269,14 +271,16 @@ void settings_save()
     }
     f=_wfopen(L"settings.cfg",L"wt");
     if(!f)return;
-    fwprintf(f,L"\"-drp_dir:%s\" \"-index_dir:%s\" \"-output_dir:%s\" "
-              "\"-data_dir:%s\" \"-log_dir:%s\" "
-              "\"-finish_cmd:%s\" \"-finishrb_cmd:%s\" "
-              "-hintdelay:%d -port:%d -filters:%d \"-lang:%s\" \"-theme:%s\" ",
+    fwprintf(f,L"\"-drp_dir:%s\"\n\"-index_dir:%s\"\n\"-output_dir:%s\"\n"
+              "\"-data_dir:%s\"\n\"-log_dir:%s\"\n\n"
+              "\"-finish_cmd:%s\"\n\"-finishrb_cmd:%s\"\n"
+              "\"-lang:%s\"\n\"-theme:%s\"\n\n"
+              "-hintdelay:%d\n-port:%d\n-downlimit:%d\n-uplimit:%d\n-filters:%d\n\n",
             drp_dir,index_dir,output_dir,
             data_dir,logO_dir,
             finish,finish_rb,
-            hintdelay,torrentport,filters,curlang,curtheme);
+            curlang,curtheme,
+            hintdelay,torrentport,downlimit,uplimit,filters);
 
     if(license)fwprintf(f,L"-license ");
     if(expertmode)fwprintf(f,L"-expertmode ");
@@ -297,7 +301,7 @@ int  settings_load(WCHAR *filename)
 
     f=_wfopen(filename,L"rt");
     if(!f)return 0;
-    fgetws(buf,BUFLEN,f);
+    LoadCFGFile(filename,buf);
     settings_parse(buf,0);
     fclose(f);
     return 1;
@@ -363,8 +367,6 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
       WCHAR buff[BUFLEN];
       LoadCFGFile(CLIParam.SaveInstalledFileName, buff);
       settings_parse(buff,0);
-      //CLIParam.SaveInstalledFileName[0] = '\0';
-
     }
     else
     if(!settings_load(L"settings.cfg"))

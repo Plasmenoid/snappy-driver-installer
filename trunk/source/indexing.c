@@ -841,6 +841,14 @@ void driverpack_saveindex(driverpack_t *drp)
     p=heap_save(&drp->HWID_list_handle,p);
     p=heap_save(&drp->text_handle,p);
     p=hash_save(&drp->indexes,p);
+    /*log_con("Sz:(%d,%d,%d,%d,%d,%d)=%d\n",
+            drp->inffile_handle.used,
+            drp->manufacturer_handle.used,
+            drp->desc_list_handle.used,
+            drp->HWID_list_handle.used,
+            drp->text_handle.used,
+            drp->indexes.items_handle.used,
+            sz);*/
 
     if(drp->col->flags&COLLECTION_USE_LZMA)
     {

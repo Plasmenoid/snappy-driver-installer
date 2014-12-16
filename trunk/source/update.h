@@ -33,6 +33,7 @@ typedef struct _torrent_status_t
 
 extern volatile int downloadmangar_exitflag;
 extern int torrentport;
+extern int downlimit,uplimit;
 extern HANDLE downloadmangar_event;
 extern HANDLE thandle_download;
 extern torrent_status_t torrentstatus;
