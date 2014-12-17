@@ -604,7 +604,7 @@ void update_getstatus(torrent_status_t *t)
     if(t->downloadspeed)
     {
         averageSpeed=SMOOTHING_FACTOR*t->downloadspeed+(1-SMOOTHING_FACTOR)*averageSpeed;
-        t->remaining=(t->downloadsize-t->downloaded)/averageSpeed*1000;
+        if(averageSpeed)t->remaining=(t->downloadsize-t->downloaded)/averageSpeed*1000;
     }
 
     t->sessionpaused=sessionhandle->is_paused();
