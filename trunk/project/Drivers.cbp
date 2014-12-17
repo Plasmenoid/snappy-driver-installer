@@ -131,12 +131,15 @@
 			<Add option="-D_UNICODE" />
 			<Add option="-D_NO_CRYPTO" />
 			<Add option="-DEXTRACT_ONLY" />
+			<Add option="-D_WIN32_WINNT=0x0500" />
+			<Add option="-DWINVER=0x0500" />
 			<Add directory="../resources" />
 			<Add directory="../external/SevenZ/build/C" />
 		</Compiler>
 		<Linker>
 			<Add option="-static-libstdc++" />
 			<Add option="-static" />
+			<Add library="msimg32" />
 			<Add library="baseboard" />
 			<Add library="7z" />
 			<Add library="kernel32" />
@@ -152,7 +155,6 @@
 			<Add library="odbc32" />
 			<Add library="odbccp32" />
 			<Add library="setupapi" />
-			<Add library="msimg32" />
 			<Add library="shlwapi" />
 			<Add library="newdev" />
 			<Add library="comctl32" />

@@ -258,6 +258,15 @@ unsigned int __stdcall thread_download(void *arg)
             update_getstatus(&torrentstatus);
             InvalidateRect(hPopup,0,0);
             Sleep(500);
+            {
+                std::auto_ptr<alert> holder;
+                holder=sessionhandle->pop_alert();
+                while(holder.get())
+                {
+                    log_con("Torrent: %s | %s\n",holder.get()->what(),holder.get()->message().c_str());
+                    holder=sessionhandle->pop_alert();
+                }
+            }
             if(downloadmangar_exitflag)break;
             if(finisheddownloading)
             {
@@ -493,11 +502,18 @@ void update_start()
     dht.privacy_lookups=true;
     sessionhandle->set_dht_settings(dht);
     settings.use_dht_as_fallback = false;
-    sessionhandle->add_dht_router(std::make_pair(std::string("router.bittorrent.com"),torrentport));
-    sessionhandle->add_dht_router(std::make_pair(std::string("router.utorrent.com"),torrentport));
-    sessionhandle->add_dht_router(std::make_pair(std::string("router.bitcomet.com"),torrentport));
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.bittorrent.com"),6881));
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.utorrent.com"),6881));
+    sessionhandle->add_dht_router(std::make_pair(std::string("router.bitcomet.com"),6881));
     sessionhandle->start_dht();
-    sessionhandle->set_alert_mask(alert::error_notification|alert::storage_notification);
+    sessionhandle->set_alert_mask(
+        alert::error_notification|
+        //alert::port_mapping_notification|
+        alert::tracker_notification|
+        alert::ip_block_notification|
+        alert::dht_notification|
+        alert::performance_warning|
+        alert::storage_notification);
 
     settings.user_agent = "Snappy Driver Installer/" SVN_REV2;
     settings.always_send_user_agent=true;
