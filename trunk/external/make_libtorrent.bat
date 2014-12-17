@@ -24,10 +24,10 @@ echo BOOST:      %BOOST_ROOT%
 echo.
 
 rem Check for webp
-if /I not exist ..\webp\mingw\msys\1.0\home\libwebp-0.4.2.tar.gz  (echo ERROR: libwebp-0.4.2.tar.gz not found in webp\mingw\msys\1.0\home & goto EOF)
+if /I not exist ..\webp\mingw\msys\1.0\home\libwebp-0.4.0.tar.gz  (echo ERROR: libwebp-0.4.0.tar.gz not found in webp\mingw\msys\1.0\home & goto EOF)
 
 rem prepare for webp
-if /I exist %GCC_PATH%\msys\1.0\home\libwebp-0.4.2.tar.gz (echo Skipping prepwebp & goto skipprepwebp)
+if /I exist %GCC_PATH%\msys\1.0\home\libwebp-0.4.0.tar.gz (echo Skipping prepwebp & goto skipprepwebp)
 xcopy ..\webp\mingw %GCC_PATH% /E /I /Y
 echo %GCC_PATH% /mingw > %GCC_PATH%\msys\1.0\etc\fstab
 :skipprepwebp
@@ -70,7 +70,7 @@ xcopy "%BOOST_ROOT%\boost" %GCC_PATH%\include\boost /E /I /Y
 rem Copy libboost_system.a
 if /I exist %GCC_PATH%\lib\libboost_system.a (echo Skipping BOOST[libboost_system.a] & goto skipboost2)
 echo Copying libboost_system.a
-copy "%BOOST_ROOT%\bin.v2\libs\system\build\gcc-mngw-%GCC_VERSION%\myrls\excpt-hndl-off\*.a" %GCC_PATH%\lib\libboost_system.a
+xcopy "%BOOST_ROOT%\bin.v2\libs\system\build\gcc-mngw-%GCC_VERSION%\myrls\excpt-hndl-off\*.a" %GCC_PATH%\lib\libboost_system.a
 :skipboost2
 
 echo.
