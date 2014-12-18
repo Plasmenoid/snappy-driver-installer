@@ -190,6 +190,9 @@ FONT_SIZE                = 16
 MAINWND_WX               = 900
 MAINWND_WY               = 800
 
+// Popup
+POPUP_WY                 = 16
+
 // Panel, generic
 PANEL_WY                 = 22
 PANEL_WX                 = 220

@@ -54,6 +54,7 @@ void ListView_SetItemTextUpdate(HWND hwnd,int iItem,int iSubItem,WCHAR *str);
 int  upddlg_populatelist(HWND hList,int flags);
 
 // Update
+int istorrentready();
 void update_start();
 void update_stop();
 void update_resume();

@@ -476,7 +476,7 @@ int upddlg_populatelist(HWND hList,int update)
 }
 
 int yes1(libtorrent::torrent_status const&){return true;}
-
+int istorrentready(){return updatehandle.torrent_file()!=0;}
 void update_start()
 {
     error_code ec;

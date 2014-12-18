@@ -4,7 +4,7 @@ STR_EMPTY               = ""
 STR_EMPTY_H             = ""
 
 STR_LANG_NAME           = "Armenian"
-STR_LANG_CODE           = 1
+STR_LANG_CODE           = 0x2B
 
 // Левая панель
 STR_SHOW_SYSINFO        = "Օպերացիոն համակարգ"
