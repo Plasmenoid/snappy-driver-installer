@@ -284,6 +284,22 @@ unsigned int __stdcall thread_install(void *arg)
     for(i=RES_SLOTS;i<manager_g->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
         if(itembar->checked&&itembar->isactive&&itembar->hwidmatch&&getdrp_packontorrent(itembar->hwidmatch))
     {
+        if(!istorrentready())
+        {
+            int j;
+            log_con("Waiting for torrent");
+            for(j=0;j<100;j++)
+            {
+                log_con("*");
+                if(istorrentready())
+                {
+                    log_con("DONE\n");
+                    break;
+                }
+                Sleep(100);
+            }
+            if(!istorrentready())break;
+        }
         upddlg_setpriorities_driverpack(getdrp_packname(itembar->hwidmatch),1);
         downdrivers++;
     }
@@ -426,10 +442,10 @@ goaround:
                         Sleep(1000);
                         tries++;
                         if(!itembar->checked||installmode!=MODE_INSTALLING||tries>60)break;
-                    }while(!PathFileExists(getdrp_packpath(hwidmatch)));
+                    }while(!PathFileExists(getdrp_packpath(hwidmatch))&&!getdrp_packontorrent(hwidmatch));
                     log_con("OK\n");
                 }
-            }while(r);
+            }while(r&&!getdrp_packontorrent(hwidmatch));
             if(installmode==MODE_STOPPING)
             {
                 manager_g->items_list[SLOT_EXTRACTING].install_status=STR_INST_STOPPING;

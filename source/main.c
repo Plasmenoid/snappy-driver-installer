@@ -833,6 +833,14 @@ const WCHAR *get_winverstr(manager_t *manager1)
     int ver=manager1->matcher->state->platform.dwMinorVersion;
     ver+=10*manager1->matcher->state->platform.dwMajorVersion;
 
+    if(ver==64)ver=100;
+    if(ver==52)
+    {
+        if(manager1->matcher->state->architecture)
+            ver=51;
+        else
+            return L"Windows Server 2003";
+    }
     for(i=0;i<NUM_OS;i++)if(windows_ver[i]==ver)return windows_name[i];
     return windows_name[NUM_OS-1];
 }
