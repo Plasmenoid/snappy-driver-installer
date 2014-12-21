@@ -256,9 +256,10 @@ unsigned int __stdcall thread_download(void *arg)
         while(sessionhandle)
         {
             update_getstatus(&torrentstatus);
+            ShowProgressInTaskbar(hMain,TBPF_NORMAL,torrentstatus.downloaded,torrentstatus.downloadsize);
             InvalidateRect(hPopup,0,0);
             Sleep(500);
-            {
+           {
                 std::auto_ptr<alert> holder;
                 holder=sessionhandle->pop_alert();
                 while(holder.get())
@@ -295,6 +296,15 @@ unsigned int __stdcall thread_download(void *arg)
                 updatehandle.force_recheck();
                 ListView_DeleteAllItems(hListg);
                 upddlg_populatelist(hListg,0);
+
+                ShowProgressInTaskbar(hMain,TBPF_NOPROGRESS,0,0);
+                FLASHWINFO fi;
+                fi.cbSize=sizeof(FLASHWINFO);
+                fi.hwnd=hMain;
+                fi.dwFlags=FLASHW_ALL|FLASHW_TIMERNOFG;
+                fi.uCount=1;
+                fi.dwTimeout=0;
+                FlashWindowEx(&fi);
                 break;
             }
         }

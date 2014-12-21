@@ -9,7 +9,8 @@ MAINWND_WX               = 900
 MAINWND_WY               = 800
 
 // Popup
-POPUP_WY                 = 16
+POPUP_WX                 = 450
+POPUP_WY                 = 19
 
 // Panel, generic
 PANEL_WY                 = 22

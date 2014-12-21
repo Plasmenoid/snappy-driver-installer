@@ -54,6 +54,8 @@ Settings.cfg
 /checkupdates     Checks for updates online.
 /onlyupdates      Disables notification of missing driverpacks.
 /port:<num>       Port for torrent client
+/downlimit:<num>  Sets download speed limit (in KBs)
+/uplimit:<num>    Sets upload speed limit (in KBs)
 /cfg:<FileName>   Custom .cfg file, if set "settings.cfg" not processed.
                   Other swithes processed
 ---------

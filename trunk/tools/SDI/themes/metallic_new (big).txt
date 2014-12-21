@@ -159,8 +159,8 @@ MAINWND_MINX             = 805
 MAINWND_MINY             = 295
 
 // Popup
-POPUP_WX                 = 420
-POPUP_WY                 = 18
+POPUP_WX                 = 450
+POPUP_WY                 = 19
 
 // Panel, generic
 PANEL_WY                 = 22
