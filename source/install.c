@@ -168,6 +168,8 @@ int _7z_setcomplited(long long i)
     if(!manager_g->items_list[itembar_act].checked)return E_ABORT;
 
     ar_proceed=i;
+    updatecur();
+    updateoverall(manager_g);
     redrawfield();
     return S_OK;
 }
@@ -286,7 +288,6 @@ unsigned int __stdcall thread_install(void *arg)
     {
         if(!istorrentready())
         {
-            int j;
             log_con("Waiting for torrent");
             for(j=0;j<100;j++)
             {

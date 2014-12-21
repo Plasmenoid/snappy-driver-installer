@@ -1,4 +1,4 @@
-﻿// Translated by LaMoLa (R137)
+﻿// Translated by LaMoLa (R150) 20.Dec.2014
 
 STR_EMPTY               = ""
 STR_EMPTY_H             = ""
@@ -17,10 +17,10 @@ STR_SELECT_ALL_H        = "Ctrl+A"
 STR_SELECT_NONE         = "  - Visszavonás -"
 STR_SELECT_NONE_H       = "Ctrl+N"
 
-STR_LANG                = "Nyelv kiválasztása(Language)"
-STR_LANG_H              = ""
-STR_THEME               = "Téma (skin) kiválasztása"
-STR_THEME_H             = ""
+STR_LANG                = "Nyelv (Language)"
+STR_LANG_H              = "(Language)"
+STR_THEME               = "Felület (skin)"
+STR_THEME_H             = "Skin"
 STR_EXPERT              = "Speciális lehetõségek"
 STR_EXPERT_H            = "További lehetõségek : \n\nNyomja le a Ctrl vagy a Space gombot (vagy egér jobbklikk) a driver ablaka felett, egy részletes leírás megtekintéséhez."
 
@@ -249,7 +249,7 @@ STR_SYS_DISRESTPNT      = "Visszaállítási pontok blokkolása"
 //STR_UPD_DIALOG_MSG      = "Akar automatikus Online ellenőrzést az újabb driver-csomagok és az alkalmazás verziókkal kapcsolatban?"
 //STR_UPD_DIALOG_INDEX    = "Letölti a legújabb indexeket annak érdekében, hogy lehetővé váljon mely driver-csomagokat kell letöltenie?"
 
-STR_UPD_TITLE           = "Elérhető frissítések  - A szerverhez való csatlakozás hosszabb időbe tellhet! Várjon türelemmel -"
+STR_UPD_TITLE           = "Elérhető frissítések"
 STR_UPD_BTN_ALL         = "Mind kijelölése"
 STR_UPD_BTN_NONE        = "Visszavonása"
 STR_UPD_BTN_THISPC      = "Csak erre a számítógépre megfelelőt jelölje"

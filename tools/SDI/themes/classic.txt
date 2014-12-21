@@ -7,6 +7,7 @@ FONT_NAME                = "Arial"
 MAINWND_BITMAP_FILENAME  = "classic\bg.webp"
 
 // Popup
+POPUP_WY                 = 13
 POPUP_TRANSPARENCY       = 250
 POPUP_TEXT_COLOR         = 0x000000
 POPUP_INSIDE_COLOR       = 0xFFFFFF
