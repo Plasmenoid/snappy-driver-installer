@@ -15,6 +15,12 @@ You should have received a copy of the GNU General Public License
 along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+extern "C"
+{
+int torrentport=50171;
+int downlimit=0,uplimit=0;
+}
+
 #ifndef _WIN64
 #define IPV6_TCLASS 30
 #include "libtorrent/config.hpp"
@@ -42,9 +48,6 @@ int cxn[]=
     70,
     90,
 };
-
-int torrentport=50171;
-int downlimit=0,uplimit=0;
 
 session *sessionhandle=0;
 torrent_handle updatehandle;
@@ -249,7 +252,14 @@ unsigned int __stdcall thread_download(void *arg)
     ResetEvent(downloadmangar_event);
     while(!downloadmangar_exitflag)
     {
-        WaitForSingleObject(downloadmangar_event,INFINITE);
+        if(flags&FLAG_AUTOUPDATE&&canWrite(L"update"))
+        {
+            log_con("Event 1\n");
+            //downloadmangar_exitflag=1;
+            DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),hMain,(DLGPROC)UpdateProcedure);
+        }
+        else
+            WaitForSingleObject(downloadmangar_event,INFINITE);
         if(downloadmangar_exitflag)break;
         log_con("{torrent_start\n");
 
@@ -296,6 +306,14 @@ unsigned int __stdcall thread_download(void *arg)
                 updatehandle.force_recheck();
                 ListView_DeleteAllItems(hListg);
                 upddlg_populatelist(hListg,0);
+
+                if(*finish_upd)
+                {
+                    WCHAR buf[BUFLEN];
+                    wsprintf(buf,L" /c %s",finish_upd);
+                    RunSilent(L"cmd",buf,SW_HIDE,0);
+                }
+                if(flags&FLAG_AUTOCLOSE)PostMessage(hMain,WM_CLOSE,0,0);
 
                 ShowProgressInTaskbar(hMain,TBPF_NOPROGRESS,0,0);
                 FLASHWINFO fi;
@@ -823,6 +841,7 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
             wpOrigButtonProc=(WNDPROC)SetWindowLong(thispcbut,GWLP_WNDPROC,(LONG)NewButtonProc);
             SetTimer(hwnd,1,2000,0);
 
+            if(flags&FLAG_AUTOUPDATE)SendMessage(hwnd,WM_COMMAND,IDCHECKALL,0);
             return TRUE;
 
         case WM_NOTIFY:
@@ -872,6 +891,11 @@ BOOL CALLBACK UpdateProcedure(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam
                 case IDUNCHECKALL:
                     for(i=0;i<ListView_GetItemCount(hListg);i++)
                         ListView_SetCheckState(hListg,i,LOWORD(wParam)==IDCHECKALL?1:0);
+                    if(flags&FLAG_AUTOUPDATE)
+                    {
+                        flags&=~FLAG_AUTOUPDATE;
+                        SendMessage(hwnd,WM_COMMAND,IDOK,0);
+                    }
                     return TRUE;
 
                 case IDCHECKTHISPC:

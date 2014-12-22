@@ -23,6 +23,7 @@ const WCHAR *menu3str[]=
     L"SDI at samforum.org (Russian)",
     L"SDI at forum.oszone.net (Russian)",
     L"SDI at VKontakte (Russian)",
+    L"SDI at Facebook",
     L"SDI at Google Code",
     L"SamDrivers",
     L"DriverPacks.net",
@@ -33,6 +34,7 @@ WCHAR *menu3url[]=
     L"http://samforum.org/showthread.php?t=31662",
     L"http://forum.oszone.net/thread-277409.html",
     L"http://vk.com/snappydriverinstaller",
+    L"http://facebook.com/SnappyDriverInstaller",
     L"http://code.google.com/p/snappy-driver-installer",
     L"http://driveroff.net/sam",
     L"http://driverpacks.net",
@@ -72,6 +74,7 @@ int mainx_w,mainy_w;
 int mousex=-1,mousey=-1,mousedown=0,mouseclick=0;
 int cntd=0;
 int hideconsole=SW_HIDE;
+int offset_target=0;
 
 int ctrl_down=0;
 int space_down=0;
@@ -96,6 +99,7 @@ WCHAR log_dir   [BUFLEN];
 
 WCHAR state_file[BUFLEN]=L"untitled.snp";
 WCHAR finish    [BUFLEN]=L"";
+WCHAR finish_upd[BUFLEN]=L"";
 WCHAR finish_rb [BUFLEN]=L"";
 
 int flags=COLLECTION_USE_LZMA;
@@ -168,15 +172,14 @@ void settings_parse(const WCHAR *str,int ind)
         }else
         if( wcsstr(pr,L"-finish_cmd:"))  wcscpy(finish,pr+12);else
         if( wcsstr(pr,L"-finishrb_cmd:"))wcscpy(finish_rb,pr+14);else
+        if( wcsstr(pr,L"-finish_upd_cmd:"))wcscpy(finish_upd,pr+16);else
         if( wcsstr(pr,L"-lang:"))        wcscpy(curlang,pr+6);else
         if( wcsstr(pr,L"-theme:"))       wcscpy(curtheme,pr+7);else
         if(!wcscmp(pr,L"-expertmode"))   expertmode=1;else
         if( wcsstr(pr,L"-hintdelay:"))   hintdelay=_wtoi(pr+11);else
-#ifndef _WIN64
         if( wcsstr(pr,L"-port:"))        torrentport=_wtoi(pr+6);else
         if( wcsstr(pr,L"-downlimit:"))   downlimit=_wtoi(pr+11);else
         if( wcsstr(pr,L"-uplimit:"))     uplimit=_wtoi(pr+9);else
-#endif
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
@@ -227,6 +230,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI|FLAG_AUTOCLOSE;else
         if(!wcscmp(pr,L"-autoinstall"))  flags|=FLAG_AUTOINSTALL;else
         if(!wcscmp(pr,L"-autoclose"))    flags|=FLAG_AUTOCLOSE;else
+        if(!wcscmp(pr,L"-autoupdate"))   flags|=FLAG_AUTOUPDATE;else
         if(!wcscmp(pr,L"-nologfile"))    flags|=FLAG_NOLOGFILE;else
         if(!wcscmp(pr,L"-nosnapshot"))   flags|=FLAG_NOSNAPSHOT;else
         if(!wcscmp(pr,L"-nostamp"))      flags|=FLAG_NOSTAMP;else
@@ -283,11 +287,7 @@ void settings_save()
             finish,finish_rb,
             curlang,curtheme,
             hintdelay,
-#ifndef _WIN64
             torrentport,downlimit,uplimit,
-#else
-            50171,0,0,
-#endif
             filters);
 
     if(license)fwprintf(f,L"-license ");
@@ -1240,11 +1240,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 0,0,0,0,hwnd,(HMENU)0,ghInst,0);
 
             // Lang
-            hLang=CreateWindowMF(WC_COMBOBOX,L"",hwnd,(HMENU)ID_LANG,CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_OVERLAPPED);
+            hLang=CreateWindowMF(WC_COMBOBOX,L"",hwnd,(HMENU)ID_LANG,CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_OVERLAPPED|WS_VSCROLL);
             SendMessage(hwnd,WM_UPDATELANG,0,0);
 
             // Theme
-            hTheme=CreateWindowMF(WC_COMBOBOX,L"",hwnd,(HMENU)ID_THEME,CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_OVERLAPPED);
+            hTheme=CreateWindowMF(WC_COMBOBOX,L"",hwnd,(HMENU)ID_THEME,CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_OVERLAPPED|WS_VSCROLL);
             SendMessage(hwnd,WM_UPDATETHEME,0,0);
 
             // Misc
@@ -1551,7 +1551,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             j=D(PANEL_LIST_OFSX)?0:1;
             f=D(PANEL_LIST_OFSX)?4:0;
             MoveWindow(hField,Xm(D(DRVLIST_OFSX)),Ym(D(DRVLIST_OFSY)),XM(D(DRVLIST_WX),D(DRVLIST_OFSX)),YM(D(DRVLIST_WY),D(DRVLIST_OFSY)),TRUE);
-            MoveWindow(hLang, Xp(&panels[2])+i,Yp(&panels[2])+j*D(PNLITEM_WY)-2+f,XP(&panels[2])-i-D(PNLITEM_OFSX),190,0);
+            MoveWindow(hLang, Xp(&panels[2])+i,Yp(&panels[2])+j*D(PNLITEM_WY)-2+f,XP(&panels[2])-i-D(PNLITEM_OFSX),190*2,0);
             j=D(PANEL_LIST_OFSX)?1:3;
             MoveWindow(hTheme,Xp(&panels[2])+i,Yp(&panels[2])+j*D(PNLITEM_WY)-2+f,XP(&panels[2])-i-D(PNLITEM_OFSX),190*2,0);
             manager_setpos(manager_g);
@@ -2063,6 +2063,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
                 case SB_THUMBTRACK:si.nPos=si.nTrackPos;break;
                 default:break;
             }
+            offset_target=0;
             setscrollpos(si.nPos);
             redrawfield();
             break;

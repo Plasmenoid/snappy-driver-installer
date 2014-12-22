@@ -205,6 +205,7 @@ extern int floating_itembar;
 extern int floating_x,floating_y;
 extern int horiz_sh;
 extern int ret_global;
+extern int offset_target;
 
 // Settings
 extern WCHAR drp_dir   [BUFLEN];
@@ -213,6 +214,8 @@ extern WCHAR drpext_dir[BUFLEN];
 extern WCHAR data_dir  [BUFLEN];
 extern WCHAR log_dir   [BUFLEN];
 extern WCHAR state_file[BUFLEN];
+extern WCHAR finish    [BUFLEN];
+extern WCHAR finish_upd[BUFLEN];
 extern WCHAR finish_rb [BUFLEN];
 extern int hintdelay;
 extern int filters;
