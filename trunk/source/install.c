@@ -383,6 +383,10 @@ goaround:
         hwidmatch_print(hwidmatch,limits);
         wsprintf(cmd,L"%s\\%S",extractdir,getdrp_infpath(hwidmatch));
 
+        SetTimer(hMain,1,1000/60,0);
+        manager_g->animstart=GetTickCount();
+        offset_target=(itembar->curpos>>16)-mainy_c+D(DRVITEM_DIST_Y0)-3;
+
         // Extract
         extracttime=GetTickCount();
         wsprintf(inf,L"%s\\%S%S",

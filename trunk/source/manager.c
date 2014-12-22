@@ -815,6 +815,15 @@ int manager_animate(manager_t *manager)
         if(itembar->accel<0&&pos<itembar->tagpos)pos=itembar->tagpos;
         itembar->curpos=pos;
     }
+    i=getscrollpos();
+    if(offset_target&&i!=offset_target)
+    {
+        if(i<offset_target)i+=4;
+        //log_con("Y:%d/%d\n",i,offset_target);
+        setscrollpos(i);
+        if(i>offset_target)offset_target=0;
+        chg=1;
+    }
     return chg||
         (installmode==MODE_NONE&&manager->items_list[SLOT_EXTRACTING].install_status);
 }

@@ -51,13 +51,21 @@ Settings.cfg
 /showdrpnames1    Shows driverpack names on the right.
 /showdrpnames2    Shows driverpack names above.
 /preservecfg      Prevents updating of settings.cfg.
-/checkupdates     Checks for updates online.
-/onlyupdates      Disables notification of missing driverpacks.
-/port:<num>       Port for torrent client
-/downlimit:<num>  Sets download speed limit (in KBs)
-/uplimit:<num>    Sets upload speed limit (in KBs)
 /cfg:<FileName>   Custom .cfg file, if set "settings.cfg" not processed.
                   Other swithes processed
+
+-------
+Torrent
+-------
+/checkupdates     Checks for updates online.
+/onlyupdates      Disables notification of missing driverpacks.
+/autoupdate       Starts dowloading automatically.
+/port:<num>       Port for torrent client.
+/downlimit:<num>  Sets download speed limit (in KBs)
+/uplimit:<num>    Sets upload speed limit (in KBs)
+/finish_upd_cmd:<cmd> Specifies a command executed upon completion of download.
+/autoclose        Close the application after downloading.
+
 ---------
 Emulation
 ---------
