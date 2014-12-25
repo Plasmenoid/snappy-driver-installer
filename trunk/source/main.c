@@ -317,15 +317,9 @@ int  settings_load(WCHAR *filename)
 
 void SignalHandler(int signum)
 {
-    switch (signum)
-    {
-    case SIGSEGV:
-        log_err("!!! Crashed !!!\n");
-        log_stop();
-        break;
-    default:
-        break;
-    }
+    log_err("!!! Crashed %d!!!\n",signum);
+    log_save();
+    log_stop();
 }
 
 void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
@@ -359,7 +353,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     bundle_t bundle[2];
     monitor_t mon_drp;
     HANDLE thr;
-    HMODULE backtrace;
+    HMODULE backtrace=0;
     DWORD dwProcessId;
 
     GetWindowThreadProcessId(GetConsoleWindow(),&dwProcessId);
@@ -367,7 +361,9 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     ShowWindow(GetConsoleWindow(),hideconsole);
 
     time_startup=time_total=GetTickCount();
+#ifdef _DEBUG
     backtrace=LoadLibraryA("backtrace.dll");
+#endif
     ghInst=hInst;
     init_CLIParam();
     if (isCfgSwithExist(GetCommandLineW(),CLIParam.SaveInstalledFileName))
@@ -405,7 +401,10 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
         ShowWindow(GetConsoleWindow(),SW_SHOW);
         return ret_global;
     }
-    //signal(SIGSEGV,SignalHandler);
+#ifdef NDEBUG
+    signal(SIGSEGV,SignalHandler);
+#endif
+
 #ifndef CONSOLE_MODE
     ShowWindow(GetConsoleWindow(),(expertmode&&flags&FLAG_SHOWCONSOLE)?SW_SHOWNOACTIVATE:hideconsole);
 #endif
@@ -489,7 +488,9 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 #endif
     log_times();
     log_stop();
-    //signal(SIGSEGV,SIG_DFL);
+#ifdef NDEBUG
+    signal(SIGSEGV,SIG_DFL);
+#endif
     ShowWindow(GetConsoleWindow(),SW_SHOWNOACTIVATE);
 
 #ifdef CONSOLE_MODE
@@ -554,6 +555,7 @@ unsigned int __stdcall thread_loadall(void *arg)
         bundle_prep(&bundle[bundle_shadow]);
         bundle_load(&bundle[bundle_shadow]);
 
+        if(!(flags&FLAG_NOGUI))
         if(WaitForSingleObject(deviceupdate_event,0)==WAIT_OBJECT_0)cancel_update=1;
 
         if(!cancel_update)
@@ -648,7 +650,7 @@ void bundle_lowprioirity(bundle_t *bundle)
     //collection_finddrp(&bundle->collection,L"");
     state_print(&bundle->state);
     matcher_print(&bundle->matcher);
-    manager_print(manager_g);
+    manager_print_hr(manager_g);
 
 #ifndef _WIN64
     if(flags&FLAG_CHECKUPDATES&&!time_chkupdate&&canWrite(L"update"))
@@ -1261,6 +1263,13 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             MoveWindow(hwnd,rect.left,rect.top,D(MAINWND_WX),D(MAINWND_WY),1);
             break;
 
+        case WM_CLOSE:
+            if(installmode==MODE_NONE||(flags&FLAG_AUTOCLOSE))
+                DestroyWindow(hwnd);
+            else if(MessageBox(0,STR(STR_INST_QUIT_MSG),STR(STR_INST_QUIT_TITLE),MB_YESNO|MB_ICONQUESTION)==IDYES)
+                installmode=MODE_STOPPING;
+            break;
+
         case WM_DESTROY:
             if(!DeleteObject(hFont))
                 log_err("ERROR in manager_free(): failed DeleteObject\n");
@@ -1587,6 +1596,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case WM_MOUSEMOVE:
             GetClientRect(hwnd,&rect);
             i=panels_hitscan(x,y,&j);
+            if(j==0||j==7||j==12)SetCursor(LoadCursor(0,IDC_HAND));
             //log_con("%d,%d\n",j,i);
 
             if(i>0)

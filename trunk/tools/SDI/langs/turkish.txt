@@ -232,6 +232,8 @@ STR_REST_CREATING       = "Sistem Geri Yükleme Noktası Oluşturuluyor..."
 STR_REST_CREATED        = "Sistem Geri Yükleme Noktası Oluşturuldu"
 STR_REST_FAILED         = "Sistem Geri Yükleme Noktası Oluşturulamadı"
 
+//STR_INST_QUIT_TITLE     = "" // Translate
+//STR_INST_QUIT_MSG       = "" // Translate
 STR_HINT_STOPINST       = "Kurulumu iptal etmek için tıklayın."
 STR_HINT_STOPEXTR       = "Çıkartmayı durdurun."
 STR_HINT_DRIVER         = "<Ctrl> tuşuna basarsanız kurulan sürücünüzle ilgili bilgileri görebilirsiniz.\n<Boşluk> tuşuna basarsanız sürücünüze alternatif olarak kullanabileceğiniz diğer sürücüleri görebilirsiniz."

@@ -268,7 +268,7 @@ void manager_filter(manager_t *manager,int options)
         manager->items_list[SLOT_RESTORE_POINT].install_status=STR_RESTOREPOINT;
 }
 
-void manager_print(manager_t *manager)
+void manager_print_tbl(manager_t *manager)
 {
     itembar_t *itembar;
     int k,act=0;
@@ -289,9 +289,50 @@ void manager_print(manager_t *manager)
         {
             log_file("$%04d|",k);
             if(itembar->hwidmatch)
-                hwidmatch_print(itembar->hwidmatch,limits);
+                hwidmatch_print_tbl(itembar->hwidmatch,limits);
             else
                 log_file("'%ws'\n",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
+            act++;
+        }else
+        {
+//            log_file("$%04d|^^ %d,%d\n",k,itembar->devicematch->num_matches,(itembar->hwidmatch)?itembar->hwidmatch->status:-1);
+        }
+
+    log_file("}manager_print[%d]\n\n",act);
+}
+
+void manager_print_hr(manager_t *manager)
+{
+    WCHAR buf[BUFLEN];
+    itembar_t *itembar;
+    int k,act=0;
+
+    if((log_verbose&LOG_VERBOSE_MANAGER)==0)return;
+    log_file("{manager_print\n");
+
+    itembar=&manager->items_list[RES_SLOTS];
+    for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
+        if(itembar->isactive&&(itembar->first&2)==0)
+        {
+            str_status(buf,itembar);
+            log_file("\n$%04d, %ws\n",k,buf);
+            if(itembar->devicematch->device)
+            {
+                device_print(itembar->devicematch->device,manager->matcher->state);
+                //device_printHWIDS(itembar->devicematch->device,manager->matcher->state);
+            }
+            if(itembar->devicematch->driver)
+            {
+                log_file("Installed driver\n");
+                driver_print(itembar->devicematch->driver,manager->matcher->state);
+            }
+
+            if(itembar->hwidmatch)
+            {
+                log_file("Available driver\n");
+                hwidmatch_print_hr(itembar->hwidmatch);
+            }
+
             act++;
         }else
         {
@@ -1302,7 +1343,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
                 int limits[7];
                 memset(limits,0,sizeof(limits));
                 log_con("%d|\n",itembar_new->hwidmatch->HWID_index);
-                hwidmatch_print(itembar_new->hwidmatch,limits);
+                hwidmatch_print_tbl(itembar_new->hwidmatch,limits);
             }
             else
                 device_print(itembar_new->devicematch->device,manager_new->matcher->state);
@@ -1322,7 +1363,7 @@ void manager_restorepos(manager_t *manager_new,manager_t *manager_old)
                 int limits[7];
                 memset(limits,0,sizeof(limits));
                 log_con("%d|\n",itembar_old->hwidmatch->HWID_index);
-                hwidmatch_print(itembar_old->hwidmatch,limits);
+                hwidmatch_print_tbl(itembar_old->hwidmatch,limits);
             }
             else
                 device_print(itembar_old->devicematch->device,manager_old->matcher->state);

@@ -604,9 +604,9 @@ void hwidmatch_calclen(hwidmatch_t *hwidmatch,int *limits)
     minlen(getdrp_drvdesc(hwidmatch),&limits[6]);
 }
 
-void hwidmatch_print(hwidmatch_t *hwidmatch,int *limits)
+void hwidmatch_print_tbl(hwidmatch_t *hwidmatch,int *limits)
 {
-    CHAR buf[4096];
+    CHAR buf[BUFLEN];
     version_t *v;
 
     v=getdrp_drvversion(hwidmatch);
@@ -629,6 +629,30 @@ void hwidmatch_print(hwidmatch_t *hwidmatch,int *limits)
     log_file(" %*s |",limits[4],buf);
     log_file(" %-*s |",limits[5],    getdrp_drvHWID(hwidmatch));
     log_file(" %-*s",limits[6],      getdrp_drvdesc(hwidmatch));
+    log_file("\n");
+}
+
+void hwidmatch_print_hr(hwidmatch_t *hwidmatch)
+{
+    CHAR buf[BUFLEN];
+    version_t *v;
+
+    v=getdrp_drvversion(hwidmatch);
+/*    log_file("  Alt:   %d\n",               hwidmatch->altsectscore);
+    log_file("  Decor: %3d\n",               hwidmatch->decorscore);
+    log_file("  CRC:  %8X%\n",              getdrp_infcrc(hwidmatch));
+    log_file("  Marker %d\n",                hwidmatch->markerscore);
+    log_file("  Status %3X\n",               hwidmatch->status);*/
+    log_file("  Pack:     %ws\\%ws\n",       getdrp_packpath(hwidmatch),getdrp_packname(hwidmatch));
+
+    log_file("  Name:     %s\n",getdrp_drvdesc(hwidmatch));
+    log_file("  Provider: %s\n",    getdrp_drvmanufacturer(hwidmatch));
+    log_file("  Date:     %2d.%02d.%4d\n",      v->d,v->m,v->y);
+    log_file("  Version:  %d.%d.%d.%d\n",  v->v1,v->v2,v->v3,v->v4);
+    log_file("  HWID:     %s\n",getdrp_drvHWID(hwidmatch));
+    getdrp_drvsection(hwidmatch,buf);
+    log_file("  inf:      %s%s,%s\n",         getdrp_infpath(hwidmatch),getdrp_infname(hwidmatch),buf);
+    log_file("  Score:    %08X\n",              hwidmatch->score);
     log_file("\n");
 }
 
@@ -856,7 +880,7 @@ void matcher_print(matcher_t *matcher)
 
         hwidmatch=&matcher->hwidmatch_list[devicematch->start_matches];
         for(j=0;j<matcher->devicematch_list[i].num_matches;j++,hwidmatch++)
-            hwidmatch_print(hwidmatch,limits);
+            hwidmatch_print_tbl(hwidmatch,limits);
         log_file("\n");
     }
     log_file("}matcher_print\n\n");

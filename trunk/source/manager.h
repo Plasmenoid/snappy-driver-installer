@@ -105,7 +105,8 @@ void manager_init(manager_t *manager,matcher_t *matcher);
 void manager_free(manager_t *manager);
 void manager_populate(manager_t *manager);
 void manager_filter(manager_t *manager,int options);
-void manager_print(manager_t *manager);
+void manager_print_tbl(manager_t *manager);
+void manager_print_hr(manager_t *manager);
 void manager_sorta(matcher_t *m,int *v);
 int  manager_drplive(WCHAR *s);
 

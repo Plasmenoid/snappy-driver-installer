@@ -233,6 +233,8 @@ STR_REST_CREATING       = "Létrehozás..."
 STR_REST_CREATED        = "Létrehozva"
 STR_REST_FAILED         = "Nem sikerült létrehozni"
 
+//STR_INST_QUIT_TITLE     = "" // Translate
+//STR_INST_QUIT_MSG       = "" // Translate
 STR_HINT_STOPINST       = "Klikk ide a telepítés megszakításához"
 STR_HINT_STOPEXTR       = "Klikk ide a kicsomagolás leállításához"
 STR_HINT_DRIVER         = "Klikk ide az alternatív driverek megjelenítéséhez\nNyomja le a 'Space' gombot, az alternatív driverek részleteihez"

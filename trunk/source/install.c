@@ -200,6 +200,7 @@ void driver_install(WCHAR *hwid,WCHAR *inf,int *ret,int *needrb)
     }
 
     clicker_flag=1;
+    log_save();
     thr=(HANDLE)_beginthreadex(0,0,&thread_clicker,0,0,0);
     {
         if(flags&FLAG_DISABLEINSTALL)
@@ -380,7 +381,7 @@ goaround:
         ar_proceed=0;
         hwidmatch_t *hwidmatch=itembar->hwidmatch;
         log_con("Installing $%04d\n",i);
-        hwidmatch_print(hwidmatch,limits);
+        hwidmatch_print_hr(hwidmatch);
         wsprintf(cmd,L"%s\\%S",extractdir,getdrp_infpath(hwidmatch));
 
         SetTimer(hMain,1,1000/60,0);
@@ -435,7 +436,6 @@ goaround:
                 r=Extract7z(cmd);
                 EnterCriticalSection(&sync);
                 itembar=&manager_g->items_list[itembar_act];
-                log_con("%d\n",r);
                 if(r==2)
                 {
                     log_con("Error, checking for driverpack availability...");
@@ -524,7 +524,7 @@ goaround:
         if(!unpacked&&(flags&FLAG_DELEXTRAINFS))removeextrainfs(inf);
         if(instflag&INSTALLDRIVERS)itembar->percent=0;
         itembar->checked=0;
-        redrawfield();
+        redrawmainwnd();
     }
     if(installmode==MODE_INSTALLING)
     {
@@ -584,7 +584,7 @@ goaround:
     LeaveCriticalSection(&sync);
     ShowProgressInTaskbar(hMain,TBPF_NOPROGRESS,0,0);
     PostMessage(hMain,WM_DEVICECHANGE,7,1);
-    redrawfield();
+    redrawmainwnd();
 
     return 0;
 }

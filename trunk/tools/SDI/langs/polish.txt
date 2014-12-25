@@ -232,6 +232,8 @@ STR_REST_CREATING       = "Tworzenie punktu przywracania..."
 STR_REST_CREATED        = "Utworzono punkt przywracania"
 STR_REST_FAILED         = "Nie udało się utworzyć punktu przywracania"
 
+//STR_INST_QUIT_TITLE     = "" // Translate
+//STR_INST_QUIT_MSG       = "" // Translate
 STR_HINT_STOPINST       = "Kliknij tutaj, aby anulować instalację."
 STR_HINT_STOPEXTR       = "Kliknij tutaj, aby zatrzymać wypakowywanie."
 STR_HINT_DRIVER         = "Przytrzymaj klawisz CTRL, aby porównać zainstalowany sterownik z dostępnym.\nPrzytrzymaj SPACJĘ, aby wyświetlić informację o alternatywnych sterownikach."
