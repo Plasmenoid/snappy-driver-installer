@@ -231,6 +231,8 @@ STR_REST_CREATING       = "Bərpa nöqtəsinin yaradılması..."
 STR_REST_CREATED        = "Bərpa nöqtəsi yaradıldı"
 STR_REST_FAILED         = "Bərpa nöqtənin yaradılması mümkün olmadı"
 
+//STR_INST_QUIT_TITLE     = "" // Translate
+//STR_INST_QUIT_MSG       = "" // Translate
 STR_HINT_STOPINST       = "Quraşdırılmayı dayandırmaq üçün bura sıxın."
 STR_HINT_STOPEXTR       = "Açmanı dayandırmaq üçün bura sıxın."
 STR_HINT_DRIVER         = "Quraşdırılmış və quraşdmağa hazı olan drayverləri müqayisə etmək üçün Ctrl düyməsini sıxın.\n\nAlternativ drayverlərin siyahısına baxmaq üçün SPACE (Boşluq) düyməsini sıxın."

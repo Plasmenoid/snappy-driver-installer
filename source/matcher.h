@@ -103,7 +103,8 @@ void minlen(CHAR *s,int *len);
 void hwidmatch_init(hwidmatch_t *hwidmatch,driverpack_t *drp,int HWID_index,int dev_pos,int ishw,state_t *state,devicematch_t *devicematch);
 void hwidmatch_initbriefly(hwidmatch_t *hwidmatch,driverpack_t *drp,int HWID_index);
 void hwidmatch_calclen(hwidmatch_t *hwidmatch,int *limits);
-void hwidmatch_print(hwidmatch_t *hwidmatch,int *limits);
+void hwidmatch_print_tbl(hwidmatch_t *hwidmatch,int *limits);
+void hwidmatch_print_hr(hwidmatch_t *hwidmatch);
 int  hwidmatch_cmp(hwidmatch_t *match1,hwidmatch_t *match2);
 
 // Matcher

@@ -58,6 +58,7 @@ void closeConsole();
 void log_times();
 void gen_timestamp();
 void log_start(WCHAR *log_dir);
+void log_save();
 void log_stop();
 void log_file(CHAR const *format,...);
 void log_err(CHAR const *format,...);

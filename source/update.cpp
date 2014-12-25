@@ -647,7 +647,7 @@ void update_stop()
 {
     if(!sessionhandle)return;
 
-    log_con("Closing torrent sesstion...");
+    log_con("Closing torrent session...");
     delete sessionhandle;
     log_con("DONE\n");
 }

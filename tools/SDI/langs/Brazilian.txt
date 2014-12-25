@@ -232,6 +232,8 @@ STR_REST_CREATING       = "Criando um ponto de restauração..."
 STR_REST_CREATED        = "Ponto de restauração criado"
 STR_REST_FAILED         = "Falha ao criar o ponto de restauração"
 
+//STR_INST_QUIT_TITLE     = "" // Translate
+//STR_INST_QUIT_MSG       = "" // Translate
 STR_HINT_STOPINST       = "Clique aqui para cancelar a instalação."
 STR_HINT_STOPEXTR       = "Clique aqui para parar a extração."
 STR_HINT_DRIVER         = "Segure o botão Ctrl para comparar o driver instalado com um disponível.\nSegure a barra de espaço para mostrar informações sobre drivers alternativos."

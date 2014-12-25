@@ -232,6 +232,8 @@ STR_REST_CREATING       = "Creating a restore point..."
 STR_REST_CREATED        = "Restore point created"
 STR_REST_FAILED         = "Failed to create a restore point"
 
+STR_INST_QUIT_TITLE     = "Canceling"
+STR_INST_QUIT_MSG       = "Are you sure you want to interrupt installation?"
 STR_HINT_STOPINST       = "Click here to cancel installation."
 STR_HINT_STOPEXTR       = "Click here to stop extracting."
 STR_HINT_DRIVER         = "Hold the Ctrl button to compare the installed driver to the available one.\nHold the Spacebar button to display info about alternate drivers."

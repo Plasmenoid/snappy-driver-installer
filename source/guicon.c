@@ -125,6 +125,12 @@ void log_start(WCHAR *logdir)
     log_file("%s\n\n",SVN_REV_STR);
 }
 
+void log_save()
+{
+    if(!logfile)return;
+    fflush(logfile);
+}
+
 void log_stop()
 {
     if(!logfile)return;
