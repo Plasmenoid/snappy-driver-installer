@@ -159,6 +159,8 @@ void manager_filter(manager_t *manager,int options)
             //if(!itembar->hwidmatch)log_con("ERROR %d,%d\n",itembar->index,j);
             if(!itembar->hwidmatch)continue;
 
+            if(flags&FLAG_FILTERSP&&j)continue;
+
             if(itembar->first&2)
             {
                 itembar->isactive=0;

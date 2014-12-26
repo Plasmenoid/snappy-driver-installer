@@ -109,7 +109,7 @@ void log_start(WCHAR *logdir)
 
     mkdir_r(logdir);
     if(flags&FLAG_NOLOGFILE)return;
-    logfile=_wfopen(filename,L"wb");
+    logfile=_wfopen(filename,L"wt");
     if(!logfile)
     {
         log_err("ERROR in log_start(): Write-protected,'%ws'\n",filename);

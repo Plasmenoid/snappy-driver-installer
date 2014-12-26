@@ -227,6 +227,7 @@ void settings_parse(const WCHAR *str,int ind)
         }
         else
         if( wcsstr(pr,L"-hwid:"))        wcscpy(HWIDs,pr+6);else
+        if(!wcscmp(pr,L"-filtersp"))     flags|=FLAG_FILTERSP;else
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else
         if(!wcscmp(pr,L"-index_hr"))     flags|=COLLECTION_PRINT_INDEX;else
         if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI|FLAG_AUTOCLOSE;else
@@ -447,6 +448,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     manager_init(&manager_v[1],&bundle[bundle_display].matcher);
 
     bundle_prep(&bundle[bundle_display]);
+    vault_loadfromres(&vLang,IDR_LANG);
 
     deviceupdate_event=CreateEvent(0,0,0,0);
     thr=(HANDLE)_beginthreadex(0,0,&thread_loadall,&bundle[0],0,0);

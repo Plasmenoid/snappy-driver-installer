@@ -196,6 +196,7 @@ typedef struct _data_HWID_t // 8
 #define FLAG_SHOWDRPNAMES2           0x00800000
 #define FLAG_ONLYUPDATES             0x01000000
 #define FLAG_AUTOUPDATE              0x02000000
+#define FLAG_FILTERSP                0x04000000
 
 typedef struct _collection_t
 {

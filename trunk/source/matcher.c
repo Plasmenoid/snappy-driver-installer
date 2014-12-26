@@ -503,6 +503,8 @@ int cmpdate(version_t *t1,version_t *t2)
 {
     int res;
 
+    if(flags&FLAG_FILTERSP&&t2->y<1000)return 0;
+
     res=t1->y-t2->y;
     if(res)return res;
 
@@ -518,6 +520,8 @@ int cmpdate(version_t *t1,version_t *t2)
 int cmpversion(version_t *t1,version_t *t2)
 {
     int res;
+
+    if(flags&FLAG_FILTERSP&&t2->v1<0)return 0;
 
     res=t1->v1-t2->v1;
     if(res)return res;
