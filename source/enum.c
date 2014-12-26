@@ -844,8 +844,8 @@ void state_scandevices(state_t *state)
         {
             int dev_pos,ishw,inf_pos=-1;
             parse_info_t pi;
-            WCHAR filename[4096];
-            char bufa[4096];
+            WCHAR filename[BUFLEN];
+            char bufa[BUFLEN];
 
             cur_device->driver_index=heap_allocitem_i(&state->drivers_handle);
             cur_driver=&state->drivers_list[cur_device->driver_index];

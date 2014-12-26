@@ -272,6 +272,9 @@ void image_load(img_t *img,BYTE *data,int sz)
     int i;
 
     img->hasalpha=img->sx=img->sy=0;
+#ifdef CONSOLE_MODE
+    return;
+#else
     ret=WebPGetInfo((PBYTE)data,sz,&img->sx,&img->sy);
     if(!ret)
     {
@@ -284,6 +287,7 @@ void image_load(img_t *img,BYTE *data,int sz)
         log_err("ERROR in image_load(): failed WebPDecodeBGRA\n");
         return;
     }
+#endif
 
     ZeroMemory(&bmi,sizeof(BITMAPINFO));
     bmi.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);

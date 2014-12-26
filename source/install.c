@@ -282,7 +282,7 @@ unsigned int __stdcall thread_install(void *arg)
     if(panels[11].items[3].checked)flags|=FLAG_AUTOINSTALL;
 
     // Download driverpacks
-#ifndef _WIN64
+#ifdef USE_TORRENT
     itembar=&manager_g->items_list[RES_SLOTS];
     for(i=RES_SLOTS;i<manager_g->items_handle.items&&installmode==MODE_INSTALLING;i++,itembar++)
         if(itembar->checked&&itembar->isactive&&itembar->hwidmatch&&getdrp_packontorrent(itembar->hwidmatch))
@@ -316,7 +316,6 @@ unsigned int __stdcall thread_install(void *arg)
         log_con("{}}}}}}}}}\n");
     }
 #endif
-
 
     // Restore point
     if(manager_g->items_list[SLOT_RESTORE_POINT].checked)

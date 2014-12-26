@@ -101,6 +101,7 @@ WCHAR state_file[BUFLEN]=L"untitled.snp";
 WCHAR finish    [BUFLEN]=L"";
 WCHAR finish_upd[BUFLEN]=L"";
 WCHAR finish_rb [BUFLEN]=L"";
+WCHAR HWIDs     [BUFLEN]=L"";
 
 int flags=COLLECTION_USE_LZMA;
 int statemode=0;
@@ -225,6 +226,7 @@ void settings_parse(const WCHAR *str,int ind)
             break;
         }
         else
+        if( wcsstr(pr,L"-hwid:"))        wcscpy(HWIDs,pr+6);else
         if(!wcscmp(pr,L"-reindex"))      flags|=COLLECTION_FORCE_REINDEXING;else
         if(!wcscmp(pr,L"-index_hr"))     flags|=COLLECTION_PRINT_INDEX;else
         if(!wcscmp(pr,L"-nogui"))        flags|=FLAG_NOGUI|FLAG_AUTOCLOSE;else
@@ -333,7 +335,7 @@ void CALLBACK drp_callback(LPTSTR szFile,DWORD action,LPARAM lParam)
 
 void checkupdates()
 {
-    #ifndef _WIN64
+#ifdef USE_TORRENT
     if(downloadmangar_event)return;
 
     torrentstatus.sessionpaused=1;
@@ -342,7 +344,7 @@ void checkupdates()
         downloadmangar_event=CreateEvent(0,1,0,0);
         thandle_download=(HANDLE)_beginthreadex(0,0,&thread_download,0,0,0);
     }
-    #endif
+#endif
 }
 
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
@@ -462,7 +464,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     CloseHandle_log(thr,L"WinMain",L"thr");
     CloseHandle_log(deviceupdate_event,L"WinMain",L"event");
 
-    #ifndef _WIN64
+    #ifdef USE_TORRENT
     if(flags&FLAG_CHECKUPDATES)
     {
         downloadmangar_exitflag=1;
@@ -483,7 +485,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
 
     virusmonitor_stop();
     time_total=GetTickCount()-time_total;
-#ifndef _WIN64
+#ifdef USE_TORRENT
     update_stop();
 #endif
     log_times();
@@ -494,7 +496,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hinst,LPSTR pStr,int nCmd)
     ShowWindow(GetConsoleWindow(),SW_SHOWNOACTIVATE);
 
 #ifdef CONSOLE_MODE
-    MessageBox(0,L"В папке logs отчет создан!",L"Сообщение",0);
+    //MessageBox(0,L"В папке logs отчет создан!",L"Сообщение",0);
 #endif
 
     if(backtrace)FreeLibrary(backtrace);
@@ -621,7 +623,6 @@ void bundle_load(bundle_t *bundle)
 {
     HANDLE thandle[3];
 
-    //log_con("{bundle_load\n");
     thandle[0]=(HANDLE)_beginthreadex(0,0,&thread_scandevices,bundle,0,0);
     thandle[1]=(HANDLE)_beginthreadex(0,0,&thread_loadindexes,bundle,0,0);
     thandle[2]=(HANDLE)_beginthreadex(0,0,&thread_getsysinfo,bundle,0,0);
@@ -630,13 +631,9 @@ void bundle_load(bundle_t *bundle)
     CloseHandle_log(thandle[1],L"bundle_load",L"1");
     CloseHandle_log(thandle[2],L"bundle_load",L"2");
 
-    //log_con("-isnotebook_a\n");
     isnotebook_a(&bundle->state);
-    //log_con("-matcher_populate\n");
     matcher_populate(&bundle->matcher);
-    //log_con("-matcher_populate\n");
     matcher_sort(&bundle->matcher);
-    //log_con("}bundle_load\n");
 }
 
 void bundle_lowprioirity(bundle_t *bundle)
@@ -652,7 +649,7 @@ void bundle_lowprioirity(bundle_t *bundle)
     matcher_print(&bundle->matcher);
     manager_print_hr(manager_g);
 
-#ifndef _WIN64
+#ifdef USE_TORRENT
     if(flags&FLAG_CHECKUPDATES&&!time_chkupdate&&canWrite(L"update"))
     {
         log_con("Event 1\n");
@@ -731,7 +728,7 @@ void lang_refresh()
     redrawmainwnd();
     redrawfield();
     InvalidateRect(hPopup,0,1);
-#ifndef _WIN64
+#ifdef USE_TORRENT
     upddlg_updatelang();
 #endif
 
@@ -926,7 +923,7 @@ void gui(int nCmd)
         {
             flags|=FLAG_CHECKUPDATES;
             checkupdates();
-#ifndef _WIN64
+#ifdef USE_TORRENT
             if(canWrite(L"update"))SetEvent(downloadmangar_event);
 #endif
         }
@@ -1944,7 +1941,6 @@ void contextmenu3(int x,int y)
 
 void contextmenu(int x,int y)
 {
-
     int i;
     RECT rect;
     HMENU
@@ -1955,6 +1951,10 @@ void contextmenu(int x,int y)
     itembar_t *itembar=&manager_g->items_list[floating_itembar];
     int flags1=itembar->checked?MF_CHECKED:0;
     int flags2=itembar->isactive&2?MF_CHECKED:0;
+    int flagssubmenu=0;
+
+    if(!itembar->hwidmatch)flags1|=MF_GRAYED;
+    if(groupsize(manager_g,itembar->index)<2)flags2|=MF_GRAYED;
 
     if(floating_itembar==SLOT_RESTORE_POINT)
     {
@@ -2002,13 +2002,14 @@ void contextmenu(int x,int y)
             i++;
         }
     }
+    if(!i)flagssubmenu=MF_GRAYED;
 
     i=0;
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags1,ID_SCHEDULE, STR(STR_CONT_INSTALL));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags2,ID_SHOWALT,  STR(STR_CONT_SHOWALT));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_SEPARATOR,0,0);
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(UINT_PTR)hSub1,STR(STR_CONT_HWID_SEARCH));
-    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP,(UINT_PTR)hSub2,STR(STR_CONT_HWID_CLIP));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP|flagssubmenu,(UINT_PTR)hSub1,STR(STR_CONT_HWID_SEARCH));
+    InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|MF_POPUP|flagssubmenu,(UINT_PTR)hSub2,STR(STR_CONT_HWID_CLIP));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_SEPARATOR,0,0);
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags3,ID_OPENINF,  STR(STR_CONT_OPENINF));
     InsertMenu(hPopupMenu,i++,MF_BYPOSITION|MF_STRING|flags3,ID_LOCATEINF,STR(STR_CONT_LOCATEINF));
@@ -2100,7 +2101,7 @@ LRESULT CALLBACK WindowGraphProcedure(HWND hwnd,UINT message,WPARAM wParam,LPARA
             }
             if(floating_itembar==SLOT_DOWNLOAD)
             {
-#ifndef _WIN64
+#ifdef USE_TORRENT
                 DialogBox(ghInst,MAKEINTRESOURCE(IDD_DIALOG2),hwnd,(DLGPROC)UpdateProcedure);
                 break;
 #endif

@@ -464,7 +464,7 @@ void manager_toggle(manager_t *manager,int index)
     itembar_t *itembar,*itembar1;
     int i,group;
 
-#ifndef _WIN64
+#ifdef USE_TORRENT
     if(installmode&&!torrentstatus.sessionpaused)
         return;
 #endif
@@ -527,7 +527,7 @@ void manager_selectnone(manager_t *manager)
     itembar_t *itembar;
     int i;
 
-#ifndef _WIN64
+#ifdef USE_TORRENT
     if(installmode&&!torrentstatus.sessionpaused)
         return;
 #endif
@@ -545,7 +545,7 @@ void manager_selectall(manager_t *manager)
     itembar_t *itembar;
     int i,group=-1;
 
-#ifndef _WIN64
+#ifdef USE_TORRENT
     if(installmode&&!torrentstatus.sessionpaused)
         return;
 #endif
@@ -1032,7 +1032,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
             else
                 wsprintf(bufw,STR(STR_UPD_AVAIL2),itembar->val1&0xFF);
 
-#ifndef _WIN64
+#ifdef USE_TORRENT
             if(!torrentstatus.sessionpaused)
             {
                 WCHAR num1[64],num2[64];
@@ -1899,7 +1899,7 @@ void popup_sysinfo(manager_t *manager,HDC hdcMem)
 
 void format_size(WCHAR *buf,long long val,int isspeed)
 {
-#ifndef _WIN64
+#ifdef USE_TORRENT
     if(val<(1<<10))swprintf(buf,L"%d %s",    (int)val,STR(STR_UPD_BYTES));else
     if(val<(1<<20))swprintf(buf,L"%.03f %s",(double)val/(1<<10),STR(STR_UPD_BYTES+1));else
     if(val<(1<<30))swprintf(buf,L"%.03f %s",(double)val/(1<<20),STR(STR_UPD_BYTES+2));else
@@ -1933,7 +1933,7 @@ void format_time(WCHAR *buf,long long val)
 
 void popup_download(HDC hdcMem)
 {
-#ifndef _WIN64
+#ifdef USE_TORRENT
     textdata_t td;
     torrent_status_t t;
     int p0=D(POPUP_OFSX),p1=D(POPUP_OFSX)+10;
