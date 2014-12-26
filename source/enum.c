@@ -368,7 +368,7 @@ void state_save(state_t *state,const WCHAR *filename)
 
     free(mem);
     fclose(f);
-    log_file("OK\n");
+    log_con("OK\n");
 }
 
 int  state_load(state_t *state,const WCHAR *filename)
@@ -430,7 +430,7 @@ int  state_load(state_t *state,const WCHAR *filename)
     free(mem);
     if(mem_unpack)free(mem_unpack);
     fclose(f);
-    log_file("OK\n");
+    log_con("OK\n");
     return 1;
 }
 
