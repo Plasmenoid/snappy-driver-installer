@@ -17,8 +17,6 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "main.h"
 
-#define _7Z_CPP
-
 //{ Global variables
 int trap_mode=0;
 
@@ -143,10 +141,7 @@ void heap_free(heap_t *t)
 
 void heap_reset(heap_t *t,int sz)
 {
-    if(t->dup)
-    {
-        hash_clear(t->dup,1);
-    }
+    if(t->dup)hash_clear(t->dup,1);
     t->used=sz;
     t->items=0;
 }
@@ -343,7 +338,7 @@ char *memcpy_alloc(const char *s,int sz)
 //{ 7-zip
 void registerall()
 {
-#ifdef _7Z_CPP
+#ifndef CONSOLE_MODE
     registercrc();
     register7z();
     registerBCJ();

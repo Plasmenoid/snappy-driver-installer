@@ -21,7 +21,7 @@ int torrentport=50171;
 int downlimit=0,uplimit=0;
 }
 
-#ifndef _WIN64
+#ifdef USE_TORRENT
 #define IPV6_TCLASS 30
 #include "libtorrent/config.hpp"
 #include "libtorrent/entry.hpp"

@@ -547,7 +547,7 @@ void devicematch_init(devicematch_t *devicematch,device_t *cur_device,driver_t *
 //{ hwidmatch
 void hwidmatch_init(hwidmatch_t *hwidmatch,driverpack_t *drp,int HWID_index,int dev_pos,int ishw,state_t *state,devicematch_t *devicematch)
 {
-    char buf[4096];
+    char buf[BUFLEN];
 
     hwidmatch->drp=drp;
     hwidmatch->HWID_index=HWID_index;

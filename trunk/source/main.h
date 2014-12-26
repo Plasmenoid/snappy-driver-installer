@@ -69,7 +69,6 @@ typedef WINBOOL (__cdecl *WINAPI5t_SRSetRestorePointW)(PRESTOREPOINTINFOW pResto
 //{ Defines
 
 // Misc
-//#define CONSOLE_MODE
 #define APPTITLE            L"Snappy Driver Installer v0.2"
 #define VER_MARKER          "SDW"
 #define VER_STATE           0x102
@@ -217,6 +216,7 @@ extern WCHAR state_file[BUFLEN];
 extern WCHAR finish    [BUFLEN];
 extern WCHAR finish_upd[BUFLEN];
 extern WCHAR finish_rb [BUFLEN];
+extern WCHAR HWIDs     [BUFLEN];
 extern int hintdelay;
 extern int filters;
 extern int flags;
