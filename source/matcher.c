@@ -785,7 +785,8 @@ void matcher_populate(matcher_t *matcher)
             if(isMissing(cur_device,cur_driver,state))devicematch->status=STATUS_NF_MISSING;else
             if(devicematch->driver)
             {
-                if(!wcscmp((WCHAR *)(state->text+devicematch->driver->ProviderName),L"Microsoft"))
+                if(!wcscmp((WCHAR *)(state->text+devicematch->driver->ProviderName),L"Microsoft")||
+                   !wcscmp((WCHAR *)(state->text+devicematch->driver->ProviderName),L"Майкрософт"))
                     devicematch->status=STATUS_NF_STANDARD;
                 else
                 {
