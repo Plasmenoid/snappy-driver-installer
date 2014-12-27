@@ -121,8 +121,8 @@ void log_start(WCHAR *logdir)
         mkdir_r(logdir);
         logfile=_wfopen(filename,L"wb");
     }
-    log_file("{start logging\n");
-    log_file("%s\n\n",SVN_REV_STR);
+    if((log_verbose&LOG_VERBOSE_BATCH)==0)
+        log_file("{start logging\n%s\n\n",SVN_REV_STR);
 }
 
 void log_save()
@@ -134,7 +134,8 @@ void log_save()
 void log_stop()
 {
     if(!logfile)return;
-    log_file("}stop logging");
+    if((log_verbose&LOG_VERBOSE_BATCH)==0)
+        log_file("}stop logging");
     fclose(logfile);
 }
 

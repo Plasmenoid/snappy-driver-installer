@@ -26,6 +26,7 @@ along with Snappy Driver Installer.  If not, see <http://www.gnu.org/licenses/>.
 #define LOG_VERBOSE_LOG_CON    0x0100
 #define LOG_VERBOSE_LAGCOUNTER 0x0200
 #define LOG_VERBOSE_DEVSYNC    0x0400
+#define LOG_VERBOSE_BATCH      0x0800
 
 extern int log_verbose;
 extern int log_console;

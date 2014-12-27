@@ -1,0 +1,57 @@
+[Version]
+Signature="$WINDOWS NT$"
+Class=Battery
+ClassGuid={72631e54-78a4-11d0-bcf7-00aa00b7b32a}
+Provider="Noname"
+CatalogFile=ignore.cat
+DriverVer=01/01/2100,1.0.0.0
+
+[Manufacturer]
+"Noname"=HWIDS
+
+[HWIDS]
+
+;Virtual network adapter
+"VirtualBox Host-Only Ethernet Adapter"=nope,sun_vboxnetadp
+"CommStudio Virtual Adapter by TamoSoft"=a,ts_tscommmp
+"Туннельный адаптер Microsoft Teredo"=a,*teredo
+"Kerio Virtual Network Adapter"=a,kvnetid
+i1=a,sun_vboxnetfltmp
+i1=a,*vmnetadapter1
+i1=a,*vmnetadapter8
+i1=a,hamachi
+i1=a,teamviewervpn
+
+;Virtual cam
+i1=a,manycamaudio
+
+;Virtual monitor
+"TeamViewer GmbH"=a,*pnp09ff
+
+;Virtual DVD
+"Acronis Backup Archive Explorer"=a,root\timounter
+"Acronis TIB Mounter"=a,root\tib_mounter
+"Acronis Virtual Disk Bus"=a,root\vididr_bus
+"Primo Ramdisk Controller"=a,root\fancy_ramdisk
+"Block device mounter"=a,wudf\paragonblockdev
+"Universal Image Mounter Controller"=a,root\uim_bus
+"UIM Drive Backup Image Plugin"=a,uim\plugin_db
+"UIM Direct Device Image Plugin"=a,uim\plugin_devim
+"DVDFab Virtual Drive"=a,root\vdrive
+"ASRock RAM Disk"=a,root\asrramdisk
+i1=a,root\dtsoftbus01
+i1=a,root\BazisVirtualCDBus
+i1=a,root\dtultrascsibus
+i1=a,root\dtscsibus
+i1=a,vcd10bus
+i1=a,root\vclone
+
+;Antivirus/firewall
+"AvFw Packet Filter Miniport"=a,av_fltdev9mp
+"avast! SecureLine TAP Adapter v3"=a,aswtap
+"avast! Firewall NDIS Filter Miniport"=a,sw_aswndismp
+"Sunbelt Software Firewall NDIS IM Filter Miniport"=a,sb_sbfwimclmp
+i1=a,eset_epfwndismp
+
+[strings]
+%i1%="Ignore"

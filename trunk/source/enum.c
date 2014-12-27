@@ -294,6 +294,9 @@ void driver_print(driver_t *cur_driver,state_t *state)
     log_file("##inf:######%ws%ws,%ws%ws\n",(s+state->windir),s+cur_driver->InfPath,s+cur_driver->InfSection,s+cur_driver->InfSectionExt);
     int score=calc_score_h(cur_driver,state);
     log_file("##Score:####%08X %04x\n",score,cur_driver->identifierscore);
+
+    if(log_verbose&LOG_VERBOSE_BATCH)
+        log_file("##Filter:###\"%ws\"=a,%ws\n",s+cur_driver->DriverDesc,s+cur_driver->MatchingDeviceId);
 }
 //}
 
@@ -452,6 +455,15 @@ void state_print(state_t *state)
     WCHAR *buf;
     SYSTEM_POWER_STATUS *battery;
 
+    if(log_verbose&LOG_VERBOSE_SYSINFO&&log_verbose&LOG_VERBOSE_BATCH)
+    {
+        log_file("%ws (%d.%d.%d), ",get_winverstr(manager_g),state->platform.dwMajorVersion,state->platform.dwMinorVersion,state->platform.dwBuildNumber);
+        log_file("%s\n",state->architecture?"64-bit":"32-bit");
+        log_file("%s, ",isLaptop?"Laptop":"Desktop");
+        log_file("Product='%ws', ",state->text+state->product);
+        log_file("Model='%ws', ",state->text+state->model);
+        log_file("Manuf='%ws'\n",state->text+state->manuf);
+    }else
     if(log_verbose&LOG_VERBOSE_SYSINFO)
     {
         log_file("Windows\n");

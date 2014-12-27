@@ -159,7 +159,6 @@ void manager_filter(manager_t *manager,int options)
             //if(!itembar->hwidmatch)log_con("ERROR %d,%d\n",itembar->index,j);
             if(!itembar->hwidmatch)continue;
 
-            if(flags&FLAG_FILTERSP&&j)continue;
 
             if(itembar->first&2)
             {
@@ -168,6 +167,7 @@ void manager_filter(manager_t *manager,int options)
                 j--;
                 continue;
             }
+            if(flags&FLAG_FILTERSP&&j)continue;
 
             if(itembar->checked||itembar->install_status)itembar->isactive=1;
 
