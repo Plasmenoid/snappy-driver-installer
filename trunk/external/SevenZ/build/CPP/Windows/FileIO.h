@@ -3,11 +3,14 @@
 #ifndef __WINDOWS_FILE_IO_H
 #define __WINDOWS_FILE_IO_H
 
+#if defined(_WIN32) && !defined(UNDER_CE)
+#include <winioctl.h>
+#endif
+
 #include "../Common/MyString.h"
 #include "../Common/MyBuffer.h"
 
 #include "Defs.h"
-#include <winioctl.h>
 
 #define _my_IO_REPARSE_TAG_MOUNT_POINT  (0xA0000003L)
 #define _my_IO_REPARSE_TAG_SYMLINK      (0xA000000CL)
@@ -20,7 +23,9 @@
 namespace NWindows {
 namespace NFile {
 
+#if defined(_WIN32) && !defined(UNDER_CE)
 bool FillLinkData(CByteBuffer &dest, const wchar_t *path, bool isSymLink);
+#endif
 
 struct CReparseShortInfo
 {
@@ -58,7 +63,7 @@ class CFileBase
 {
 protected:
   HANDLE _handle;
-
+  
   bool Create(CFSTR path, DWORD desiredAccess,
       DWORD shareMode, DWORD creationDisposition, DWORD flagsAndAttributes);
 
@@ -101,7 +106,7 @@ public:
   bool Seek(UInt64 position, UInt64 &newPosition) const throw();
   bool SeekToBegin() const throw();
   bool SeekToEnd(UInt64 &newPosition) const throw();
-
+  
   bool GetFileInformation(BY_HANDLE_FILE_INFORMATION *info) const
     { return BOOLToBool(GetFileInformationByHandle(_handle, info)); }
 
@@ -135,7 +140,7 @@ class CInFile: public CFileBase
   #ifdef SUPPORT_DEVICE_FILE
 
   #ifndef UNDER_CE
-
+  
   bool GetGeometry(DISK_GEOMETRY *res) const
     { return DeviceIoControlOut(IOCTL_DISK_GET_DRIVE_GEOMETRY, res, sizeof(*res)); }
 
@@ -144,15 +149,15 @@ class CInFile: public CFileBase
 
   bool GetCdRomGeometry(DISK_GEOMETRY *res) const
     { return DeviceIoControlOut(IOCTL_CDROM_GET_DRIVE_GEOMETRY, res, sizeof(*res)); }
-
+  
   bool GetPartitionInfo(PARTITION_INFORMATION *res)
     { return DeviceIoControlOut(IOCTL_DISK_GET_PARTITION_INFO, LPVOID(res), sizeof(*res)); }
-
+  
   #endif
 
   void CorrectDeviceSize();
   void CalcDeviceSize(CFSTR name);
-
+  
   #endif
 
 public:
@@ -167,7 +172,7 @@ public:
     return Open(fileName, FILE_SHARE_READ, OPEN_EXISTING,
         FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
   }
-
+  
   #endif
 
   bool Read1(void *data, UInt32 size, UInt32 &processedSize) throw();

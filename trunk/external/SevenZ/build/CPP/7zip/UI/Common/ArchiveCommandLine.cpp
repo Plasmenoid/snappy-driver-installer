@@ -118,7 +118,7 @@ enum Enum
   kDisableWildcardParsing,
   kElimDup,
   kFullPathMode,
-
+  
   kHardLinks,
   kSymLinks,
   kNtSecurity,
@@ -211,19 +211,19 @@ static const CSwitchForm kSwitchForms[] =
   { "ssc", NSwitchType::kMinus },
   { "scrc", NSwitchType::kString, true, 0 },
   { "sa",  NSwitchType::kChar, false, 1, k_ArcNameMode_PostCharSet },
-
+  
   { "spd" },
   { "spe", NSwitchType::kMinus },
   { "spf", NSwitchType::kString, false, 0 },
-
+  
   { "snh", NSwitchType::kMinus },
   { "snl", NSwitchType::kMinus },
   { "sni" },
   { "sns", NSwitchType::kMinus },
-
+  
   { "snr" },
   { "snc" },
-
+  
   { "sdel" },
   { "stl" },
   { "stx", NSwitchType::kString, true, 1 }
@@ -236,8 +236,8 @@ static const int kCommandIndex = 0;
 // static const char *kUserErrorMessage  = "Incorrect command line";
 static const char *kCannotFindListFile = "Cannot find listfile";
 static const char *kIncorrectListFile = "Incorrect item in listfile.\nCheck charset encoding and -scs switch.";
-static const char *kIncorrectWildcardInListFile = "Incorrect wildcard in listfile";
-static const char *kIncorrectWildcardInCommandLine  = "Incorrect wildcard in command line";
+// static const char *kIncorrectWildcardInListFile = "Incorrect wildcard in listfile";
+// static const char *kIncorrectWildcardInCommandLine  = "Incorrect wildcard in command line";
 static const char *kTerminalOutError = "I won't write compressed data to a terminal";
 static const char *kSameTerminalError = "I won't write data and program's messages to same terminal";
 static const char *kEmptyFilePath = "Empty file path";
@@ -409,7 +409,7 @@ static void AddToCensorFromNonSwitchesStrings(
         );
 
   int oldIndex = -1;
-
+  
   for (unsigned i = startIndex; i < nonSwitchStrings.Size(); i++)
   {
     const UString &s = nonSwitchStrings[i];
@@ -432,7 +432,7 @@ static void AddToCensorFromNonSwitchesStrings(
     else
       AddNameToCensor(censor, s, true, type, wildcardMatching);
   }
-
+  
   if (oldIndex != -1)
   {
     throw CArcCmdLineException("There is no second file name for rename pair:", nonSwitchStrings[oldIndex]);
@@ -444,7 +444,7 @@ static void AddToCensorFromNonSwitchesStrings(
 struct CEventSetEnd
 {
   UString Name;
-
+  
   CEventSetEnd(const wchar_t *name): Name(name) {}
   ~CEventSetEnd()
   {
@@ -527,13 +527,13 @@ static void AddSwitchWildcardsToCensor(
     const UString &name = strings[i];
     NRecursedType::EEnum recursedType;
     unsigned pos = 0;
-
+    
     if (name.Len() < kSomeCludePostStringMinSize)
     {
       errorMessage = "Too short switch";
       break;
     }
-
+    
     if (::MyCharLower_Ascii(name[pos]) == kRecursedIDChar)
     {
       pos++;
@@ -547,15 +547,15 @@ static void AddSwitchWildcardsToCensor(
     }
     else
       recursedType = commonRecursedType;
-
+    
     if (name.Len() < pos + kSomeCludeAfterRecursedPostStringMinSize)
     {
       errorMessage = "Too short switch";
       break;
     }
-
+    
     UString tail = name.Ptr(pos + 1);
-
+    
     if (name[pos] == kImmediateNameID)
       AddNameToCensor(censor, tail, include, recursedType, wildcardMatching);
     else if (name[pos] == kFileListID)
@@ -770,9 +770,9 @@ static void SetAddCommandOptions(
     default:
       defaultActionSet = NUpdateArchive::k_ActionSet_Update;
   }*/
-
+  
   options.UpdateArchiveItself = true;
-
+  
   options.Commands.Clear();
   CUpdateArchiveCommand updateMainCommand;
   updateMainCommand.ActionSet = defaultActionSet;
@@ -926,12 +926,12 @@ void EnumerateDirItemsAndSort(
         paths.Add(dirItems.GetPhyPath(i));
     }
   }
-
+  
   if (paths.Size() == 0)
     throw CArcCmdLineException(kCannotFindArchive);
-
+  
   UStringVector fullPaths;
-
+  
   unsigned i;
   for (i = 0; i < paths.Size(); i++)
   {
@@ -973,13 +973,13 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
   options.TechMode = parser[NKey::kTechMode].ThereIs;
   if (parser[NKey::kHash].ThereIs)
     options.HashMethods = parser[NKey::kHash].PostStrings;
-
+  
   if (parser[NKey::kElimDup].ThereIs)
   {
     options.ExtractOptions.ElimDup.Def = true;
     options.ExtractOptions.ElimDup.Val = !parser[NKey::kElimDup].WithMinus;
   }
-
+  
   NWildcard::ECensorPathMode censorPathMode = NWildcard::k_RelatPath;
   bool fullPathMode = parser[NKey::kFullPathMode].ThereIs;
   if (fullPathMode)
@@ -1009,7 +1009,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
   Int32 codePage = FindCharset(parser, NKey::kListfileCharSet, false, CP_UTF8);
 
   bool thereAreSwitchIncludes = false;
-
+  
   if (parser[NKey::kInclude].ThereIs)
   {
     thereAreSwitchIncludes = true;
@@ -1020,7 +1020,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
   if (parser[NKey::kExclude].ThereIs)
     AddSwitchWildcardsToCensor(options.Censor,
         parser[NKey::kExclude].PostStrings, false, recursedType, wildcardMatching, codePage);
-
+ 
   int curCommandIndex = kCommandIndex + 1;
   bool thereIsArchiveName = !parser[NKey::kNoArName].ThereIs &&
       options.Command.CommandType != NCommandType::kBenchmark &&
@@ -1070,7 +1070,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
   SetMethodOptions(parser, options.Properties);
 
   options.EnablePercents = !parser[NKey::kDisablePercents].ThereIs;
-
+  
   if (options.EnablePercents)
   {
     if ((options.StdOutMode && !options.IsStdErrTerminal) ||
@@ -1107,7 +1107,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
       nt.ReplaceColonForAltStream = parser[NKey::kReplaceColonForAltStream].ThereIs;
       nt.WriteToAltStreamIfColon = parser[NKey::kWriteToAltStreamIfColon].ThereIs;
     }
-
+      
     options.Censor.AddPathsToCensor(NWildcard::k_AbsPath);
     options.Censor.ExtendExclude();
 
@@ -1149,7 +1149,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
           options.ArchivePathsSorted,
           options.ArchivePathsFullSorted);
     }
-
+    
     if (isExtractGroupCommand)
     {
       if (options.StdOutMode && options.IsStdOutTerminal && options.IsStdErrTerminal)
@@ -1193,7 +1193,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
     CUpdateOptions &updateOptions = options.UpdateOptions;
 
     SetAddCommandOptions(options.Command.CommandType, parser, updateOptions);
-
+    
     updateOptions.MethodMode.Properties = options.Properties;
 
     if (parser[NKey::kShareForWrite].ThereIs)

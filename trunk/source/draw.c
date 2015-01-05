@@ -39,7 +39,7 @@ panelitem_t panel2[]=
 
 panelitem_t panel3[]=
 {
-    {TYPE_GROUP,0,5,0},
+    {TYPE_GROUP,KB_EXPERT,5,0},
     {TYPE_TEXT,STR_LANG,0,0},
     {TYPE_TEXT,0,0,0},
     {TYPE_TEXT,STR_THEME,0,0},
@@ -57,7 +57,7 @@ panelitem_t panel3_w[]=
 
 panelitem_t panel4[]=
 {
-    {TYPE_GROUP_BREAK,0,4,0},
+    {TYPE_GROUP_BREAK,KB_ACTIONS,4,0},
     {TYPE_BUTTON,STR_OPENLOGS,              ID_OPENLOGS,0},
     {TYPE_BUTTON,STR_SNAPSHOT,              ID_SNAPSHOT,0},
     {TYPE_BUTTON,STR_EXTRACT,               ID_EXTRACT,0},
@@ -66,7 +66,7 @@ panelitem_t panel4[]=
 
 panelitem_t panel5[]=
 {
-    {TYPE_GROUP_BREAK,0,7,0},
+    {TYPE_GROUP_BREAK,KB_PANEL1,7,0},
     {TYPE_TEXT,STR_SHOW_FOUND,0,0},
     {TYPE_CHECKBOX, STR_SHOW_MISSING,       ID_SHOW_MISSING,0},
     {TYPE_CHECKBOX, STR_SHOW_NEWER,         ID_SHOW_NEWER,0},
@@ -78,7 +78,7 @@ panelitem_t panel5[]=
 
 panelitem_t panel6[]=
 {
-    {TYPE_GROUP_BREAK,0,4,0},
+    {TYPE_GROUP_BREAK,KB_PANEL2,4,0},
     {TYPE_TEXT,STR_SHOW_NOTFOUND,0,0},
     {TYPE_CHECKBOX, STR_SHOW_NF_MISSING,    ID_SHOW_NF_MISSING,0},
     {TYPE_CHECKBOX, STR_SHOW_NF_UNKNOWN,    ID_SHOW_NF_UNKNOWN,0},
@@ -87,7 +87,7 @@ panelitem_t panel6[]=
 
 panelitem_t panel7[]=
 {
-    {TYPE_GROUP_BREAK,0,3,0},
+    {TYPE_GROUP_BREAK,KB_PANEL3,3,0},
     {TYPE_CHECKBOX, STR_SHOW_ONE,           ID_SHOW_ONE,0},
     {TYPE_CHECKBOX, STR_SHOW_DUP,           ID_SHOW_DUP,0},
     {TYPE_CHECKBOX, STR_SHOW_INVALID,       ID_SHOW_INVALID,0},
@@ -102,6 +102,7 @@ panelitem_t panel8[]=
 
 panelitem_t panel9[]=
 {
+
     {TYPE_GROUP,0,1,0},
     {TYPE_BUTTON,STR_INSTALL,               ID_INSTALL,0},
 };
@@ -120,7 +121,7 @@ panelitem_t panel11[]=
 
 panelitem_t panel12[]=
 {
-    {TYPE_GROUP,0,3,0},
+    {TYPE_GROUP,KB_PANEL_CHK,3,0},
     {TYPE_TEXT,STR_OPTIONS,0,0},
     {TYPE_CHECKBOX,STR_RESTOREPOINT,        ID_RESTPNT,0},
     {TYPE_CHECKBOX,STR_REBOOT,              ID_REBOOT,0},
@@ -397,6 +398,32 @@ void drawrect(HDC hdc,int x1,int y1,int x2,int y2,int color1,int color2,int w,in
     if(!r32)log_err("ERROR in drawrect(): failed SelectObject(newpen)\n");
 }
 
+void drawrectsel(HDC hdc,int x1,int y1,int x2,int y2,int color2,int w)
+{
+    HPEN newpen,oldpen;
+    HBRUSH oldbrush;
+    uintptr_t *r;
+    x1-=2;
+    y1-=2;
+    x2+=2;
+    y2-=2;
+
+    oldbrush=(HBRUSH)SelectObject(hdc,GetStockObject(NULL_BRUSH));
+    if(!oldbrush)log_err("ERROR in drawrectsel(): failed SelectObject(GetStockObject)\n");
+
+    newpen=CreatePen(PS_DOT,w,color2);
+    if(!newpen)log_err("ERROR in drawrectsel(): failed CreatePen\n");
+    oldpen=(HPEN)SelectObject(hdc,newpen);
+    if(!oldpen)log_err("ERROR in drawrectsel(): failed SelectObject(newpen)\n");
+
+    Rectangle(hdc,x1,y1,x2,y2);
+
+    r=SelectObject(hdc,oldpen);
+    if(!r)log_err("ERROR in drawrectsel(): failed SelectObject(oldpen)\n");
+    r=SelectObject(hdc,oldbrush);
+    if(!r)log_err("ERROR in drawrectsel(): failed SelectObject(oldbrush)\n");
+}
+
 void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int id)
 {
     int i=box[id].index;
@@ -613,6 +640,15 @@ int panel_hitscan(panel_t *panel,int hx,int hy)
     int idofs=PAN_ENT*panel->index+PAN_ENT;
     int wy=D(PANEL_WY+idofs);
 
+    if(kbpanel&&panel->items[0].str_id==kbpanel)
+    {
+        if(kbitem[kbpanel]>panel->items[0].action_id)kbitem[kbpanel]=panel->items[0].action_id;
+        while(panel->items[kbitem[kbpanel]].type!=TYPE_CHECKBOX&&
+              panel->items[kbitem[kbpanel]].type!=TYPE_BUTTON)kbitem[kbpanel]++;
+
+        return kbitem[kbpanel];
+    }
+
     if(!wy)return -1;
     hx-=Xp(panel)+D(PNLITEM_OFSX);
     hy-=Yp(panel)+D(PNLITEM_OFSY);
@@ -735,6 +771,7 @@ void panel_draw(HDC hdc,panel_t *panel)
                 drawcheckbox(hdc,x+ofsx,y+ofsy,D(CHKBOX_SIZE)-2,D(CHKBOX_SIZE)-2,panel->items[i].checked,i==cur_i);
                 SetTextColor(hdc,D(i==cur_i?CHKBOX_TEXT_COLOR_H:CHKBOX_TEXT_COLOR));
                 TextOut(hdc,x+D(CHKBOX_TEXT_OFSX)+ofsx,y+ofsy,STR(panel->items[i].str_id),wcslen(STR(panel->items[i].str_id)));
+                if(i==cur_i&&kbpanel)drawrectsel(hdc,x+ofsx,y+ofsy,x+XP(panel)-ofsx,y+ofsy+wy,0xff00,1);
                 y+=D(PNLITEM_WY);
                 break;
 

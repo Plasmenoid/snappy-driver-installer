@@ -69,7 +69,7 @@ namespace NArchive
         kSkip
       };
     }
-
+  
     namespace NOperationResult
     {
       enum
@@ -86,7 +86,7 @@ namespace NArchive
       };
     }
   }
-
+  
   namespace NUpdate
   {
     namespace NOperationResult
@@ -183,17 +183,26 @@ Notes:
   Some IInArchive handlers will work incorrectly in that case.
 */
 
+/* MSVC allows the code where there is throw() in declaration of function,
+   but there is no throw() in definition of function. */
+
+#ifdef _MSC_VER
+  #define MY_NO_THROW_DECL_ONLY throw()
+#else
+  #define MY_NO_THROW_DECL_ONLY
+#endif
+
 #define INTERFACE_IInArchive(x) \
-  STDMETHOD(Open)(IInStream *stream, const UInt64 *maxCheckStartPosition, IArchiveOpenCallback *openCallback) throw() x; \
-  STDMETHOD(Close)() throw() x; \
-  STDMETHOD(GetNumberOfItems)(UInt32 *numItems) throw() x; \
-  STDMETHOD(GetProperty)(UInt32 index, PROPID propID, PROPVARIANT *value) throw() x; \
-  STDMETHOD(Extract)(const UInt32* indices, UInt32 numItems, Int32 testMode, IArchiveExtractCallback *extractCallback) throw() x; \
-  STDMETHOD(GetArchiveProperty)(PROPID propID, PROPVARIANT *value) throw() x; \
-  STDMETHOD(GetNumberOfProperties)(UInt32 *numProps) throw() x; \
-  STDMETHOD(GetPropertyInfo)(UInt32 index, BSTR *name, PROPID *propID, VARTYPE *varType) throw() x; \
-  STDMETHOD(GetNumberOfArchiveProperties)(UInt32 *numProps) throw() x; \
-  STDMETHOD(GetArchivePropertyInfo)(UInt32 index, BSTR *name, PROPID *propID, VARTYPE *varType) throw() x;
+  STDMETHOD(Open)(IInStream *stream, const UInt64 *maxCheckStartPosition, IArchiveOpenCallback *openCallback) MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(Close)() MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(GetNumberOfItems)(UInt32 *numItems) MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(GetProperty)(UInt32 index, PROPID propID, PROPVARIANT *value) MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(Extract)(const UInt32* indices, UInt32 numItems, Int32 testMode, IArchiveExtractCallback *extractCallback) MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(GetArchiveProperty)(PROPID propID, PROPVARIANT *value) MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(GetNumberOfProperties)(UInt32 *numProps) MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(GetPropertyInfo)(UInt32 index, BSTR *name, PROPID *propID, VARTYPE *varType) MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(GetNumberOfArchiveProperties)(UInt32 *numProps) MY_NO_THROW_DECL_ONLY x; \
+  STDMETHOD(GetArchivePropertyInfo)(UInt32 index, BSTR *name, PROPID *propID, VARTYPE *varType) MY_NO_THROW_DECL_ONLY x;
 
 ARCHIVE_INTERFACE(IInArchive, 0x60)
 {
@@ -246,7 +255,7 @@ ARCHIVE_INTERFACE(IArchiveGetRawProps, 0x70)
 #define INTERFACE_IArchiveGetRootProps(x) \
   STDMETHOD(GetRootProp)(PROPID propID, PROPVARIANT *value) x; \
   STDMETHOD(GetRootRawProp)(PROPID propID, const void **data, UInt32 *dataSize, UInt32 *propType) x; \
-
+ 
 ARCHIVE_INTERFACE(IArchiveGetRootProps, 0x71)
 {
   INTERFACE_IArchiveGetRootProps(PURE)
@@ -263,7 +272,7 @@ ARCHIVE_INTERFACE(IArchiveOpenSeq, 0x61)
     S_FALSE - is not archive
     ? - DATA error
 */
-
+    
 /*
 const UInt32 kOpenFlags_RealPhySize = 1 << 0;
 const UInt32 kOpenFlags_NoSeek = 1 << 1;
@@ -276,7 +285,7 @@ Flags:
      - if phySize is not available, it doesn't try to make full parse to get phySize
    kOpenFlags_NoSeek -  ArcOpen2 function doesn't use IInStream interface, even if it's available
    kOpenFlags_RealPhySize - the handler will try to get PhySize, even if it requires full decompression for file
-
+   
   if handler is not allowed to use IInStream and the flag kOpenFlags_RealPhySize is not specified,
   the handler can return S_OK, but it doesn't check even Signature.
   So next Extract can be called for that sequential stream.
@@ -346,7 +355,7 @@ UpdateItems()
   outStream: output stream. (the handler) MUST support the case when
     Seek position in outStream is not ZERO.
     but the caller calls with empty outStream and seek position is ZERO??
-
+ 
   archives with stub:
 
   If archive is open and the handler and (Offset > 0), then the handler
@@ -444,7 +453,7 @@ ARCHIVE_INTERFACE(IArchiveAllowTail, 0x05)
 // #define k_IsArc_Res_YES_LOW_PROB 3
 
 #define API_FUNC_IsArc EXTERN_C UInt32 WINAPI
-#define API_FUNC_static_IsArc EXTERN_C UInt32 WINAPI
+#define API_FUNC_static_IsArc extern "C" { static UInt32 WINAPI
 
 extern "C"
 {

@@ -29,7 +29,7 @@ inline char *MyStpCpy(char *dest, const char *src)
 {
   for (;;)
   {
-    Byte c = *src;
+    char c = *src;
     *dest = c;
     if (c == 0)
       return dest;
@@ -166,9 +166,9 @@ class AString
   {
     memmove(_chars + dest, _chars + src, (size_t)(_len - src + 1) * sizeof(char));
   }
-
+  
   void InsertSpace(unsigned &index, unsigned size);
-
+  
   void ReAlloc(unsigned newLimit);
   void SetStartLen(unsigned len);
   void Grow_1();
@@ -248,8 +248,8 @@ public:
   // int CompareNoCase(const char *s) const { return MyStringCompareNoCase(_chars, s); }
   // int CompareNoCase(const AString &s) const { return MyStringCompareNoCase(_chars, s._chars); }
   bool IsPrefixedBy(const char *s) const { return IsString1PrefixedByString2(_chars, s); }
-  bool IsPrefixedBy_Ascii_NoCase(const char *s) const;
-
+  bool IsPrefixedBy_Ascii_NoCase(const char *s) const throw();
+ 
   int Find(char c) const { return FindCharPosInString(_chars, c); }
   int Find(char c, unsigned startIndex) const
   {
@@ -276,7 +276,7 @@ public:
   void RemoveChar(char ch) throw();
   void Replace(char oldChar, char newChar) throw();
   void Replace(const AString &oldString, const AString &newString);
-
+  
   void Delete(unsigned index) throw();
   void Delete(unsigned index, unsigned count) throw();
   void DeleteFrontal(unsigned num) throw();
@@ -324,9 +324,9 @@ class UString
   {
     memmove(_chars + dest, _chars + src, (size_t)(_len - src + 1) * sizeof(wchar_t));
   }
-
+  
   void InsertSpace(unsigned index, unsigned size);
-
+  
   void ReAlloc(unsigned newLimit);
   void SetStartLen(unsigned len);
   void Grow_1();
@@ -413,7 +413,7 @@ public:
   // int CompareNoCase(const wchar_t *s) const { return MyStringCompareNoCase(_chars, s); }
   // int CompareNoCase(const UString &s) const { return MyStringCompareNoCase(_chars, s._chars); }
   bool IsPrefixedBy(const wchar_t *s) const { return IsString1PrefixedByString2(_chars, s); };
-  bool IsPrefixedBy_Ascii_NoCase(const char *s) const;
+  bool IsPrefixedBy_Ascii_NoCase(const char *s) const throw();
 
   int Find(wchar_t c) const { return FindCharPosInString(_chars, c); }
   int Find(wchar_t c, unsigned startIndex) const
@@ -421,8 +421,8 @@ public:
     int pos = FindCharPosInString(_chars + startIndex, c);
     return pos < 0 ? -1 : (int)startIndex + pos;
   }
-  int Find(const UString &s) { return Find(s, 0); }
-  int Find(const UString &s, unsigned startIndex);
+  int Find(const UString &s) const { return Find(s, 0); }
+  int Find(const UString &s, unsigned startIndex) const throw();
   int ReverseFind(wchar_t c) const throw();
 
   void TrimLeft() throw();

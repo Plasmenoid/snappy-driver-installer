@@ -8,7 +8,7 @@ namespace NSecurity {
 #ifndef UNDER_CE
 
 #ifdef _UNICODE
-#define MY_FUNC_SELECT(f) :: ## f
+#define MY_FUNC_SELECT(f) :: f
 #else
 #define MY_FUNC_SELECT(f) my_ ## f
 extern "C" {
@@ -29,37 +29,37 @@ bool EnablePrivilege(LPCTSTR privilegeName, bool enable)
   HMODULE hModule = ::LoadLibrary(TEXT("Advapi32.dll"));
   if (hModule == NULL)
     return false;
-
+  
   GET_PROC_ADDR(OpenProcessToken, "OpenProcessToken");
   GET_PROC_ADDR(LookupPrivilegeValue, "LookupPrivilegeValueA");
   GET_PROC_ADDR(AdjustTokenPrivileges, "AdjustTokenPrivileges");
-
+  
   if (my_OpenProcessToken &&
       my_AdjustTokenPrivileges &&
       my_LookupPrivilegeValue)
-
+  
   #endif
 
   {
     HANDLE token;
-    if ((::OpenProcessToken)(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token))
+    if (MY_FUNC_SELECT(OpenProcessToken)(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token))
     {
       TOKEN_PRIVILEGES tp;
-      if ((::LookupPrivilegeValue)(NULL, privilegeName, &(tp.Privileges[0].Luid)))
+      if (MY_FUNC_SELECT(LookupPrivilegeValue)(NULL, privilegeName, &(tp.Privileges[0].Luid)))
       {
         tp.PrivilegeCount = 1;
         tp.Privileges[0].Attributes = (enable ? SE_PRIVILEGE_ENABLED : 0);
-        if ((::AdjustTokenPrivileges)(token, FALSE, &tp, 0, NULL, NULL))
+        if (MY_FUNC_SELECT(AdjustTokenPrivileges)(token, FALSE, &tp, 0, NULL, NULL))
           res = (GetLastError() == ERROR_SUCCESS);
       }
       ::CloseHandle(token);
     }
   }
-
+    
   #ifndef _UNICODE
 
   ::FreeLibrary(hModule);
-
+  
   #endif
 
   return res;
