@@ -87,6 +87,19 @@ typedef WINBOOL (__cdecl *WINAPI5t_SRSetRestorePointW)(PRESTOREPOINTINFOW pResto
 #define FLOATING_ABOUT      5
 #define FLOATING_DOWNLOAD   6
 
+// kb panels
+#define KB_NONE             0
+#define KB_FIELD            1
+#define KB_INSTALL          2
+#define KB_LANG             3
+#define KB_THEME            4
+#define KB_EXPERT           5
+#define KB_ACTIONS          6
+#define KB_PANEL1           7
+#define KB_PANEL2           8
+#define KB_PANEL3           9
+#define KB_PANEL_CHK       10
+
 // Left panel types
 #define TYPE_GROUP          1
 #define TYPE_TEXT           2
@@ -205,6 +218,7 @@ extern int floating_x,floating_y;
 extern int horiz_sh;
 extern int ret_global;
 extern int offset_target;
+extern int kbpanel,kbitem[KB_PANEL_CHK+1];
 
 // Settings
 extern WCHAR drp_dir   [BUFLEN];

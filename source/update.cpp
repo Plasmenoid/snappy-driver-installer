@@ -329,7 +329,6 @@ unsigned int __stdcall thread_download(void *arg)
         finishedupdating=1;
         sessionhandle->pause();
         update_getstatus(&torrentstatus);
-        upddlg_populatelist(0,0);
         monitor_pause=0;
         PostMessage(hMain,WM_DEVICECHANGE,7,2);
         log_con("}torrent_stop\n");

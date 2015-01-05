@@ -143,6 +143,7 @@ void manager_filter(manager_t *manager,int options)
     itembar_t *itembar,*itembar1,*itembar_drp=0,*itembar_drpcur=0;
     int i,j,k;
     int cnt[NUM_STATUS+1];
+    int ontorrent;
     int o1=options&FILTER_SHOW_ONE;
 
     itembar=&manager->items_list[RES_SLOTS];
@@ -151,6 +152,7 @@ void manager_filter(manager_t *manager,int options)
     {
         devicematch=itembar->devicematch;
         memset(cnt,0,sizeof(cnt));
+        ontorrent=0;
         if(!devicematch){itembar++;i++;continue;}
         for(j=0;j<devicematch->num_matches;j++,itembar++,i++)
         {
@@ -195,7 +197,9 @@ void manager_filter(manager_t *manager,int options)
             if((!o1||!cnt[NUM_STATUS])&&(options&FILTER_SHOW_MISSING)&&itembar->hwidmatch->status&STATUS_MISSING)
             {
                 itembar->isactive=1;
-                if(!getdrp_packontorrent(itembar->hwidmatch))
+                if(getdrp_packontorrent(itembar->hwidmatch)&&!ontorrent)
+                    ontorrent=1;
+                else
                     cnt[NUM_STATUS]++;
             }
 
@@ -214,7 +218,9 @@ void manager_filter(manager_t *manager,int options)
                    &&(options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&(options&FILTER_SHOW_INVALID)==0
                    &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0&&devicematch->driver)continue;
 
-                if(!getdrp_packontorrent(itembar->hwidmatch))
+                if(getdrp_packontorrent(itembar->hwidmatch)&&!ontorrent)
+                    ontorrent=1;
+                else
                 {
                     cnt[k]++;
                     cnt[NUM_STATUS]++;

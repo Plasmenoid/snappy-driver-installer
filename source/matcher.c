@@ -349,16 +349,13 @@ int isblacklisted(hwidmatch_t *hwidmatch,state_t *state,WCHAR *hwid,char *sectio
 int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state)
 {
     version_t *v;
-    int major=state->platform.dwMajorVersion,
-        minor=state->platform.dwMinorVersion;
+    int major=state->platform.dwMajorVersion;
 
     v=getdrp_drvversion(hwidmatch);
     switch(v->v1)
     {
-        case 5:if(major!=5)return 0;break;              // XP
-        case 6:if(major!=6||minor!=0)return 0;break;    // Vista
-        case 7:if(major!=6||minor!=1)return 0;break;    // 7
-        case 8:if(major!=6||minor <2)return 0;break;    // 8 and 8.1
+        case 5:if(major!=5)return 0;break;
+        case 6:if(major==5)return 0;break;
         default:break;
     }
     return 1;
@@ -403,7 +400,7 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
            !isvalid_usb30hub(hwidmatch,state,L"IUSB3\\ROOT_HUB30&VID_8086&PID_9C31")&&
            !isvalid_usb30hub(hwidmatch,state,L"IUSB3\\ROOT_HUB30&VID_8086&PID_0F35")&&
            !isvalid_usb30hub(hwidmatch,state,L"pnp0a08")&&
-           !isvalid_usb30hub(hwidmatch,state,L"IUSB3\\ROOT_HUB30&VID_8086&PID_8C31"))return 0;
+           !isvalid_usb30hub(hwidmatch,state,L"IUSB3\\ROOT_HUB30&VID_8086&PID_8CB1"))return 0;
 
     if(StrStrIA(getdrp_infpath(hwidmatch),"matchver\\")||
        StrStrIA(getdrp_infpath(hwidmatch),"L\\Realtek\\")||

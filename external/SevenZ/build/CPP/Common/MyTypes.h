@@ -4,7 +4,6 @@
 #define __COMMON_MY_TYPES_H
 
 #include "../../C/7zTypes.h"
-#define throw()
 
 typedef int HRes;
 
@@ -14,7 +13,7 @@ struct CBoolPair
   bool Def;
 
   CBoolPair(): Val(false), Def(false) {}
-
+  
   void Init()
   {
     Val = false;

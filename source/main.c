@@ -76,8 +76,11 @@ int cntd=0;
 int hideconsole=SW_HIDE;
 int offset_target=0;
 
+int kbpanel=KB_NONE;
+int kbitem[]={0,0,0,0,0,0,0,0,0,0,0};
 int ctrl_down=0;
 int space_down=0;
+int shift_down=0;
 int floating_type=0;
 int floating_itembar=-1;
 int floating_x=1,floating_y=1;
@@ -958,17 +961,70 @@ void gui(int nCmd)
                     done=TRUE;
                     break;
                 }else
-                if(msg.message==WM_KEYDOWN&&!(msg.lParam&(1<<30)))
+                if(msg.message==WM_KEYDOWN)
                 {
-                    if(msg.wParam==VK_CONTROL||msg.wParam==VK_SPACE)
+                    if(!(msg.lParam&(1<<30)))
                     {
-                        POINT p;
-                        GetCursorPos(&p);
-                        SetCursorPos(p.x+1,p.y);
-                        SetCursorPos(p.x,p.y);
+                        if(msg.wParam==VK_CONTROL||msg.wParam==VK_SPACE)
+                        {
+                            POINT p;
+                            GetCursorPos(&p);
+                            SetCursorPos(p.x+1,p.y);
+                            SetCursorPos(p.x,p.y);
+                        }
+                        if(msg.wParam==VK_CONTROL)ctrl_down=1;
+                        if(msg.wParam==VK_SPACE)  space_down=1;
+                        if(msg.wParam==VK_SHIFT||msg.wParam==VK_LSHIFT||msg.wParam==VK_RSHIFT)  space_down=shift_down=1;
                     }
-                    if(msg.wParam==VK_CONTROL)ctrl_down=1;
-                    if(msg.wParam==VK_SPACE)  space_down=1;
+                    if(msg.wParam==VK_SPACE)
+                    {
+                        SendMessage(hMain,WM_LBUTTONDOWN,0,0);
+                        SendMessage(hMain,WM_LBUTTONUP,0,0);
+                    }
+                    if(msg.wParam==VK_TAB&&shift_down)
+                    {
+                        kbpanel--;
+                        if(!kbpanel)kbpanel=KB_PANEL_CHK;
+                        log_con("Shift+Tab %d\n",kbpanel);
+                        if(kbpanel==KB_LANG)SetFocus(hLang);else
+                        if(kbpanel==KB_THEME)SetFocus(hTheme);else
+                            SetFocus(hMain);
+                        redrawmainwnd();
+                    }
+                    if(msg.wParam==VK_TAB&&!shift_down)
+                    {
+                        kbpanel++;
+                        if(kbpanel>KB_PANEL_CHK)kbpanel=KB_FIELD;
+                        log_con("Tab %d\n",kbpanel);
+                        if(kbpanel==KB_LANG)SetFocus(hLang);else
+                        if(kbpanel==KB_THEME)SetFocus(hTheme);else
+                            SetFocus(hMain);
+                        redrawmainwnd();
+                    }
+                    if(msg.wParam==VK_UP)
+                    {
+                        if(kbitem[kbpanel]>0)kbitem[kbpanel]--;
+                        log_con("up\n");
+                        redrawmainwnd();
+                    }
+                    if(msg.wParam==VK_DOWN)
+                    {
+                        kbitem[kbpanel]++;
+                        log_con("down\n");
+                        redrawmainwnd();
+                    }
+                    if(msg.wParam==VK_LEFT)
+                    {
+                        if(kbitem[kbpanel]>0)kbitem[kbpanel]--;
+                        log_con("left\n");
+                        redrawmainwnd();
+                    }
+                    if(msg.wParam==VK_RIGHT)
+                    {
+                        kbitem[kbpanel]++;
+                        log_con("right\n");
+                        redrawmainwnd();
+                    }
                 }else
                 if(msg.message==WM_KEYUP)
                 {
@@ -978,6 +1034,7 @@ void gui(int nCmd)
                     }
                     if(msg.wParam==VK_CONTROL)ctrl_down=0;
                     if(msg.wParam==VK_SPACE)  space_down=0;
+                    if(msg.wParam==VK_SHIFT||msg.wParam==VK_LSHIFT||msg.wParam==VK_RSHIFT)  space_down=shift_down=0;
                 }
 
                 if(!(msg.message==WM_SYSKEYDOWN&&msg.wParam==VK_MENU))
@@ -1032,6 +1089,11 @@ LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             return 1;
 
         case WM_LBUTTONDOWN:
+            if(kbpanel&&x&&y)
+            {
+                kbpanel=KB_NONE;
+                redrawmainwnd();
+            }
             SetFocus(hMain);
             if(!IsZoomed(hMain))
             {
@@ -1329,6 +1391,10 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 manager_setpos(manager_g);
                 log_con("}Sync\n");
                 LeaveCriticalSection(&sync);
+
+#ifdef USE_TORRENT
+                upddlg_populatelist(0,0);
+#endif
                 //log_con("Mode in WM_BUNDLEREADY: %d\n",installmode);
                 if(flags&FLAG_AUTOINSTALL)
                 {
@@ -1622,7 +1688,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             if(i<0)break;
             if(i<4&&j==0)
             {
-                    RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
+                RunSilent(L"devmgmt.msc",0,SW_SHOW,0);
             }
             else
             //log_con("%d,%d\n",j,i);

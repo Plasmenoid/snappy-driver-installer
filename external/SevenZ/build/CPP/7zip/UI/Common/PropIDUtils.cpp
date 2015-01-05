@@ -21,7 +21,6 @@
 using namespace NWindows;
 
 static const char g_WinAttribChars[16 + 1] = "RHS8DAdNTsLCOnE_";
-Byte k7z_PROPID_To_VARTYPE[kpid_NUM_DEFINED]; // VARTYPE
 /*
 0 READONLY
 1 HIDDEN
@@ -53,7 +52,7 @@ void ConvertWinAttribToString(char *s, UInt32 wa)
 static const char kPosixTypes[16] = { '0', 'p', 'c', '3', 'd', '5', 'b', '7', '-', '9', 'l', 'B', 's', 'D', 'E', 'F' };
 #define MY_ATTR_CHAR(a, n, c) ((a) & (1 << (n))) ? c : '-';
 
-void ConvertPropertyToShortString(char *dest, const PROPVARIANT &prop, PROPID propID, bool full)
+void ConvertPropertyToShortString(char *dest, const PROPVARIANT &prop, PROPID propID, bool full) throw()
 {
   *dest = 0;
   if (prop.vt == VT_FILETIME)
@@ -205,7 +204,7 @@ static const char *sidNames[] =
 struct CSecID2Name
 {
   UInt32 n;
-  char *sz;
+  const char *sz;
 };
 
 const CSecID2Name sid_32_Names[] =
@@ -256,12 +255,12 @@ static const CSecID2Name sid_21_Names[] =
 struct CServicesToName
 {
   UInt32 n[5];
-  char *sz;
+  const char *sz;
 };
 
 static const CServicesToName services_to_name[] =
 {
-  { { 956008885, 3418522649, 1831038044, 1853292631, 2271478464 } , "TrustedInstaller" }
+  { { 0x38FB89B5, 0xCBC28419, 0x6D236C5C, 0x6E770057, 0x876402C0 } , "TrustedInstaller" }
 };
 
 static void ParseSid(AString &s, const Byte *p, UInt32 lim, UInt32 &sidSize)
@@ -330,7 +329,7 @@ static void ParseSid(AString &s, const Byte *p, UInt32 lim, UInt32 &sidSize)
       }
     }
   }
-
+  
   char sz[16];
   s += "S-1-";
   if (p[2] == 0 && p[3] == 0)
