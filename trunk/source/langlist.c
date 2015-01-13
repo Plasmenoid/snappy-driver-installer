@@ -149,6 +149,7 @@ entry_t language[STR_NM]=
 // Driver popup windows
     DEF_STR("STR_HINT_UNKNOWN")
     DEF_STR("STR_HINT_ANALYSIS")
+    DEF_STR("STR_HINT_SIGNATURE")
     DEF_STR("STR_HINT_DRP")
     DEF_STR("STR_HINT_DEVICE")
     DEF_STR("STR_HINT_HARDWAREID")

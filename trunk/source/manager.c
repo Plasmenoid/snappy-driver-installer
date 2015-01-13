@@ -69,6 +69,16 @@ void manager_sorta(matcher_t *m,int *v)
             hwidmatch_i=(devicematch_i->num_matches)?&m->hwidmatch_list[devicematch_i->start_matches]:0;
             hwidmatch_j=(devicematch_j->num_matches)?&m->hwidmatch_list[devicematch_j->start_matches]:0;
 
+            if(devicematch_i->device->problem<devicematch_j->device->problem)
+            {
+                int t;
+
+                t=v[i];
+                v[i]=v[j];
+                v[j]=t;
+            }
+            else
+            if(devicematch_i->device->problem==devicematch_j->device->problem)
             if((hwidmatch_i&&hwidmatch_j&&wcscmp(getdrp_packname(hwidmatch_i),getdrp_packname(hwidmatch_j))>0)
                ||
                (!hwidmatch_i&&hwidmatch_j))
@@ -81,7 +91,6 @@ void manager_sorta(matcher_t *m,int *v)
             }
         }
     }
-    //for(i=0;i<num;i++)v[i]=i;
 }
 
 int  manager_drplive(WCHAR *s)
@@ -207,7 +216,7 @@ void manager_filter(manager_t *manager,int options)
             for(k=0;k<NUM_STATUS;k++)
                 if((!o1||!cnt[NUM_STATUS])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
             {
-                if((options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&(options&FILTER_SHOW_INVALID)==0&&
+                if((options&FILTER_SHOW_WORSE_RANK)==0/*&&(options&FILTER_SHOW_OLD)==0*/&&(options&FILTER_SHOW_INVALID)==0&&
                    devicematch->device->problem==0&&devicematch->driver&&itembar->hwidmatch->altsectscore<2)continue;
 
                 // hide if
@@ -215,7 +224,7 @@ void manager_filter(manager_t *manager,int options)
                 //[ ] Worse
                 //worse, no problem
                 if((options&FILTER_SHOW_NEWER)!=0
-                   &&(options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_OLD)==0&&(options&FILTER_SHOW_INVALID)==0
+                   &&(options&FILTER_SHOW_WORSE_RANK)==0/*&&(options&FILTER_SHOW_OLD)==0*/&&(options&FILTER_SHOW_INVALID)==0
                    &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0&&devicematch->driver)continue;
 
                 if(getdrp_packontorrent(itembar->hwidmatch)&&!ontorrent)
@@ -426,6 +435,7 @@ void manager_testitembars(manager_t *manager)
     for(i=0;i<manager->items_handle.items;i++,itembar++)
     if(i>SLOT_EMPTY&&i<RES_SLOTS)
     {
+        if(i==SLOT_VIRUS_HIDDEN||i==SLOT_VIRUS_RECYCLER||i==SLOT_NODRIVERS||i==SLOT_DPRDIR)continue;
         itembar->index=index;
         itembar->isactive=1;
     }
@@ -910,6 +920,7 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
     int wx=XG(D(DRVITEM_WX),x);
     int r=D(box[box_status(index)].index+3);
     int intend=0;
+    int oldstyle=flags&FLAG_SHOWDRPNAMES1||flags&FLAG_OLDSTYLE;
 
     itembar_t *itembar=&manager->items_list[index];
     int pos=(itembar->curpos>>16)-D(DRVITEM_DIST_Y0);
@@ -1105,7 +1116,18 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
                 pos+=D(ITEM_TEXT_OFS_Y);
                 wsprintf(bufw,L"%S",getdrp_drvdesc(itembar->hwidmatch));
                 SetTextColor(hdc,D(boxindex[box_status(index)]+14));
-                TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
+                RECT rect;
+                int wx1=wx-D(ITEM_TEXT_OFS_X)-D(ITEM_ICON_OFS_X);
+                rect.left=x+D(ITEM_TEXT_OFS_X);
+                rect.top=pos;
+                if(intend)wx1-=D(DRVITEM_LINE_INTEND);
+                rect.right=rect.left+wx1/2;
+                rect.bottom=rect.top+90;
+                if(oldstyle)
+                    TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
+                else
+                    DrawText(hdc,bufw,-1,&rect,DT_WORDBREAK);
+
 
                 // Available driver status
                 SetTextColor(hdc,D(boxindex[box_status(index)]+15));
@@ -1131,7 +1153,14 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
                     default:
                         wcscpy(bufw,STR(itembar->install_status));
                 }
-                TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+                rect.left=x+D(ITEM_TEXT_OFS_X)+wx1/2;
+                rect.top=pos;
+                rect.right=rect.left+wx1/2;
+                rect.bottom=rect.top+90;
+                if(oldstyle)
+                    TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+                else
+                    DrawText(hdc,bufw,-1,&rect,DT_WORDBREAK);
 
                 if(flags&FLAG_SHOWDRPNAMES1)
                 {
@@ -1153,11 +1182,27 @@ int  manager_drawitem(manager_t *manager,HDC hdc,int index,int ofsy,int zone,int
                 {
                     wsprintf(bufw,L"%ws",manager->matcher->state->text+itembar->devicematch->device->Devicedesc);
                     SetTextColor(hdc,D(boxindex[box_status(index)]+14));
-                    TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
+                    RECT rect;
+                    int wx1=wx-D(ITEM_TEXT_OFS_X)-D(ITEM_ICON_OFS_X);
+                    rect.left=x+D(ITEM_TEXT_OFS_X);
+                    rect.top=pos;
+                    rect.right=rect.left+wx1/2;
+                    rect.bottom=rect.top+90;
+                    if(oldstyle)
+                        TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos,bufw,wcslen(bufw));
+                    else
+                        DrawText(hdc,bufw,-1,&rect,DT_WORDBREAK);
 
                     str_status(bufw,itembar);
                     SetTextColor(hdc,D(boxindex[box_status(index)]+15));
-                    TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+                    rect.left=x+D(ITEM_TEXT_OFS_X)+wx1/2;
+                    rect.top=pos;
+                    rect.right=rect.left+wx1/2;
+                    rect.bottom=rect.top+90;
+                    if(oldstyle)
+                        TextOut(hdc,x+D(ITEM_TEXT_OFS_X),pos+D(ITEM_TEXT_DIST_Y),bufw,wcslen(bufw));
+                    else
+                        DrawText(hdc,bufw,-1,&rect,DT_WORDBREAK);
                 }
             }
             // Device icon
@@ -1677,8 +1722,7 @@ void popup_drivercmp(manager_t *manager,HDC hdcMem,RECT rect,int index)
     if(hwidmatch_f)
     {
         TextOutF(&td,isvalidcat(hwidmatch_f,manager->matcher->state)?cb:D(POPUP_CMP_INVALID_COLOR),
-                 L"cat: (%d)%S",pickcat(hwidmatch_f,manager->matcher->state),getdrp_drvcat(hwidmatch_f,pickcat(hwidmatch_f,manager->matcher->state)));
-//        TextOutF(&td,0,L"cat: (*)%S",t+cur_driver->cat);
+                 L"%s(%d)%S",STR(STR_HINT_SIGNATURE),pickcat(hwidmatch_f,manager->matcher->state),getdrp_drvcat(hwidmatch_f,pickcat(hwidmatch_f,manager->matcher->state)));
 
         td.x=p0;TextOutF(&td,c0,L"%s",STR(STR_HINT_DRP));td.x=p1;
         TextOutF(&td,c0,L"%s\\%s",getdrp_packpath(hwidmatch_f),getdrp_packname(hwidmatch_f));

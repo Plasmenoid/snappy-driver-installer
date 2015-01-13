@@ -249,4 +249,5 @@ DRVITEM_DIST_Y0          = 45
 
 // Driver item content
 ITEM_CHECKBOX_SIZE       = 25
+ITEM_TEXT_OFS_Y          = 0
 ITEM_TEXT_DIST_Y         = 16

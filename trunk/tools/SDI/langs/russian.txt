@@ -126,6 +126,7 @@ STR_ABOUT_LICENSE       = "Snappy Driver Installer распространяет�
 // Всплывающее окно (при удерживании Ctrl или пробела)
 STR_HINT_UNKNOWN        = "неизвестно"
 STR_HINT_ANALYSIS       = "Анализ"
+STR_HINT_SIGNATURE      = "Подпись: "
 STR_HINT_DRP            = "Драйверпак"
 STR_HINT_DEVICE         = "Устройство"
 STR_HINT_HARDWAREID     = "HardwareID"

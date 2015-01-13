@@ -127,6 +127,7 @@ STR_ABOUT_SIZE          = 2
 // Popup on drivers(while holding Ctrl or spacebar)
 STR_HINT_UNKNOWN        = "Bilinmiyor"
 STR_HINT_ANALYSIS       = "Analiz"
+//STR_HINT_SIGNATURE      = "" // Translate
 STR_HINT_DRP            = "Sürücü Paketi"
 STR_HINT_DEVICE         = "Aygıt"
 STR_HINT_HARDWAREID     = "Donanım Kimliği"

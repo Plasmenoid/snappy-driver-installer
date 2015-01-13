@@ -190,6 +190,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-nofeaturescore"))flags|=FLAG_NOFEATURESCORE;else
         if(!wcscmp(pr,L"-showdrpnames1"))flags|=FLAG_SHOWDRPNAMES1;else
         if(!wcscmp(pr,L"-showdrpnames2"))flags|=FLAG_SHOWDRPNAMES2;else
+        if(!wcscmp(pr,L"-oldstyle"))     flags|=FLAG_OLDSTYLE;else
         if(!wcscmp(pr,L"-preservecfg"))  flags|=FLAG_PRESERVECFG;else
         if(!wcscmp(pr,L"-showconsole"))  flags|=FLAG_SHOWCONSOLE;else
         if(!wcscmp(pr,L"-checkupdates")) flags|=FLAG_CHECKUPDATES;else
@@ -302,6 +303,7 @@ void settings_save()
     if(flags&FLAG_NOFEATURESCORE)fwprintf(f,L"-nofeaturescore ");
     if(flags&FLAG_SHOWDRPNAMES1)fwprintf(f,L"-showdrpnames1 ");
     if(flags&FLAG_SHOWDRPNAMES2)fwprintf(f,L"-showdrpnames2 ");
+    if(flags&FLAG_OLDSTYLE)fwprintf(f,L"-oldstyle ");
     if(flags&FLAG_SHOWCONSOLE)fwprintf(f,L"-showconsole ");
     if(flags&FLAG_CHECKUPDATES)fwprintf(f,L"-checkupdates ");
     if(flags&FLAG_ONLYUPDATES)fwprintf(f,L"-onlyupdates ");
@@ -924,7 +926,7 @@ void gui(int nCmd)
         log_con("lang %d\n",f);
         lang_set(f);
 
-        if(MessageBox(0,STR(STR_UPD_DIALOG_MSG),STR(STR_UPD_DIALOG_TITLE),MB_YESNO|MB_ICONQUESTION)==IDYES)
+        //if(MessageBox(0,STR(STR_UPD_DIALOG_MSG),STR(STR_UPD_DIALOG_TITLE),MB_YESNO|MB_ICONQUESTION)==IDYES)
         {
             flags|=FLAG_CHECKUPDATES;
             checkupdates();

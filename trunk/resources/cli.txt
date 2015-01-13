@@ -50,6 +50,7 @@ Settings.cfg
 /norestorepnt     Suppress creating of restore point.
 /showdrpnames1    Shows driverpack names on the right.
 /showdrpnames2    Shows driverpack names above.
+/oldstyle         Shows driver list using old style.
 /preservecfg      Prevents updating of settings.cfg.
 /cfg:<FileName>   Custom .cfg file, if set "settings.cfg" not processed.
                   Other swithes processed

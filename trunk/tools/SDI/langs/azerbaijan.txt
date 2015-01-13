@@ -126,6 +126,7 @@ STR_ABOUT_LICENSE       = "Snappy Driver Installer GNU General Public License ve
 // Всплывающее окно (при удерживании Ctrl или пробела)
 STR_HINT_UNKNOWN        = "naməlum"
 STR_HINT_ANALYSIS       = "Analiz"
+//STR_HINT_SIGNATURE      = "" // Translate
 STR_HINT_DRP            = "Drayverpack"
 STR_HINT_DEVICE         = "Qurğu"
 STR_HINT_HARDWAREID     = "HardwareID"
