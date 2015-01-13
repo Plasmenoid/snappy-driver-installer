@@ -144,6 +144,7 @@ enum
 // Driver popup windows
     STR_HINT_UNKNOWN,
     STR_HINT_ANALYSIS,
+    STR_HINT_SIGNATURE,
     STR_HINT_DRP,
     STR_HINT_DEVICE,
     STR_HINT_HARDWAREID,

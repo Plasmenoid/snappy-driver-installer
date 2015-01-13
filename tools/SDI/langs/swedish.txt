@@ -127,6 +127,7 @@ STR_ABOUT_SIZE 		= 12
 // Popup drivrutin (medan du håller Ctrl eller mellanslag) 
 STR_HINT_UNKNOWN 	= "okänd" 
 STR_HINT_ANALYSIS 	= "analys" 
+STR_HINT_SIGNATURE  = "Signatur: "
 STR_HINT_DRP 		= "Driverpack" 
 STR_HINT_DEVICE 	= "Enhet" 
 STR_HINT_HARDWAREID 	= "HardwareID" 

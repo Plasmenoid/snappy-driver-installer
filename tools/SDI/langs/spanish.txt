@@ -127,6 +127,7 @@ STR_ABOUT_SIZE          = 13
 // Popup on drivers(while holding Ctrl or spacebar)
 STR_HINT_UNKNOWN        = "Desconocido"
 STR_HINT_ANALYSIS       = "Análisis"
+STR_HINT_SIGNATURE      = "Firma: "
 STR_HINT_DRP            = "DriverPack"
 STR_HINT_DEVICE         = "Dispositivo"
 STR_HINT_HARDWAREID     = "ID Hardware"

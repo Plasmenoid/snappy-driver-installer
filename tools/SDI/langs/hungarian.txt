@@ -127,6 +127,7 @@ STR_ABOUT_SIZE          = 12
 // Popup on drivers(while holding Ctrl or spacebar)
 STR_HINT_UNKNOWN        = "Ismeretlen"
 STR_HINT_ANALYSIS       = "Elemzés"
+STR_HINT_SIGNATURE      = "Aláírás: "
 STR_HINT_DRP            = "Driverpack"
 STR_HINT_DEVICE         = "Eszköz"
 STR_HINT_HARDWAREID     = "Hardver azonosító"
@@ -233,8 +234,8 @@ STR_REST_CREATING       = "Létrehozás..."
 STR_REST_CREATED        = "Létrehozva"
 STR_REST_FAILED         = "Nem sikerült létrehozni"
 
-//STR_INST_QUIT_TITLE     = "" // Translate
-//STR_INST_QUIT_MSG       = "" // Translate
+STR_INST_QUIT_TITLE     = "Megszakítás"
+STR_INST_QUIT_MSG       = "Biztosan megszakítja a telepítést?"
 STR_HINT_STOPINST       = "Klikk ide a telepítés megszakításához"
 STR_HINT_STOPEXTR       = "Klikk ide a kicsomagolás leállításához"
 STR_HINT_DRIVER         = "Klikk ide az alternatív driverek megjelenítéséhez\nNyomja le a 'Space' gombot, az alternatív driverek részleteihez"
@@ -247,9 +248,9 @@ STR_SYS_DISINSTALL      = "Telepítés letiltása"
 STR_SYS_DISRESTPNT      = "Visszaállítási pontok blokkolása"
 
 // Update
-//STR_UPD_DIALOG_TITLE    = "Frissítés ellenőrzése"
-//STR_UPD_DIALOG_MSG      = "Akar automatikus Online ellenőrzést az újabb driver-csomagok és az alkalmazás verziókkal kapcsolatban?"
-//STR_UPD_DIALOG_INDEX    = "Letölti a legújabb indexeket annak érdekében, hogy lehetővé váljon mely driver-csomagokat kell letöltenie?"
+STR_UPD_DIALOG_TITLE    = "Frissítés ellenőrzése"
+STR_UPD_DIALOG_MSG      = "Akar automatikus Online ellenőrzést az újabb driver-csomagok és az alkalmazás verziókkal kapcsolatban?"
+STR_UPD_DIALOG_INDEX    = "Letölti a legújabb indexeket annak érdekében, hogy lehetővé váljon mely driver-csomagokat kell letöltenie?"
 
 STR_UPD_TITLE           = "Elérhető frissítések"
 STR_UPD_BTN_ALL         = "Mind kijelölése"
