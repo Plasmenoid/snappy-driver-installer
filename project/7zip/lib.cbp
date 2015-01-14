@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="7-ZIP 9.38" />
+		<Option title="7-ZIP 7.38" />
 		<Option platforms="Windows;" />
 		<Option makefile="makefile" />
 		<Option compiler="gcc" />
