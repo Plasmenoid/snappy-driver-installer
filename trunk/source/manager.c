@@ -640,7 +640,7 @@ void str_status(WCHAR *buf,itembar_t *itembar)
         else
         {
             if(status&STATUS_MISSING)
-                wsprintf(buf,L"%s,%d",STR(STR_STATUS_MISSING),itembar->devicematch->device->problem);
+                wsprintf(buf,L"%s",STR(STR_STATUS_MISSING),itembar->devicematch->device->problem);
             else
             {
                 if(status&STATUS_BETTER&&status&STATUS_NEW)        wcscat(buf,STR(STR_STATUS_BETTER_NEW));
