@@ -12,4 +12,5 @@ echo Stitching...
 chcp 866>nul
 for /F %%f in ('dir /b logs\*.txt') do call attach_single.bat logs\%%f ..\%1
 copy /b logs\*.* ..\%1.txt >nul
+dubremover.exe ..\%1.txt ..\%1_cl.txt
 echo done
