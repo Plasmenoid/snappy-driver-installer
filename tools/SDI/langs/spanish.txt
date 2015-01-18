@@ -233,11 +233,11 @@ STR_REST_CREATING       = "Crear un punto de restauración..."
 STR_REST_CREATED        = "Punto de restauración creado"
 STR_REST_FAILED         = "No se pudo crear un punto de restauración"
 
-//STR_INST_QUIT_TITLE     = "" // Translate
-//STR_INST_QUIT_MSG       = "" // Translate
+STR_INST_QUIT_TITLE     = "Cancelado"
+STR_INST_QUIT_MSG       = "¿Seguro que quieres interrumpir la instalación?"
 STR_HINT_STOPINST       = "Haz clic aquí para cancelar la instalación."
 STR_HINT_STOPEXTR       = "Haz clic aquí para detener la extracción."
-STR_HINT_DRIVER         = "Manten pulsado Ctrl para comparar el controlador instalado a la disponible.\nHold Spacebar to display info about alternate drivers."
+STR_HINT_DRIVER         = "Manten pulsado Ctrl para comparar el controlador instalado con el disponible.\nManten pulsada la barra espaciadora para mostrar información sobre controladores alternativos."
 
 STR_SYS_WINVER          = "Versión de Windows"
 STR_SYS_32              = "32-bit"
@@ -277,7 +277,7 @@ STR_UPD_KB              = "KB"
 STR_UPD_MB              = "MB"
 STR_UPD_GB              = "GB"
 STR_UPD_SEC             = "/s"
-STR_UPD_TSEC            = "secs"
+STR_UPD_TSEC            = "segs"
 STR_UPD_TMIN            = "mins"
 STR_UPD_THOUR           = "horas"
 STR_UPD_TDAY            = "días"
@@ -290,7 +290,7 @@ STR_UPD_UPDATEHINT2     = "Debes actualizar la base primero para poder utilizar 
 // Update hint
 STR_UPD_AVAIL1          = "Actualización disponible: SDI R%d"
 STR_UPD_AVAIL2          = "Actualizaciones disponibles: %d driverpacks"
-STR_UPD_AVAIL3          = "Actualizaciones disponibles: SDI R%d and %d driverpacks"
+STR_UPD_AVAIL3          = "Actualizaciones disponibles: SDI R%d y %d driverpacks"
 STR_UPD_START           = "(Haz clic aquí para iniciar la descarga)"
 STR_UPD_PROGRES         = "descargado %s de %s (%d%%)"
 STR_UPD_MODIFY          = "(Haz clic aquí para seleccionar las actualizaciones)"

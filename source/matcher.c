@@ -413,6 +413,7 @@ int calc_altsectscore(hwidmatch_t *hwidmatch,state_t *state,int curscore)
         if((calc_markerscore(state,getdrp_infpath(hwidmatch))&7)!=7)return 0;
 
     //log_file("Sc:%d\n\n",curscore);
+    if(flags&FLAG_FILTERSP)return 2;
     return isvalidcat(hwidmatch,state)?2:1;
 }
 

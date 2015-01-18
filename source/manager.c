@@ -212,6 +212,8 @@ void manager_filter(manager_t *manager,int options)
                     cnt[NUM_STATUS]++;
             }
 
+            if(flags&FLAG_FILTERSP&&itembar->hwidmatch->altsectscore==2&&!isvalidcat(itembar->hwidmatch,manager->matcher->state))
+                itembar->hwidmatch->altsectscore=1;
 
             for(k=0;k<NUM_STATUS;k++)
                 if((!o1||!cnt[NUM_STATUS])&&(options&statustnl[k].filter)&&itembar->hwidmatch->status&statustnl[k].status)
@@ -219,12 +221,14 @@ void manager_filter(manager_t *manager,int options)
                 if((options&FILTER_SHOW_WORSE_RANK)==0/*&&(options&FILTER_SHOW_OLD)==0*/&&(options&FILTER_SHOW_INVALID)==0&&
                    devicematch->device->problem==0&&devicematch->driver&&itembar->hwidmatch->altsectscore<2)continue;
 
+                if((options&FILTER_SHOW_OLD)!=0&&(itembar->hwidmatch->status&STATUS_BETTER))continue;
+
                 // hide if
                 //[X] Newer
                 //[ ] Worse
                 //worse, no problem
                 if((options&FILTER_SHOW_NEWER)!=0
-                   &&(options&FILTER_SHOW_WORSE_RANK)==0/*&&(options&FILTER_SHOW_OLD)==0*/&&(options&FILTER_SHOW_INVALID)==0
+                   &&(options&FILTER_SHOW_WORSE_RANK)==0&&(options&FILTER_SHOW_INVALID)==0
                    &&itembar->hwidmatch->status&STATUS_WORSE&&devicematch->device->problem==0&&devicematch->driver)continue;
 
                 if(getdrp_packontorrent(itembar->hwidmatch)&&!ontorrent)
@@ -331,6 +335,7 @@ void manager_print_hr(manager_t *manager)
     for(k=RES_SLOTS;k<manager->items_handle.items;k++,itembar++)
         if(itembar->isactive&&(itembar->first&2)==0)
         {
+            if(flags&FLAG_FILTERSP&&!isvalidcat(itembar->hwidmatch,manager->matcher->state))continue;
             str_status(buf,itembar);
             log_file("\n$%04d, %ws\n",k,buf);
             if(itembar->devicematch->device)
