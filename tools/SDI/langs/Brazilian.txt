@@ -4,7 +4,7 @@ STR_EMPTY               = ""
 STR_EMPTY_H             = ""
 
 STR_LANG_NAME           = "Português Brasil"
-STR_LANG_CODE           = 0x09
+STR_LANG_CODE           = 0x16
 
 // left panel
 STR_SHOW_SYSINFO        = "Informação do sistema"
