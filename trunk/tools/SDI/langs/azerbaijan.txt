@@ -4,7 +4,7 @@ STR_EMPTY               = ""
 STR_EMPTY_H             = ""
 
 STR_LANG_NAME           = "Azerbaijan"
-STR_LANG_CODE           = 0x19
+STR_LANG_CODE           = 0x2C
 
 // Sol panel
 STR_SHOW_SYSINFO        = "Sistem barədə məlumat"
