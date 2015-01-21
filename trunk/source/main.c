@@ -89,6 +89,7 @@ int scrollvisible=0;
 
 int ret_global=0;
 volatile int deviceupdate_exitflag=0;
+FILE *snplist=0;
 HANDLE deviceupdate_event;
 
 // Settings
@@ -248,6 +249,7 @@ void settings_parse(const WCHAR *str,int ind)
         if(!wcscmp(pr,L"-failsafe"))     flags|=FLAG_FAILSAFE;else
         if(!wcscmp(pr,L"-delextrainfs")) flags|=FLAG_DELEXTRAINFS;else
         if( wcsstr(pr,L"-verbose:"))     log_verbose=_wtoi(pr+9);else
+        if( wcsstr(pr,L"-snplist:"))     snplist=_wfopen(pr+9,L"rt");else
         if( wcsstr(pr,L"-ls:"))          {wcscpy(state_file,pr+4);statemode=STATEMODE_LOAD;}else
         if(!wcscmp(pr,L"-a:32"))         virtual_arch_type=32;else
         if(!wcscmp(pr,L"-a:64"))         virtual_arch_type=64;else
@@ -599,6 +601,12 @@ unsigned int __stdcall thread_loadall(void *arg)
         log_con("}2Sync\n");
         LeaveCriticalSection(&sync);
         WaitForSingleObject(deviceupdate_event,INFINITE);
+        if(snplist)
+        {
+            fgetws(state_file,BUFLEN,snplist);
+            log_con("SNP: '%ws'\n",state_file);
+            deviceupdate_exitflag=feof(snplist);
+        }
         //printf("%ld\n",GetTickCount()-t);
     }while(!deviceupdate_exitflag);
     DeleteCriticalSection(&sync);
@@ -878,6 +886,26 @@ void mkdir_r(const WCHAR *path)
 //}
 
 //{ GUI
+void tabadvance(int v)
+{
+    while(1)
+    {
+        kbpanel+=v;
+        if(!kbpanel)kbpanel=KB_PANEL_CHK;
+        if(kbpanel>KB_PANEL_CHK)kbpanel=KB_FIELD;
+
+        if(!expertmode&&kbpanel>=KB_ACTIONS&&kbpanel<=KB_PANEL3)continue;
+        if(kbpanel==KB_PANEL_CHK&&!YP(&panels[11]))continue;
+        break;
+    }
+    //log_con("Tab %d,%d\n",kbpanel,YP(&panels[11]));
+    if(kbpanel==KB_LANG)SetFocus(hLang);else
+    if(kbpanel==KB_THEME)SetFocus(hTheme);else
+        SetFocus(hMain);
+    redrawfield();
+    redrawmainwnd();
+}
+
 void gui(int nCmd)
 {
     int done=0;
@@ -985,48 +1013,36 @@ void gui(int nCmd)
                     }
                     if(msg.wParam==VK_TAB&&shift_down)
                     {
-                        kbpanel--;
-                        if(!kbpanel)kbpanel=KB_PANEL_CHK;
-                        log_con("Shift+Tab %d\n",kbpanel);
-                        if(kbpanel==KB_LANG)SetFocus(hLang);else
-                        if(kbpanel==KB_THEME)SetFocus(hTheme);else
-                            SetFocus(hMain);
-                        redrawmainwnd();
+                        tabadvance(-1);
                     }
                     if(msg.wParam==VK_TAB&&!shift_down)
                     {
-                        kbpanel++;
-                        if(kbpanel>KB_PANEL_CHK)kbpanel=KB_FIELD;
-                        log_con("Tab %d\n",kbpanel);
-                        if(kbpanel==KB_LANG)SetFocus(hLang);else
-                        if(kbpanel==KB_THEME)SetFocus(hTheme);else
-                            SetFocus(hMain);
-                        redrawmainwnd();
+                        tabadvance(1);
                     }
                     if(msg.wParam==VK_UP)
                     {
                         if(kbitem[kbpanel]>0)kbitem[kbpanel]--;
-                        log_con("up\n");
                         redrawmainwnd();
+                        redrawfield();
                     }
                     if(msg.wParam==VK_DOWN)
                     {
                         kbitem[kbpanel]++;
-                        log_con("down\n");
                         redrawmainwnd();
+                        redrawfield();
                     }
-                    if(msg.wParam==VK_LEFT)
+                    /*if(msg.wParam==VK_LEFT)
                     {
                         if(kbitem[kbpanel]>0)kbitem[kbpanel]--;
-                        log_con("left\n");
                         redrawmainwnd();
+                        redrawfield();
                     }
                     if(msg.wParam==VK_RIGHT)
                     {
                         kbitem[kbpanel]++;
-                        log_con("right\n");
                         redrawmainwnd();
-                    }
+                        redrawfield();
+                    }*/
                 }else
                 if(msg.message==WM_KEYUP)
                 {

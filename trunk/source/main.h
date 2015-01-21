@@ -291,6 +291,7 @@ void snapshot();
 void extractto();
 
 // GUI
+void tabadvance(int v);
 void gui(int nCmd);
 void checktimer(WCHAR *str,long long t,int uMsg);
 LRESULT CALLBACK WndProcCommon(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);

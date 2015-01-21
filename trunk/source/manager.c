@@ -382,13 +382,27 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
 
     *r=-2;
     *zone=0;
+    int cnt=0;
+
     y-=-D(DRVITEM_DIST_Y0);
     x-=Xg(D(DRVITEM_OFSX));
-    if(x<0||x>wx)return;
+    if(kbpanel==KB_NONE)if(x<0||x>wx)return;
     itembar=manager->items_list;
     for(i=0;i<manager->items_handle.items;i++,itembar++)
     if(itembar->isactive&&(itembar->first&2)==0)
     {
+
+        if(kbpanel==KB_FIELD)
+        {
+            *r=i;
+            if(kbitem[kbpanel]==cnt)
+            {
+        log_con("%d\n",kbitem[kbpanel]);
+                return;
+            }
+            cnt++;
+            continue;
+        }
         pos=itembar->curpos>>16;
         if(i>=SLOT_RESTORE_POINT&&y<cutoff)continue;
         if(i>=SLOT_RESTORE_POINT)pos-=ofsy;
@@ -402,8 +416,14 @@ void manager_hitscan(manager_t *manager,int x,int y,int *r,int *zone)
             if(x>wx-50&&!ofs)*zone=expertmode?2:2;
             if(!*zone&&(x-ofs<D(ITEM_CHECKBOX_SIZE)))*zone=3;
             if(!*zone&&(x>240+190))*zone=3;
-            return;
+            if(kbpanel==KB_NONE)return;
         }
+    }
+    if(kbpanel==KB_FIELD)
+    {
+        kbitem[kbpanel]=cnt-1;
+        log_con("%d,%d\n",kbitem[kbpanel],*r);
+        return;
     }
     *r=-1;
 }
