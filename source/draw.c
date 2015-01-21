@@ -103,19 +103,19 @@ panelitem_t panel8[]=
 panelitem_t panel9[]=
 {
 
-    {TYPE_GROUP,0,1,0},
+    {TYPE_GROUP,KB_INSTALL,1,0},
     {TYPE_BUTTON,STR_INSTALL,               ID_INSTALL,0},
 };
 
 panelitem_t panel10[]=
 {
-    {TYPE_GROUP,0,1,0},
+    {TYPE_GROUP,KB_INSTALL,1,0},
     {TYPE_BUTTON,STR_SELECT_ALL,            ID_SELECT_ALL,0},
 };
 
 panelitem_t panel11[]=
 {
-    {TYPE_GROUP,0,1,0},
+    {TYPE_GROUP,KB_INSTALL,1,0},
     {TYPE_BUTTON,STR_SELECT_NONE,           ID_SELECT_NONE,0},
 };
 
@@ -642,6 +642,11 @@ int panel_hitscan(panel_t *panel,int hx,int hy)
 
     if(kbpanel&&panel->items[0].str_id==kbpanel)
     {
+        if(kbpanel==KB_INSTALL)
+        {
+            if(kbitem[kbpanel]>2)kbitem[kbpanel]=2;
+            return panel->index-8==kbitem[kbpanel];
+        }
         if(kbitem[kbpanel]>panel->items[0].action_id)kbitem[kbpanel]=panel->items[0].action_id;
         while(panel->items[kbitem[kbpanel]].type!=TYPE_CHECKBOX&&
               panel->items[kbitem[kbpanel]].type!=TYPE_BUTTON)kbitem[kbpanel]++;

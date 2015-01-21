@@ -92,6 +92,7 @@ void image_loadRes(img_t *img,int id);
 void image_draw(HDC dc,img_t *img,int x1,int y1,int x2,int y2,int anchor,int fill);
 
 // Draw
+void drawrectsel(HDC hdc,int x1,int y1,int x2,int y2,int color2,int w);
 void box_draw(HDC hdc,int x1,int y1,int x2,int y2,int i);
 void drawcheckbox(HDC hdc,int x,int y,int wx,int wy,int checked,int active);
 void drawrect(HDC hdc,int x1,int y1,int x2,int y2,int color1,int color2,int w,int r);
