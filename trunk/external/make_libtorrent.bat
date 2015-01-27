@@ -1,7 +1,7 @@
 @echo off
 cls
 cd torrent
-set BOOST_ROOT=%CD%\boost_1_55_0
+set BOOST_ROOT=%CD%\boost_1_57_0
 set GCC_PATH=c:\MinGW_481
 set GCC_VERSION=4.8.1
 
@@ -35,7 +35,7 @@ echo %GCC_PATH% /mingw > %GCC_PATH%\msys\1.0\etc\fstab
 rem Build bjam.exe
 if /I not exist %GCC_PATH%\include\wspiapi.h (copy ..\asio\wspiapi.h %GCC_PATH%\include\wspiapi.h /Y)
 if /I not exist %GCC_PATH%\include\shobjidl.h (copy ..\shobjidl.h %GCC_PATH%\include\shobjidl.h /Y)
-if /I not exist "%BOOST_ROOT%\boost\asio\detail\socket_types.hpp" (copy ..\asio\socket_types.hpp "%BOOST_ROOT%\boost\asio\detail\socket_types.hpp" /Y)
+copy ..\asio\socket_types.hpp "%BOOST_ROOT%\boost\asio\detail\socket_types.hpp" /Y
 if /I exist "%BOOST_ROOT%\bjam.exe" (echo Skipping Build bjam.exe & goto skipbuildbjam)
 cd "%BOOST_ROOT%"
 call bootstrap.bat mingw

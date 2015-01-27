@@ -68,8 +68,10 @@ void manager_sorta(matcher_t *m,int *v)
             devicematch_j=&m->devicematch_list[v[j]];
             hwidmatch_i=(devicematch_i->num_matches)?&m->hwidmatch_list[devicematch_i->start_matches]:0;
             hwidmatch_j=(devicematch_j->num_matches)?&m->hwidmatch_list[devicematch_j->start_matches]:0;
+            int ismi=isMissing(devicematch_i->device,devicematch_i->driver,m->state);
+            int ismj=isMissing(devicematch_j->device,devicematch_j->driver,m->state);
 
-            if(devicematch_i->device->problem<devicematch_j->device->problem)
+            if(ismi<ismj)
             {
                 int t;
 
@@ -78,7 +80,7 @@ void manager_sorta(matcher_t *m,int *v)
                 v[j]=t;
             }
             else
-            if(devicematch_i->device->problem==devicematch_j->device->problem)
+            if(ismi==ismj)
             if((hwidmatch_i&&hwidmatch_j&&wcscmp(getdrp_packname(hwidmatch_i),getdrp_packname(hwidmatch_j))>0)
                ||
                (!hwidmatch_i&&hwidmatch_j))

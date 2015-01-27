@@ -37,6 +37,14 @@ const tbl_t table_version[NUM_VER_NAMES]=
     {"driverpackagedisplayname",   24},
     {"driverpackagetype",          17}
 };
+const WCHAR *olddrps[]=
+{
+    L"DP_Video_Server_1",
+    L"DP_Video_Others_1",
+    L"DP_Video_nVIDIA_1",
+    L"DP_Video_AMD_1",
+    L"DP_Videos_AMD_1",
+};
 //}
 
 //{ Parse
@@ -506,7 +514,10 @@ int collection_scanfolder_count(collection_t *col,const WCHAR *path)
     WIN32_FIND_DATA FindFileData;
     WCHAR buf[BUFLEN];
     driverpack_t drp;
-    int cnt=0;
+    int cnt;
+    int i;
+
+    cnt=0;
 
     wsprintf(buf,L"%ws\\*.*",path);
     hFind=FindFirstFile(buf,&FindFileData);
@@ -521,7 +532,14 @@ int collection_scanfolder_count(collection_t *col,const WCHAR *path)
         } else
         {
             int len=lstrlen(FindFileData.cFileName);
-            if(_wcsicmp(FindFileData.cFileName+len-3,L".7z")==0)
+            for(i=0;i<5;i++)
+            if(StrStrIW(FindFileData.cFileName,olddrps[i]))
+            {
+                wsprintf(buf,L" /c del \"%s\\%s*.7z\" /Q /F",col->driverpack_dir,olddrps[i]);
+                RunSilent(L"cmd",buf,SW_HIDE,1);
+                break;
+            }
+            if(i==5&&_wcsicmp(FindFileData.cFileName+len-3,L".7z")==0)
             {
                 driverpack_init(&drp,path,FindFileData.cFileName,col);
                 //log_con("<%ws><%ws>\n",path,FindFileData.cFileName);

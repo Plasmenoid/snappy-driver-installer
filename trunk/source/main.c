@@ -188,7 +188,6 @@ void settings_parse(const WCHAR *str,int ind)
         if( wcsstr(pr,L"-filters:"))     filters=_wtoi(pr+9);else
         if(!wcscmp(pr,L"-license"))      license=1;else
         if(!wcscmp(pr,L"-norestorepnt")) flags|=FLAG_NORESTOREPOINT;else
-        if(!wcscmp(pr,L"-nofeaturescore"))flags|=FLAG_NOFEATURESCORE;else
         if(!wcscmp(pr,L"-showdrpnames1"))flags|=FLAG_SHOWDRPNAMES1;else
         if(!wcscmp(pr,L"-showdrpnames2"))flags|=FLAG_SHOWDRPNAMES2;else
         if(!wcscmp(pr,L"-oldstyle"))     flags|=FLAG_OLDSTYLE;else
@@ -302,7 +301,6 @@ void settings_save()
     if(license)fwprintf(f,L"-license ");
     if(expertmode)fwprintf(f,L"-expertmode ");
     if(flags&FLAG_NORESTOREPOINT)fwprintf(f,L"-norestorepnt ");
-    if(flags&FLAG_NOFEATURESCORE)fwprintf(f,L"-nofeaturescore ");
     if(flags&FLAG_SHOWDRPNAMES1)fwprintf(f,L"-showdrpnames1 ");
     if(flags&FLAG_SHOWDRPNAMES2)fwprintf(f,L"-showdrpnames2 ");
     if(flags&FLAG_OLDSTYLE)fwprintf(f,L"-oldstyle ");
