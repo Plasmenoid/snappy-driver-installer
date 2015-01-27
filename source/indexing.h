@@ -183,7 +183,7 @@ typedef struct _data_HWID_t // 8
 #define FLAG_NOLOGFILE               0x00000800
 #define FLAG_NOSNAPSHOT              0x00001000
 #define FLAG_NOSTAMP                 0x00002000
-#define FLAG_NOFEATURESCORE          0x00004000
+//#define FLAG_NOFEATURESCORE          0x00004000
 #define FLAG_PRESERVECFG             0x00008000
 
 #define FLAG_EXTRACTONLY             0x00010000

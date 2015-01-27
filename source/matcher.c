@@ -155,12 +155,14 @@ WCHAR *Filter_18[]={L"Gigabyte",L"gigabyte",0};
 WCHAR *Filter_19[]={L"Sony",L"sony",L"vaio",0};
 WCHAR *Filter_20[]={L"Toshiba",L"toshiba",0};
 WCHAR *Filter_21[]={L"OEM",L"twinhead",L"durabook",0};
+WCHAR *Filter_22[]={L"NEC",L"Nec_brand",L"nec",0};
 
 WCHAR **filter_list[]=
 {
     Filter_1, Filter_2, Filter_3, Filter_4, Filter_5, Filter_6, Filter_7,
     Filter_8, Filter_9, Filter_10,Filter_11,Filter_12,Filter_13,Filter_14,
-    Filter_15,Filter_16,Filter_17,Filter_18,Filter_19,Filter_20,Filter_21
+    Filter_15,Filter_16,Filter_17,Filter_18,Filter_19,Filter_20,Filter_21,
+    Filter_22,
 };
 //}
 
@@ -237,7 +239,6 @@ int calc_signature(int catalogfile,state_t *state,int isnt)
 
 unsigned calc_score(int catalogfile,int feature,int rank,state_t *state,int isnt)
 {
-    if(flags&FLAG_NOFEATURESCORE)feature=0;
     if(state->platform.dwMajorVersion>=6)
         return (calc_signature(catalogfile,state,isnt)<<16)+(feature<<16)+rank;
     else
@@ -246,15 +247,13 @@ unsigned calc_score(int catalogfile,int feature,int rank,state_t *state,int isnt
 
 unsigned calc_score_h(driver_t *driver,state_t *state)
 {
-    int feature=driver->feature;
-    if(flags&FLAG_NOFEATURESCORE)feature=0;
-    return calc_score(driver->catalogfile,feature,driver->identifierscore,
+    return calc_score(driver->catalogfile,driver->feature,driver->identifierscore,
         state,StrStrI((WCHAR *)(state->text+driver->InfSectionExt),L".nt")?1:0);
 }
 
 int calc_secttype(const char *s)
 {
-    char buf[4096];
+    char buf[BUFLEN];
     char *p=buf,*s1;
     int i;
 
@@ -1015,6 +1014,10 @@ char *getdrp_drvinstallPicked(hwidmatch_t *hwidmatch)
 }
 int getdrp_drvfeature(hwidmatch_t *hwidmatch)
 {
+    char *p;
+    p=StrStrIA(getdrp_infpath(hwidmatch),"feature_");
+    if(p)return atoi(p+8);
+
     driverpack_t *drp=hwidmatch->drp;
     int desc_index=drp->HWID_list[hwidmatch->HWID_index].desc_index;
     return drp->desc_list[desc_index].feature&0xFF;
