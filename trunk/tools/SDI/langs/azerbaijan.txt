@@ -11,10 +11,10 @@ STR_SHOW_SYSINFO        = "Sistem barədə məlumat"
 STR_SHOW_SYSINFO_H      = ""
 
 STR_INSTALL             = "Quraşdırmaq"
-STR_INSTALL_H           = "Qeyd olunmuş drayverlərin quraşdırılmasına başlamaq(Ctrl+I).\n\nMƏSLƏHƏT: Shift düyməsini sıxaraq ayrıca drayverin quraşdırılmasına da başlamaq olar."
+STR_INSTALL_H           = "Seçilmiş drayverlərin quraşdırılmasına başlamaq(Ctrl+I).\n\nMƏSLƏHƏT: Shift düyməsini sıxaraq ayrıca drayverin quraşdırılmasına da başlamaq olar."
 STR_SELECT_ALL          = "Hamısını qeyd etmək"
 //STR_SELECT_ALL_H        = ""
-STR_SELECT_NONE         = "Qeydləri çıxart"
+STR_SELECT_NONE         = "Qeyd olunmuşları çıxart"
 //STR_SELECT_NONE_H       = ""
 
 STR_LANG                = "Dil (Language)"
@@ -126,7 +126,7 @@ STR_ABOUT_LICENSE       = "Snappy Driver Installer GNU General Public License ve
 // Всплывающее окно (при удерживании Ctrl или пробела)
 STR_HINT_UNKNOWN        = "naməlum"
 STR_HINT_ANALYSIS       = "Analiz"
-//STR_HINT_SIGNATURE      = "" // Translate
+STR_HINT_SIGNATURE      = "İmza"
 STR_HINT_DRP            = "Drayverpack"
 STR_HINT_DEVICE         = "Qurğu"
 STR_HINT_HARDWAREID     = "HardwareID"
@@ -232,8 +232,8 @@ STR_REST_CREATING       = "Bərpa nöqtəsinin yaradılması..."
 STR_REST_CREATED        = "Bərpa nöqtəsi yaradıldı"
 STR_REST_FAILED         = "Bərpa nöqtənin yaradılması mümkün olmadı"
 
-//STR_INST_QUIT_TITLE     = "" // Translate
-//STR_INST_QUIT_MSG       = "" // Translate
+STR_INST_QUIT_TITLE     = "Quraşdırmanı dayandırmaq"
+STR_INST_QUIT_MSG       = "Siz drayverlərin quraşdırılmasını dayandırmaqa əminsiz?"
 STR_HINT_STOPINST       = "Quraşdırılmayı dayandırmaq üçün bura sıxın."
 STR_HINT_STOPEXTR       = "Açmanı dayandırmaq üçün bura sıxın."
 STR_HINT_DRIVER         = "Quraşdırılmış və quraşdmağa hazı olan drayverləri müqayisə etmək üçün Ctrl düyməsini sıxın.\n\nAlternativ drayverlərin siyahısına baxmaq üçün SPACE (Boşluq) düyməsini sıxın."
@@ -315,7 +315,7 @@ STR_DWN_ERRSES          = "Torrent sessiyasını açmaq mümkün olmadı"
 STR_DWN_ERRTOR          = "Torrenti açmaq mümkün olmadı"
 
 STR_TR_ST0              = "yoxlamaq üçün növbədədir"
-STR_TR_ST1              = "faylların yoxlanması"
+STR_TR_ST1              = "faylların yoxlanılması"
 STR_TR_ST2              = "metaməlumatın yüklənməsi"
 STR_TR_ST3              = "faylların yüklənməsi"
 STR_TR_ST4              = "qurtarıb"
