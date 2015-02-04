@@ -354,7 +354,7 @@ int isvalid_ver(hwidmatch_t *hwidmatch,state_t *state)
     switch(v->v1)
     {
         case 5:if(major!=5)return 0;break;
-        case 6:if(major==5)return 0;break;
+        case 6:case 106:if(major==5)return 0;break;
         default:break;
     }
     return 1;
