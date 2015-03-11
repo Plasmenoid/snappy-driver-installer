@@ -1,0 +1,242 @@
+// 2015 by September
+
+THEME_NAME              = "happy new year (big)"
+
+// Main window
+MAINWND_TEXT_COLOR       = 0x000000
+MAINWND_WX               = 800
+MAINWND_WY               = 600
+MAINWND_MINX             = 640
+MAINWND_MINY             = 260
+MAINWND_INSIDE_COLOR     = 0xE6E6E6
+MAINWND_BITMAP_FILENAME  = "happy_new_year\main.webp"
+MAINWND_BITMAP_ANCHOR    = center
+MAINWND_BITMAP_FILL      = hstr_vstr
+
+// Progress bar (active)
+PROGR_OUTLINE_ROUND      = 0
+
+// Panel, generic
+PANEL_INSIDE_COLOR       = 0xFF000000
+PANEL_OUTLINE_ROUND      = 0
+PANEL_BITMAP_FILENAME    = "happy_new_year\semi.webp"
+PANEL_BITMAP_FILL        = hstr_vstr
+
+// Panel, sysinfo
+PANEL1_OFSX              = 155
+PANEL1_OFSY              = 4
+PANEL1_WX                = -483
+
+// Panel, install
+PANEL2_WY                = 0
+
+// Panel, lang_theme
+PANEL3_OFSY              = 127
+
+// Panel, actions
+PANEL4_OFSY              = 220
+
+// Panel, filters (found)
+PANEL5_OFSY              = 296
+
+// Panel, filters (not found)
+PANEL6_OFSY              = 423
+
+// Panel, filters (special)
+PANEL7_OFSY              = 499
+
+// Panel, revision
+PANEL8_OFSX              = 5
+PANEL8_OFSY              = 110
+PANEL8_BITMAP_FILENAME   = ""
+
+// Panel, install button
+PANEL9_OFSX              = -140
+PANEL9_OFSY              = 0
+PANEL9_WX                = 137
+PANEL9_WY                = 57
+PANEL9_OUTLINE_WIDTH     = -1
+PANEL9_BITMAP_FILENAME   = "happy_new_year\button.webp"
+PANEL9_BITMAP_FILENAME_H = "happy_new_year\button_h.webp"
+
+// Panel, selectall button
+PANEL10_OFSX             = -247
+PANEL10_OFSY             = 1
+PANEL10_WX               = 110
+PANEL10_WY               = 27
+PANEL10_OUTLINE_WIDTH    = PANEL9_OUTLINE_WIDTH
+PANEL10_BITMAP_FILENAME  = "happy_new_year\button_2.webp"
+PANEL10_BITMAP_FILENAME_H= "happy_new_year\button_2s.webp"
+
+// Panel, selectnone button
+PANEL11_OFSX             = PANEL10_OFSX
+PANEL11_OFSY             = 30
+PANEL11_WX               = PANEL10_WX
+PANEL11_WY               = PANEL10_WY
+PANEL11_OUTLINE_WIDTH    = PANEL9_OUTLINE_WIDTH
+PANEL11_BITMAP_FILENAME  = "happy_new_year\button_2.webp"
+PANEL11_BITMAP_FILENAME_H= "happy_new_year\button_2d.webp"
+
+// Panel, options
+PANEL12_OFSX             = -478
+PANEL12_OFSY             = 4
+PANEL12_WX               = 229
+PANEL12_WY               = PANEL_WY
+
+// Panel, logo
+PANEL13_OFSX             = 20
+PANEL13_OFSY             = 5
+PANEL13_WX               = 110
+PANEL13_WY               = 105
+PANEL13_INSIDE_COLOR     = 0xFF000000
+PANEL13_OUTLINE_COLOR    = 0xFF000000
+PANEL13_OUTLINE_WIDTH    = 0
+PANEL13_BITMAP_FILENAME  = "RES_211"
+
+// Checkboxes on left panel
+CHKBOX_TEXT_COLOR_H      = 0xFF1919
+CHKBOX_SIZE              = 15
+BUTTON_BITMAP_CHECKED    = "happy_new_year\checked.webp"
+BUTTON_BITMAP_CHECKED_H  = "happy_new_year\checked.webp"
+BUTTON_BITMAP_UNCHECKED  = "happy_new_year\unchecked.webp"
+BUTTON_BITMAP_UNCHECKED_H= "happy_new_year\unchecked.webp"
+
+// Buttons on left panel
+BUTTON_INSIDE_COLOR      = 0xFF000000
+BUTTON_OUTLINE_WIDTH     = 0
+BUTTON_OUTLINE_ROUND     = 0
+BUTTON_INSIDE_COLOR_H    = 0xFFBB1B
+BUTTON_OUTLINE_WIDTH_H   = 1
+BUTTON_OUTLINE_ROUND_H   = 0
+
+// Driver list
+DRVLIST_OFSX             = 155
+DRVLIST_OFSY             = 65
+DRVLIST_WX               = -7
+DRVLIST_WY               = -5
+DRVLIST_INSIDE_COLOR     = 0xFF000000
+DRVLIST_OUTLINE_COLOR    = 0x000000
+DRVLIST_OUTLINE_WIDTH    = 1
+DRVLIST_OUTLINE_ROUND    = 0
+DRVLIST_BITMAP_FILENAME  = "happy_new_year\semi.webp"
+DRVLIST_BITMAP_FILL      = hstr_vstr
+
+// Driver item content
+ITEM_CHECKBOX_OFS_Y      = 7
+ITEM_CHECKBOX_SIZE       = 17
+
+// Driver item (generic style)
+DRVITEM_OUTLINE_ROUND    = 0
+DRVITEM_OUTLINE_ROUND_H  = 0
+DRVITEM_INSIDE_COLOR     = 0xFFE98B
+DRVITEM_INSIDE_COLOR_H   = 0xFFC250
+
+// BETTER_NEW
+DRVITEM_TEXT2_COLOR_BN   = 0xA25100
+
+// SAME_NEW
+DRVITEM_TEXT2_COLOR_SN   = 0xA25100
+
+// WORSE_NEW
+DRVITEM_TEXT2_COLOR_WN   = 0xA25100
+
+// BETTER_CUR
+DRVITEM_TEXT2_COLOR_BC   = 0xA25100
+
+// BETTER_OLD
+DRVITEM_TEXT2_COLOR_BO   = 0x008100
+
+// MISSING
+DRVITEM_TEXT2_COLOR_MS   = 0x008400
+
+
+
+// Font
+FONT_SIZE                = 16
+
+// Main window
+MAINWND_WX               = 1024
+MAINWND_WY               = 731
+MAINWND_MINX             = 805
+MAINWND_MINY             = 295
+
+// Popup
+POPUP_WX                 = 450
+POPUP_WY                 = 19
+
+// Panel, generic
+PANEL_WY                 = 22
+
+// Panel, sysinfo
+PANEL1_WX                = -668
+
+// Panel, lang_theme
+PANEL3_OFSY              = 135 // 10+17*(4+4)
+PANEL3_WX                = 225
+
+// Panel, actions
+PANEL4_OFSY              = 255 // 10+17*(4+4+6)
+PANEL4_WX                = PANEL3_WX
+
+// Panel, filters (found)
+PANEL5_OFSY              = 354 // 10+17*(4+4+6+5)
+PANEL5_WX                = PANEL3_WX
+
+// Panel, filters (not found)
+PANEL6_OFSY              = 519 // 10+17*(4+4+6+5+8)
+PANEL6_WX                = PANEL3_WX
+
+// Panel, filters (special)
+PANEL7_OFSY              = 617 // 10+17*(4+4+6+5+8+5)
+PANEL7_WX                = PANEL3_WX
+
+// Panel, revision
+PANEL8_WX                = PANEL3_WX
+
+// Panel, install button
+PANEL9_OFSX              = -180
+PANEL9_OFSY              = 0
+PANEL9_WX                = 177
+PANEL9_WY                = 73
+
+// Panel, selectall button
+PANEL10_OFSX             = -337
+PANEL10_OFSY             = 1
+PANEL10_WX               = 160
+PANEL10_WY               = 34
+
+// Panel, selectnone button
+PANEL11_OFSX             = PANEL10_OFSX
+PANEL11_OFSY             = 39
+PANEL11_WX               = PANEL10_WX
+PANEL11_WY               = PANEL10_WY
+
+// Panel, options
+PANEL12_OFSX             = -665
+PANEL12_OFSY             = 4
+PANEL12_WX               = 328
+
+// Items on left panel
+PANEL_LIST_OFSX          = 0
+PNLITEM_OFSY             = 4
+
+// Checkboxes on left panel
+CHKBOX_TEXT_OFSX         = 22
+CHKBOX_SIZE              = 19
+
+// Driver list
+DRVLIST_OFSX             = 240
+DRVLIST_OFSY             = 80
+
+// Driver items
+DRVITEM_WY               = 40
+DRVITEM_OFSY             = 10
+DRVITEM_DIST_Y0          = 45
+DRVITEM_DIST_Y1          = 45
+
+// Driver item content
+ITEM_CHECKBOX_OFS_X      = 5
+ITEM_CHECKBOX_OFS_Y      = 8
+ITEM_CHECKBOX_SIZE       = 24
+ITEM_TEXT_OFS_Y          = 0
+ITEM_TEXT_DIST_Y         = 15
